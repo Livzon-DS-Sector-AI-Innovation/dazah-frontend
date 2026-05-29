@@ -14,10 +14,10 @@ export function TopNav() {
       {/* Logo */}
       <div className="flex items-center gap-2.5 mr-10 shrink-0">
         <div className="w-7 h-7 rounded-[var(--rounded-md)] bg-[var(--color-primary)] flex items-center justify-center">
-          <span className="text-white text-xs font-semibold">D</span>
+          <span className="text-white text-xs font-semibold">API</span>
         </div>
         <span className="text-[var(--color-charcoal)] text-[15px] font-semibold tracking-tight">
-          大杂烩
+          原料药
         </span>
       </div>
 

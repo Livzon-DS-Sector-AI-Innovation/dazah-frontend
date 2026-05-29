@@ -1,0 +1,1 @@
+// quality module TypeScript types

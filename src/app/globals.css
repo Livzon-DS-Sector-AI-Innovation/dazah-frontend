@@ -110,20 +110,37 @@ body {
   overflow: hidden;
 }
 
-.ant-table-thead > tr > th {
+.ant-table-thead > tr > th,
+.ant-table-thead > tr > td {
   background: #ffffff;
   color: #5d5b54;
   font-weight: 500;
   font-size: 13px;
   border-bottom: 1px solid #ede9e4;
+  padding: 6px 12px !important;
 }
 
 .ant-table-tbody > tr > td {
   border-bottom: 1px solid #f0eeec;
+  padding: 4px 12px !important;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .ant-table-tbody > tr:hover > td {
   background: #f6f5f4;
+}
+
+/* small size 进一步压缩 */
+.ant-table-small .ant-table-thead > tr > th,
+.ant-table-small .ant-table-thead > tr > td {
+  padding: 4px 8px !important;
+  font-size: 12px;
+}
+
+.ant-table-small .ant-table-tbody > tr > td {
+  padding: 3px 8px !important;
+  font-size: 12px;
 }
 
 /* 分页样式 */

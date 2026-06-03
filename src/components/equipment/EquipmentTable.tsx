@@ -92,14 +92,14 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       dataIndex: 'equipment_no',
       key: 'equipment_no',
       width: 130,
-      fixed: 'left' as const,
+      fixed: 'start' as const,
     },
     {
       title: '设备名称',
       dataIndex: 'name',
       key: 'name',
       width: 180,
-      fixed: 'left' as const,
+      fixed: 'start' as const,
     },
     {
       title: '设备分类',
@@ -159,7 +159,7 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       title: '操作',
       key: 'action',
       width: 130,
-      fixed: 'right' as const,
+      fixed: 'end' as const,
       render: (_: unknown, record: Equipment) => (
         <Space>
           <Button
@@ -208,6 +208,7 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
         columns={columns}
         dataSource={equipments}
         rowKey="id"
+        size="small"
         loading={loading}
         scroll={{ x: 'max-content' }}
         pagination={{

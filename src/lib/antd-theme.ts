@@ -131,8 +131,9 @@ export const antdTheme: ThemeConfig = {
       headerSortActiveBg: '#f6f5f4',
       rowHoverBg: '#f6f5f4',
       borderColor: '#ede9e4',
-      cellPaddingInline: 16,
-      cellPaddingBlock: 12,
+      cellPaddingInline: 12,
+      cellPaddingBlock: 4,
+      headerBorderRadius: 0,
     },
 
     // 卡片组件

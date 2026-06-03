@@ -35,7 +35,7 @@ export function StatsCards({ statistics }: StatsCardsProps) {
               style={{
                 cursor: 'pointer',
                 background: isActive ? '#ffffff' : bgColor,
-                border: isActive ? '2px solid #5645d4' : '1px solid #e5e3df',
+                border: isActive ? '2px solid #5645d4' : '2px solid #e5e3df',
                 borderRadius: 12,
                 transition: 'all 0.2s ease',
               }}

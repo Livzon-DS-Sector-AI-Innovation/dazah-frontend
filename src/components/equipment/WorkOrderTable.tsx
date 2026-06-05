@@ -1,7 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
-import { App, Table, Tag, Space, Button, Select } from 'antd'
+import { Table, Tag, Space, Button, Select } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { WorkOrder, WorkOrderStatus, WorkOrderPriority, WorkOrderType } from '@/types/equipment'
@@ -32,6 +31,8 @@ const priorityOptions: { label: string; value: WorkOrderPriority }[] = [
 ]
 const typeOptions: { label: string; value: WorkOrderType }[] = [
   { label: '故障维修', value: '故障维修' },
+  { label: '计划维护', value: '计划维护' },
+  { label: '巡检', value: '巡检' },
   { label: '校准', value: '校准' },
 ]
 
@@ -55,6 +56,14 @@ export function WorkOrderTable({ onRefresh }: WorkOrderTableProps) {
       key: 'work_order_no',
       width: 160,
       fixed: 'start',
+    },
+    {
+      title: '设备名称',
+      dataIndex: 'equipment_name',
+      key: 'equipment_name',
+      width: 150,
+      ellipsis: true,
+      render: (text: string | null) => text || '-',
     },
     {
       title: '工单类型',

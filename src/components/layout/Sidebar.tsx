@@ -20,14 +20,14 @@ export function Sidebar() {
     label: item.label,
   }))
 
-  // 优先精确匹配，再按路径长度降序做前缀匹配，避免短路径（如 /safety）抢先匹配子路径
-  const selectedKey =
-    currentModule.children.find((item) => pathname === item.path)?.path ||
-    currentModule.children
-      .slice()
-      .sort((a, b) => b.path.length - a.path.length)
-      .find((item) => pathname.startsWith(item.path + "/"))?.path ||
-    currentModule.children[0]?.path
+  // 按路径长度降序排序，优先匹配更具体的路径
+  const sortedChildren = [...currentModule.children].sort(
+    (a, b) => b.path.length - a.path.length
+  )
+
+  const selectedKey = sortedChildren.find(
+    (item) => pathname === item.path || pathname.startsWith(item.path + "/")
+  )?.path || currentModule.children[0]?.path
 
   const handleClick: MenuProps['onClick'] = ({ key }) => {
     router.push(key)

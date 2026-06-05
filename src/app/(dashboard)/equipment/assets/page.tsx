@@ -5,10 +5,9 @@ import { EquipmentCategory, Location, Equipment, EquipmentStatistics } from '@/t
 // 默认空数据
 const defaultStatistics: EquipmentStatistics = {
   total: 0,
-  running: 0,
-  idle: 0,
-  maintenance: 0,
-  fault: 0,
+  by_status: {} as Record<string, number>,
+  by_category: {} as Record<string, number>,
+  by_location: {} as Record<string, number>,
 }
 
 export default async function EquipmentPageWrapper() {

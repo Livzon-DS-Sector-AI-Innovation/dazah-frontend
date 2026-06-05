@@ -1,6 +1,6 @@
 'use client'
 
-import { ConfigProvider } from 'antd'
+import { App, ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { antdTheme } from '@/lib/antd-theme'
 
@@ -11,7 +11,9 @@ interface AntdProviderProps {
 export function AntdProvider({ children }: AntdProviderProps) {
   return (
     <ConfigProvider theme={antdTheme} locale={zhCN}>
-      {children}
+      <App component={false}>
+        {children}
+      </App>
     </ConfigProvider>
   )
 }

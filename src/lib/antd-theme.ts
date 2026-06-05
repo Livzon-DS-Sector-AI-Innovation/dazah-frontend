@@ -5,6 +5,7 @@ import type { ThemeConfig } from 'antd'
  * 基于 DESIGN.md 的 Notion 风格设计系统
  */
 export const antdTheme: ThemeConfig = {
+  cssVar: false,
   token: {
     // 主色调 - Notion Purple
     colorPrimary: '#5645d4',

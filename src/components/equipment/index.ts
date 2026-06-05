@@ -20,3 +20,26 @@ export { CalibrationPlanTable } from './CalibrationPlanTable'
 export { CalibrationPlanDrawer } from './CalibrationPlanDrawer'
 export { CalibrationRecordTable } from './CalibrationRecordTable'
 export { CalibrationRecordDrawer } from './CalibrationRecordDrawer'
+
+// spare parts page and components
+export { SparePartsPage } from './SparePartsPage'
+export { SparePartTable } from './SparePartTable'
+export { SparePartDrawer } from './SparePartDrawer'
+export { StockInboundDrawer } from './StockInboundDrawer'
+export { StockWarningTable } from './StockWarningTable'
+
+// maintenance plan components
+export { MaintenancePlanTable } from './MaintenancePlanTable'
+export { MaintenancePlanDrawer } from './MaintenancePlanDrawer'
+
+// inspection template components
+export { InspectionTemplateTable } from './InspectionTemplateTable'
+export { InspectionTemplateDrawer } from './InspectionTemplateDrawer'
+export { InspectionCompleteDrawer } from './InspectionCompleteDrawer'
+
+// repair drawer
+export { RepairDrawer } from './RepairDrawer'
+
+// material components
+export { MaterialRecordTable } from './MaterialRecordTable'
+export { MaterialConsumeDrawer } from './MaterialConsumeDrawer'

@@ -44,9 +44,10 @@ export const moduleMenus: ModuleMenu[] = [
     icon: "bolt",
     path: "/energy",
     children: [
-      { key: "monitor", label: "能耗监控", path: "/energy/monitor" },
-      { key: "report", label: "能源报表", path: "/energy/report" },
-      { key: "saving", label: "节能措施", path: "/energy/saving" },
+      { key: "overview", label: "能源总览", path: "/energy" },
+      { key: "devices", label: "设备配置", path: "/energy/devices" },
+      { key: "alerts", label: "预警管理", path: "/energy/alerts" },
+      { key: "collect-logs", label: "采集日志", path: "/energy/collect-logs" },
     ],
   },
   {

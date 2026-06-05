@@ -15,6 +15,7 @@ import { LocationTree } from './LocationTree'
 import { EquipmentDrawer } from './EquipmentDrawer'
 import { CategoryDrawer } from './CategoryDrawer'
 import { LocationDrawer } from './LocationDrawer'
+import { RepairDrawer } from './RepairDrawer'
 
 interface EquipmentPageProps {
   initialCategories: EquipmentCategory[]
@@ -169,6 +170,12 @@ export function EquipmentPage({
           <EquipmentDrawer onRefresh={fetchData} />
           <CategoryDrawer />
           <LocationDrawer />
+          <RepairDrawer
+            equipments={(initialEquipments).map(e => ({
+              id: e.id, equipment_no: e.equipment_no, name: e.name, importance: e.importance,
+            }))}
+            onRefresh={fetchData}
+          />
         </div>
       </App>
     </ConfigProvider>

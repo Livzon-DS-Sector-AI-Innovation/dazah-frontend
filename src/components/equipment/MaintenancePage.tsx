@@ -1,16 +1,25 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
-import { App, ConfigProvider, Tabs, Button, Spin } from 'antd'
+import { useState, useEffect, useCallback } from 'react'
+import { App, ConfigProvider, Tabs, Button, Spin, Collapse, Input, InputNumber, Space } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { PlusOutlined } from '@ant-design/icons'
-import { Equipment, FailureCode, WorkOrder, WorkOrderStatistics, CalibrationPlan, CalibrationRecord } from '@/types/equipment'
+import {
+  Equipment, FailureCode, WorkOrder, WorkOrderStatistics, CalibrationPlan, CalibrationRecord,
+  MaintenancePlan, InspectionTemplate,
+} from '@/types/equipment'
 import { useEquipmentStore } from '@/stores/equipment'
 import { antdTheme } from '@/lib/antd-theme'
 import {
   fetchWorkOrdersClient, fetchWorkOrderStatisticsClient,
   fetchFailureCodesClient, fetchCalibrationPlansClient, fetchCalibrationRecordsClient,
+  fetchMaintenancePlansClient, fetchInspectionTemplatesClient,
+  fetchEquipmentsClient,
+  fetchClaimTimeoutConfigClient,
 } from '@/lib/api/equipment-client'
+import { fetchCategories } from '@/lib/api/equipment'
+import { updateClaimTimeoutConfig } from '@/actions/equipment'
+import { EquipmentCategory } from '@/types/equipment'
 import { WorkOrderStatsCards } from './WorkOrderStatsCards'
 import { WorkOrderTable } from './WorkOrderTable'
 import { WorkOrderDrawer } from './WorkOrderDrawer'
@@ -21,6 +30,11 @@ import { CalibrationPlanTable } from './CalibrationPlanTable'
 import { CalibrationPlanDrawer } from './CalibrationPlanDrawer'
 import { CalibrationRecordTable } from './CalibrationRecordTable'
 import { CalibrationRecordDrawer } from './CalibrationRecordDrawer'
+import { MaintenancePlanTable } from './MaintenancePlanTable'
+import { MaintenancePlanDrawer } from './MaintenancePlanDrawer'
+import { InspectionTemplateTable } from './InspectionTemplateTable'
+import { InspectionTemplateDrawer } from './InspectionTemplateDrawer'
+import { InspectionCompleteDrawer } from './InspectionCompleteDrawer'
 
 interface MaintenancePageProps {
   initialEquipments: Equipment[]
@@ -32,6 +46,10 @@ interface MaintenancePageProps {
   initialCalibrationPlanTotal: number
   initialCalibrationRecords: CalibrationRecord[]
   initialCalibrationRecordTotal: number
+  initialMaintenancePlans: MaintenancePlan[]
+  initialMaintenancePlanTotal: number
+  initialInspectionTemplates: InspectionTemplate[]
+  initialInspectionTemplateTotal: number
 }
 
 export function MaintenancePage({
@@ -40,6 +58,8 @@ export function MaintenancePage({
   initialFailureCodes,
   initialCalibrationPlans, initialCalibrationPlanTotal,
   initialCalibrationRecords, initialCalibrationRecordTotal,
+  initialMaintenancePlans, initialMaintenancePlanTotal,
+  initialInspectionTemplates, initialInspectionTemplateTotal,
 }: MaintenancePageProps) {
   const {
     maintenanceTab, setMaintenanceTab,
@@ -49,10 +69,50 @@ export function MaintenancePage({
     setFailureCodes,
     setCalibrationPlans, setCalibrationPlanTotal, setCalibrationPlanLoading,
     calibrationPlanStatusFilter, calibrationPlanPage, calibrationPlanPageSize,
+    calibrationPlans,
     setCalibrationRecords, setCalibrationRecordTotal, setCalibrationRecordLoading,
     calibrationRecordPage, calibrationRecordPageSize,
+    setMaintenancePlans, setMaintenancePlanTotal, setMaintenancePlanLoading,
+    maintenancePlanStatusFilter, maintenancePlanPage, maintenancePlanPageSize,
+    setInspectionTemplates, setInspectionTemplateTotal, setInspectionTemplateLoading,
+    inspectionTemplatePage, inspectionTemplatePageSize, inspectionTemplateKeyword,
     openWorkOrderDrawer,
+    openMaintenancePlanDrawer, openInspectionTemplateDrawer,
   } = useEquipmentStore()
+
+  // 超时配置
+  const [claimTimeoutConfig, setClaimTimeoutConfig] = useState({
+    emergency: 15, high: 30, medium: 60, low: 120,
+  })
+
+  useEffect(() => {
+    fetchClaimTimeoutConfigClient().then(setClaimTimeoutConfig).catch(() => {})
+  }, [])
+
+  const { message: configMsg } = App.useApp()
+
+  const handleSaveConfig = async () => {
+    try {
+      await updateClaimTimeoutConfig(claimTimeoutConfig)
+      configMsg.success('超时配置保存成功')
+    } catch (error: any) {
+      configMsg.error(error?.message || '保存配置失败')
+    }
+  }
+
+  // 设备列表和分类（客户端回退）
+  const [equipments, setEquipmentsState] = useState<Equipment[]>(initialEquipments)
+  const [categories, setCategoriesState] = useState<EquipmentCategory[]>([])
+
+  useEffect(() => {
+    // 如果服务端没拿到设备数据，客户端重新获取
+    if (initialEquipments.length === 0) {
+      fetchEquipmentsClient({ page: 1, page_size: 200 }).then((res) => {
+        setEquipmentsState(res.items)
+      }).catch(() => {})
+    }
+    fetchCategories().then(setCategoriesState).catch(() => {})
+  }, [initialEquipments.length])
 
   // 初始化
   useEffect(() => {
@@ -66,13 +126,21 @@ export function MaintenancePage({
     setCalibrationPlanTotal(initialCalibrationPlanTotal)
     setCalibrationRecords(initialCalibrationRecords)
     setCalibrationRecordTotal(initialCalibrationRecordTotal)
+    setMaintenancePlans(initialMaintenancePlans)
+    setMaintenancePlanTotal(initialMaintenancePlanTotal)
+    setInspectionTemplates(initialInspectionTemplates)
+    setInspectionTemplateTotal(initialInspectionTemplateTotal)
   }, [
     initialWorkOrders, initialWorkOrderTotal, initialWorkOrderStatistics,
     initialFailureCodes, initialCalibrationPlans, initialCalibrationPlanTotal,
     initialCalibrationRecords, initialCalibrationRecordTotal,
+    initialMaintenancePlans, initialMaintenancePlanTotal,
+    initialInspectionTemplates, initialInspectionTemplateTotal,
     setWorkOrders, setWorkOrderTotal, setWorkOrderStatistics,
     setFailureCodes, setCalibrationPlans, setCalibrationPlanTotal,
     setCalibrationRecords, setCalibrationRecordTotal,
+    setMaintenancePlans, setMaintenancePlanTotal,
+    setInspectionTemplates, setInspectionTemplateTotal,
   ])
 
   const fetchWorkOrderData = useCallback(async () => {
@@ -143,6 +211,38 @@ export function MaintenancePage({
     }
   }, [calibrationRecordPage, calibrationRecordPageSize, setCalibrationRecords, setCalibrationRecordTotal, setCalibrationRecordLoading])
 
+  const fetchMaintenancePlanData = useCallback(async () => {
+    setMaintenancePlanLoading(true)
+    try {
+      const res = await fetchMaintenancePlansClient({
+        status: maintenancePlanStatusFilter || undefined,
+        page: maintenancePlanPage, page_size: maintenancePlanPageSize,
+      })
+      setMaintenancePlans(res.items)
+      setMaintenancePlanTotal(res.total)
+    } catch (e) {
+      console.error('获取维护计划数据失败:', e)
+    } finally {
+      setMaintenancePlanLoading(false)
+    }
+  }, [maintenancePlanStatusFilter, maintenancePlanPage, maintenancePlanPageSize, setMaintenancePlans, setMaintenancePlanTotal, setMaintenancePlanLoading])
+
+  const fetchInspectionTemplateData = useCallback(async () => {
+    setInspectionTemplateLoading(true)
+    try {
+      const res = await fetchInspectionTemplatesClient({
+        keyword: inspectionTemplateKeyword || undefined,
+        page: inspectionTemplatePage, page_size: inspectionTemplatePageSize,
+      })
+      setInspectionTemplates(res.items)
+      setInspectionTemplateTotal(res.total)
+    } catch (e) {
+      console.error('获取巡检模板数据失败:', e)
+    } finally {
+      setInspectionTemplateLoading(false)
+    }
+  }, [inspectionTemplateKeyword, inspectionTemplatePage, inspectionTemplatePageSize, setInspectionTemplates, setInspectionTemplateTotal, setInspectionTemplateLoading])
+
   useEffect(() => {
     if (maintenanceTab === 'work-orders') fetchWorkOrderData()
   }, [maintenanceTab, fetchWorkOrderData])
@@ -155,6 +255,14 @@ export function MaintenancePage({
     if (maintenanceTab === 'calibration') fetchCalibrationRecordData()
   }, [maintenanceTab, fetchCalibrationRecordData])
 
+  useEffect(() => {
+    if (maintenanceTab === 'maintenance-plans') fetchMaintenancePlanData()
+  }, [maintenanceTab, fetchMaintenancePlanData])
+
+  useEffect(() => {
+    if (maintenanceTab === 'inspection') fetchInspectionTemplateData()
+  }, [maintenanceTab, fetchInspectionTemplateData])
+
   const tabItems = [
     {
       key: 'work-orders',
@@ -162,6 +270,38 @@ export function MaintenancePage({
       children: (
         <div>
           <WorkOrderStatsCards statistics={workOrderStatistics} />
+
+          <Collapse
+            style={{ marginTop: 16, marginBottom: 16 }}
+            items={[{
+              key: 'timeout-config',
+              label: '抢单超时配置',
+              children: (
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  {[
+                    { key: 'emergency', label: '紧急', color: '#e03131' },
+                    { key: 'high', label: '高', color: '#dd5b00' },
+                    { key: 'medium', label: '中', color: '#5645d4' },
+                    { key: 'low', label: '低', color: '#787671' },
+                  ].map(({ key, label, color }) => (
+                    <div key={key}>
+                      <div style={{ marginBottom: 4, fontSize: 13, color, fontWeight: 500 }}>{label}优先级</div>
+                      <Space.Compact>
+                        <InputNumber
+                          min={1} max={1440}
+                          value={claimTimeoutConfig[key as keyof typeof claimTimeoutConfig]}
+                          onChange={(v) => setClaimTimeoutConfig(prev => ({ ...prev, [key]: v || 15 }))}
+                        />
+                        <Button disabled>分钟</Button>
+                      </Space.Compact>
+                    </div>
+                  ))}
+                  <Button type="primary" onClick={handleSaveConfig}>保存配置</Button>
+                </div>
+              ),
+            }]}
+          />
+
           <div style={{ marginTop: 16 }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold" style={{ fontSize: 18, color: '#1a1a1a', lineHeight: 1.4, margin: 0 }}>
@@ -194,6 +334,40 @@ export function MaintenancePage({
         />
       ),
     },
+    {
+      key: 'maintenance-plans',
+      label: '维护计划',
+      children: (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold" style={{ fontSize: 18, color: '#1a1a1a', lineHeight: 1.4, margin: 0 }}>
+              维护计划列表
+            </h2>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => openMaintenancePlanDrawer()}>
+              新建维护计划
+            </Button>
+          </div>
+          <MaintenancePlanTable onRefresh={fetchMaintenancePlanData} equipments={equipments} />
+        </div>
+      ),
+    },
+    {
+      key: 'inspection',
+      label: '巡检模板',
+      children: (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold" style={{ fontSize: 18, color: '#1a1a1a', lineHeight: 1.4, margin: 0 }}>
+              巡检模板列表
+            </h2>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => openInspectionTemplateDrawer()}>
+              新建巡检模板
+            </Button>
+          </div>
+          <InspectionTemplateTable onRefresh={fetchInspectionTemplateData} categories={categories} />
+        </div>
+      ),
+    },
   ]
 
   return (
@@ -207,11 +381,14 @@ export function MaintenancePage({
             <Tabs activeKey={maintenanceTab} onChange={setMaintenanceTab} items={tabItems} />
           </div>
 
-          <WorkOrderDrawer equipments={initialEquipments} symptoms={initialFailureCodes.symptoms} onRefresh={fetchWorkOrderData} />
+          <WorkOrderDrawer equipments={equipments} symptoms={initialFailureCodes.symptoms} onRefresh={fetchWorkOrderData} />
           <WorkOrderDetailDrawer onRefresh={fetchWorkOrderData} />
           <FailureCodeDrawer onRefresh={fetchFailureCodeData} />
-          <CalibrationPlanDrawer equipments={initialEquipments} onRefresh={fetchCalibrationPlanData} />
-          <CalibrationRecordDrawer calibrationPlans={initialCalibrationPlans} onRefresh={fetchCalibrationRecordData} />
+          <CalibrationPlanDrawer equipments={equipments} onRefresh={fetchCalibrationPlanData} />
+          <CalibrationRecordDrawer calibrationPlans={calibrationPlans} onRefresh={fetchCalibrationRecordData} />
+          <MaintenancePlanDrawer equipments={equipments} onRefresh={fetchMaintenancePlanData} />
+          <InspectionTemplateDrawer categories={categories} onRefresh={fetchInspectionTemplateData} />
+          <InspectionCompleteDrawer onRefresh={fetchWorkOrderData} />
         </div>
       </App>
     </ConfigProvider>

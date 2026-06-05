@@ -2,7 +2,7 @@
 
 import { useMemo, useCallback } from 'react'
 import { App, Table, Tag, Space, Button, Input, Select } from 'antd'
-import { EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, SearchOutlined, ToolOutlined } from '@ant-design/icons'
 import { Equipment, EquipmentStatus, EquipmentCategory, Location } from '@/types/equipment'
 import { useEquipmentStore } from '@/stores/equipment'
 import { deleteEquipment } from '@/actions/equipment'
@@ -59,6 +59,7 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
     setStatusFilter,
     setKeyword,
     openEquipmentDrawer,
+    openRepairDrawer,
   } = useEquipmentStore()
 
   // 构建 ID -> Name 映射
@@ -138,6 +139,25 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       },
     },
     {
+      title: '重要性',
+      dataIndex: 'importance',
+      key: 'importance',
+      width: 80,
+      render: (importance: string) => {
+        const config: Record<string, { color: string; bgColor: string }> = {
+          '高': { color: '#e03131', bgColor: '#fff1f0' },
+          '中': { color: '#5645d4', bgColor: '#ede9f7' },
+          '低': { color: '#787671', bgColor: '#f0eeec' },
+        }
+        const cfg = config[importance] || { color: '#787671', bgColor: '#f0eeec' }
+        return (
+          <Tag style={{ color: cfg.color, background: cfg.bgColor, border: 'none', borderRadius: 4, fontWeight: 500 }}>
+            {importance}
+          </Tag>
+        )
+      },
+    },
+    {
       title: '型号',
       dataIndex: 'model',
       key: 'model',
@@ -162,6 +182,14 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       fixed: 'end' as const,
       render: (_: unknown, record: Equipment) => (
         <Space>
+          <Button
+            type="link"
+            icon={<ToolOutlined />}
+            onClick={() => openRepairDrawer(record.id)}
+            style={{ padding: 0 }}
+          >
+            报修
+          </Button>
           <Button
             type="link"
             icon={<EditOutlined />}

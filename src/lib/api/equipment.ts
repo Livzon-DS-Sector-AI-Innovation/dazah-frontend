@@ -3,6 +3,10 @@ import {
   FailureCode, WorkOrderFilters, WorkOrderListResponse, WorkOrderStatistics, WorkOrder,
   CalibrationPlanFilters, CalibrationPlanListResponse, CalibrationPlan,
   CalibrationRecordFilters, CalibrationRecordListResponse, CalibrationRecord,
+  SparePartFilters, SparePartListResponse, SparePart, StockWarning,
+  MaintenancePlanFilters, MaintenancePlanListResponse, MaintenancePlan,
+  InspectionTemplateFilters, InspectionTemplateListResponse, InspectionTemplate,
+  MaterialRecord,
 } from '@/types/equipment'
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000'
@@ -183,4 +187,109 @@ export async function fetchCalibrationRecords(filters: CalibrationRecordFilters 
     page: result.meta?.page || 1,
     page_size: result.meta?.page_size || 20,
   }
+}
+
+// ==================== 备件管理 ====================
+export async function fetchSpareParts(filters: SparePartFilters = {}): Promise<SparePartListResponse> {
+  const params = new URLSearchParams()
+  if (filters.category) params.append('category', filters.category)
+  if (filters.keyword) params.append('keyword', filters.keyword)
+  if (filters.is_active !== undefined) params.append('is_active', filters.is_active.toString())
+  if (filters.page) params.append('page', filters.page.toString())
+  if (filters.page_size) params.append('page_size', filters.page_size.toString())
+
+  const queryString = params.toString()
+  const url = queryString
+    ? `${API_BASE_URL}/api/v1/equipment/spare-parts/?${queryString}`
+    : `${API_BASE_URL}/api/v1/equipment/spare-parts/`
+
+  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
+  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
+  const result = await response.json()
+  return {
+    items: result.data || [],
+    total: result.meta?.total || 0,
+    page: result.meta?.page || 1,
+    page_size: result.meta?.page_size || 20,
+  }
+}
+
+export async function fetchSparePartById(id: string): Promise<SparePart> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/spare-parts/${id}`)
+}
+
+export async function fetchStockWarnings(): Promise<StockWarning[]> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/spare-parts/stock/warnings`)
+}
+
+export async function fetchSparePartStock(id: string): Promise<{ current_qty: number; min_qty: number }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/spare-parts/${id}/stock`)
+}
+
+// ==================== 维护计划 ====================
+export async function fetchMaintenancePlans(filters: MaintenancePlanFilters = {}): Promise<MaintenancePlanListResponse> {
+  const params = new URLSearchParams()
+  if (filters.equipment_id) params.append('equipment_id', filters.equipment_id)
+  if (filters.status) params.append('status', filters.status)
+  if (filters.keyword) params.append('keyword', filters.keyword)
+  if (filters.page) params.append('page', filters.page.toString())
+  if (filters.page_size) params.append('page_size', filters.page_size.toString())
+
+  const queryString = params.toString()
+  const url = queryString
+    ? `${API_BASE_URL}/api/v1/equipment/maintenance/plans/?${queryString}`
+    : `${API_BASE_URL}/api/v1/equipment/maintenance/plans/`
+
+  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
+  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
+  const result = await response.json()
+  return {
+    items: result.data || [],
+    total: result.meta?.total || 0,
+    page: result.meta?.page || 1,
+    page_size: result.meta?.page_size || 20,
+  }
+}
+
+export async function fetchMaintenancePlanById(id: string): Promise<MaintenancePlan> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/maintenance/plans/${id}`)
+}
+
+export async function fetchOverdueMaintenancePlans(days?: number): Promise<MaintenancePlan[]> {
+  const params = days ? `?days=${days}` : ''
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/maintenance/plans/overdue${params}`)
+}
+
+// ==================== 巡检模板 ====================
+export async function fetchInspectionTemplates(filters: InspectionTemplateFilters = {}): Promise<InspectionTemplateListResponse> {
+  const params = new URLSearchParams()
+  if (filters.equipment_category_id) params.append('equipment_category_id', filters.equipment_category_id)
+  if (filters.is_active !== undefined) params.append('is_active', filters.is_active.toString())
+  if (filters.keyword) params.append('keyword', filters.keyword)
+  if (filters.page) params.append('page', filters.page.toString())
+  if (filters.page_size) params.append('page_size', filters.page_size.toString())
+
+  const queryString = params.toString()
+  const url = queryString
+    ? `${API_BASE_URL}/api/v1/equipment/maintenance/inspection-templates/?${queryString}`
+    : `${API_BASE_URL}/api/v1/equipment/maintenance/inspection-templates/`
+
+  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
+  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
+  const result = await response.json()
+  return {
+    items: result.data || [],
+    total: result.meta?.total || 0,
+    page: result.meta?.page || 1,
+    page_size: result.meta?.page_size || 20,
+  }
+}
+
+export async function fetchInspectionTemplateById(id: string): Promise<InspectionTemplate> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/maintenance/inspection-templates/${id}`)
+}
+
+// ==================== 工单物料 ====================
+export async function fetchWorkOrderMaterials(workOrderId: string): Promise<MaterialRecord[]> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/maintenance/work-orders/${workOrderId}/materials`)
 }

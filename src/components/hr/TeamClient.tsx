@@ -1,66 +1,57 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button, message, Table, Space, Popconfirm, Input, Modal } from 'antd'
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, TeamOutlined } from '@ant-design/icons'
-import { Department } from '@/types/hr'
-import { fetchDepartmentsAction, deleteDepartment } from '@/actions/hr'
-import DepartmentForm from './DepartmentForm'
-import TeamClient from './TeamClient'
+import { Button, message, Table, Space, Popconfirm, Input } from 'antd'
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { Team } from '@/types/hr'
+import { fetchTeamsAction, deleteTeam } from '@/actions/hr'
+import TeamForm from './TeamForm'
 
-interface DepartmentClientProps {
-  initialDepartments: Department[]
-  initialTotal: number
+interface TeamClientProps {
+  departmentId: string
+  departmentName: string
 }
 
-export default function DepartmentClient({
-  initialDepartments,
-  initialTotal,
-}: DepartmentClientProps) {
-  const [departments, setDepartments] = useState<Department[]>(initialDepartments)
-  const [total, setTotal] = useState(initialTotal)
+export default function TeamClient({ departmentId, departmentName }: TeamClientProps) {
+  const [teams, setTeams] = useState<Team[]>([])
+  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [formOpen, setFormOpen] = useState(false)
-  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null)
   const [loading, setLoading] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
-  const [teamModalOpen, setTeamModalOpen] = useState(false)
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetchDepartmentsAction({
+      const res = await fetchTeamsAction({
+        department_id: departmentId,
         keyword: searchKeyword || undefined,
         page,
         page_size: pageSize,
       })
-      setDepartments(res.data)
+      setTeams(res.data)
       setTotal(res.meta?.total || 0)
     } catch (err: any) {
       message.error(err.message || '加载数据失败')
     } finally {
       setLoading(false)
     }
-  }, [searchKeyword, page, pageSize])
+  }, [departmentId, searchKeyword, page, pageSize])
 
   const handlePageChange = (newPage: number, newPageSize: number) => {
     setPage(newPage)
     setPageSize(newPageSize)
   }
 
-  const handleRefresh = () => {
-    loadData()
-  }
-
-  const handleEdit = (department: Department) => {
-    setEditingDepartment(department)
+  const handleEdit = (team: Team) => {
+    setEditingTeam(team)
     setFormOpen(true)
   }
 
   const handleAdd = () => {
-    setEditingDepartment(null)
+    setEditingTeam(null)
     setFormOpen(true)
   }
 
@@ -70,7 +61,7 @@ export default function DepartmentClient({
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteDepartment(id)
+      await deleteTeam(id)
       message.success('删除成功')
       loadData()
     } catch (err: any) {
@@ -78,27 +69,22 @@ export default function DepartmentClient({
     }
   }
 
-  const handleOpenTeams = (department: Department) => {
-    setSelectedDepartment(department)
-    setTeamModalOpen(true)
-  }
-
   useEffect(() => {
     loadData()
-  }, [searchKeyword, page, pageSize])
+  }, [loadData])
 
   const columns = [
     {
-      title: '部门编码',
-      dataIndex: 'code',
-      key: 'code',
-      width: 120,
-    },
-    {
-      title: '部门名称',
+      title: '班组名称',
       dataIndex: 'name',
       key: 'name',
       width: 160,
+    },
+    {
+      title: '班组编码',
+      dataIndex: 'code',
+      key: 'code',
+      width: 120,
     },
     {
       title: '描述',
@@ -109,17 +95,9 @@ export default function DepartmentClient({
     {
       title: '操作',
       key: 'action',
-      width: 220,
-      render: (_: any, record: Department) => (
+      width: 150,
+      render: (_: any, record: Team) => (
         <Space size="small">
-          <Button
-            type="text"
-            size="small"
-            icon={<TeamOutlined />}
-            onClick={() => handleOpenTeams(record)}
-          >
-            班组
-          </Button>
           <Button
             type="text"
             size="small"
@@ -130,7 +108,7 @@ export default function DepartmentClient({
           </Button>
           <Popconfirm
             title="确认删除"
-            description={`确定要删除部门 ${record.name} 吗？`}
+            description={`确定要删除班组 ${record.name} 吗？`}
             onConfirm={() => handleDelete(record.id)}
             okText="确定"
             cancelText="取消"
@@ -152,17 +130,17 @@ export default function DepartmentClient({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-[22px] font-semibold text-[var(--color-charcoal)]">
-          部门管理
-        </h1>
+        <h2 className="text-lg font-semibold text-[var(--color-charcoal)]">
+          {departmentName} — 班组管理
+        </h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-          新增部门
+          新增班组
         </Button>
       </div>
 
       <div className="flex flex-wrap gap-3 items-center">
         <Input
-          placeholder="搜索部门名称或编码"
+          placeholder="搜索班组名称或编码"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           prefix={<SearchOutlined />}
@@ -173,7 +151,7 @@ export default function DepartmentClient({
 
       <Table
         columns={columns}
-        dataSource={departments}
+        dataSource={teams}
         rowKey="id"
         loading={loading}
         pagination={{
@@ -186,27 +164,13 @@ export default function DepartmentClient({
         }}
       />
 
-      <DepartmentForm
+      <TeamForm
         open={formOpen}
-        department={editingDepartment}
+        team={editingTeam}
+        departmentId={departmentId}
         onClose={() => setFormOpen(false)}
         onSuccess={handleFormSuccess}
       />
-
-      <Modal
-        open={teamModalOpen}
-        onCancel={() => setTeamModalOpen(false)}
-        footer={null}
-        width={800}
-        destroyOnClose
-      >
-        {selectedDepartment && (
-          <TeamClient
-            departmentId={selectedDepartment.id}
-            departmentName={selectedDepartment.name}
-          />
-        )}
-      </Modal>
     </div>
   )
 }

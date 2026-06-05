@@ -8,6 +8,9 @@ import {
   DepartmentCreateInput,
   DepartmentUpdateInput,
   DepartmentListResponse,
+  TeamCreateInput,
+  TeamUpdateInput,
+  TeamListResponse,
   OffboardingRecordCreateInput,
   OffboardingRecordUpdateInput,
   OffboardingRecordListResponse,
@@ -162,6 +165,69 @@ export async function deleteDepartment(id: string) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
     throw new Error(err.message || '删除部门失败')
+  }
+  revalidatePath('/hr/departments')
+  return res.json()
+}
+
+// ─── Team Actions ───
+
+export async function fetchTeamsAction(
+  params?: {
+    department_id?: string
+    keyword?: string
+    page?: number
+    page_size?: number
+  }
+): Promise<TeamListResponse> {
+  const searchParams = new URLSearchParams()
+  if (params?.department_id) searchParams.set('department_id', params.department_id)
+  if (params?.keyword) searchParams.set('keyword', params.keyword)
+  searchParams.set('page', String(params?.page || 1))
+  searchParams.set('page_size', String(params?.page_size || 100))
+
+  const res = await fetch(`${API_BASE}/api/v1/hr/teams?${searchParams.toString()}`, {
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error('获取班组列表失败')
+  return res.json()
+}
+
+export async function createTeam(data: TeamCreateInput) {
+  const res = await fetch(`${API_BASE}/api/v1/hr/teams`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || '创建班组失败')
+  }
+  revalidatePath('/hr/departments')
+  return res.json()
+}
+
+export async function updateTeam(id: string, data: TeamUpdateInput) {
+  const res = await fetch(`${API_BASE}/api/v1/hr/teams/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || '更新班组失败')
+  }
+  revalidatePath('/hr/departments')
+  return res.json()
+}
+
+export async function deleteTeam(id: string) {
+  const res = await fetch(`${API_BASE}/api/v1/hr/teams/${id}`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || '删除班组失败')
   }
   revalidatePath('/hr/departments')
   return res.json()

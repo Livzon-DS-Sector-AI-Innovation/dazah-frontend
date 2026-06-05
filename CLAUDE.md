@@ -43,18 +43,7 @@ page.tsx 默认是 Server Component，不加 'use client'。
 
 Client 组件放在 components/<模块>/ 里，page.tsx 只负责拿数据然后传给 Client 组件。
 
-正确写法：
-\`\`\`tsx
-// app/(dashboard)/production/page.tsx（Server Component）
-export default async function Page() {
-  const data = await fetch(`${process.env.API_BASE_URL}/production/batches`, {
-    headers: { Authorization: `Bearer ${await getServerToken()}` },
-    next: { revalidate: 60 }
-  }).then(r => r.json())
-  
-  return <BatchTable initialData={data} />  // BatchTable 是 Client 组件
-}
-\`\`\`
+详见 [examples/server-component-pattern.md](examples/server-component-pattern.md)。
 
 ## 模块边界规则（重要）
 
@@ -62,35 +51,23 @@ export default async function Page() {
 如果需要用其他模块的东西，只能从该模块的 index.ts 导入。
 
 禁止：
-\`\`\`ts
+```ts
 import { BatchForm } from '@/components/production/BatchForm'  // 进入了模块内部
-\`\`\`
+```
 
 允许：
-\`\`\`ts
+```ts
 import { BatchTable } from '@/components/production'  // 通过 index.ts
-\`\`\`
+```
 
 ## 写操作必须用 Server Actions
 
 所有 POST/PUT/DELETE 操作写在 actions/ 目录，不要在 Client 组件里直接 fetch 写接口。
 
-\`\`\`ts
-// actions/production.ts
-'use server'
-export async function createBatch(data: CreateBatchInput) {
-  const token = await getServerToken()
-  const res = await fetch(`${process.env.API_BASE_URL}/production/batches`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  if (!res.ok) throw new Error('创建批次失败')
-  revalidatePath('/production')
-}
-\`\`\`
+详见 [examples/server-actions.md](examples/server-actions.md)。
 
 ## 飞书集成
+
 暂时为空
 
 ## 不允许修改的文件

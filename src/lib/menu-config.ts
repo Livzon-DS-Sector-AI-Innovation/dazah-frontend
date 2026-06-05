@@ -112,7 +112,10 @@ export const moduleMenus: ModuleMenu[] = [
     icon: "users",
     path: "/hr",
     children: [
+      { key: "departments", label: "部门管理", path: "/hr/departments" },
       { key: "profile", label: "员工档案", path: "/hr/profile" },
+      { key: "roster", label: "员工花名册", path: "/hr/roster" },
+      { key: "offboarding", label: "离职管理", path: "/hr/offboarding" },
       { key: "attendance", label: "考勤管理", path: "/hr/attendance" },
       { key: "training", label: "培训管理", path: "/hr/training" },
     ],

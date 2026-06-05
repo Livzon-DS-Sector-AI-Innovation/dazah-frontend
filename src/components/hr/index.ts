@@ -1,1 +1,9 @@
-// hr module components
+export { default as EmployeeTable } from './EmployeeTable'
+export { default as EmployeeForm } from './EmployeeForm'
+export { default as EmployeeProfileClient } from './EmployeeProfileClient'
+export { default as RosterClient } from './RosterClient'
+export { default as DepartmentClient } from './DepartmentClient'
+export { default as DepartmentForm } from './DepartmentForm'
+export { default as OffboardingClient } from './OffboardingClient'
+export { default as OffboardingForm } from './OffboardingForm'
+export { default as FeishuSyncPanel } from './FeishuSyncPanel'

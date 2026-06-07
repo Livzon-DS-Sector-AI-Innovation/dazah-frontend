@@ -70,7 +70,7 @@ export function EnergyOverview() {
     } finally {
       setLoading(false)
     }
-  }, [overviewTimeRange])
+  }, [overviewTimeRange, message])
 
   useEffect(() => {
     fetchData()

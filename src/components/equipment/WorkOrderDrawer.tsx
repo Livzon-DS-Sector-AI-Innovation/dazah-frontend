@@ -11,9 +11,6 @@ const { TextArea } = Input
 
 const statusOptions: { label: string; value: WorkOrderStatus }[] = [
   { label: '待处理', value: '待处理' },
-  { label: '待执行', value: '待执行' },
-  { label: '已指派', value: '已指派' },
-  { label: '维修中', value: '维修中' },
   { label: '执行中', value: '执行中' },
   { label: '待验收', value: '待验收' },
   { label: '已完成', value: '已完成' },

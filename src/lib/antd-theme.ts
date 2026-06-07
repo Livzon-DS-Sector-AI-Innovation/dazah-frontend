@@ -5,7 +5,6 @@ import type { ThemeConfig } from 'antd'
  * 基于 DESIGN.md 的 Notion 风格设计系统
  */
 export const antdTheme: ThemeConfig = {
-  cssVar: false,
   token: {
     // 主色调 - Notion Purple
     colorPrimary: '#5645d4',
@@ -186,6 +185,19 @@ export const antdTheme: ThemeConfig = {
     Statistic: {
       titleFontSize: 14,
       contentFontSize: 28,
+    },
+
+    // 气泡提示 — 深色背景确保白色文字清晰可读，符合 DESIGN.md brand-navy 规范
+    Tooltip: {
+      colorBgSpotlight: '#0a1530',
+      borderRadius: 6,
+      paddingSM: 12,
+      paddingXS: 8,
+    },
+
+    // 弹出层 — 与 Tooltip 保持一致的深色风格
+    Popover: {
+      colorBgSpotlight: '#0a1530',
     },
   },
 }

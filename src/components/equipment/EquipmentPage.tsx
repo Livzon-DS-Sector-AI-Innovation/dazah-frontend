@@ -107,76 +107,74 @@ export function EquipmentPage({
   return (
     <ConfigProvider theme={antdTheme} locale={zhCN}>
       <App>
-        <div className="p-6">
-          <h1
-            className="font-semibold mb-4"
-            style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
+        <h1
+          className="font-semibold mb-4"
+          style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
+        >
+          设备台账
+        </h1>
+
+        <StatsCards statistics={statistics ?? initialStatistics} />
+
+        <div className="flex gap-4">
+          {/* 左侧：分类/位置树 */}
+          <div
+            className="shrink-0"
+            style={{
+              width: 280,
+              background: '#ffffff',
+              padding: 16,
+              borderRadius: 12,
+              border: '1px solid #e5e3df',
+            }}
           >
-            设备台账
-          </h1>
-
-          <StatsCards statistics={statistics ?? initialStatistics} />
-
-          <div className="flex gap-4">
-            {/* 左侧：分类/位置树 */}
-            <div
-              className="shrink-0"
-              style={{
-                width: 280,
-                background: '#ffffff',
-                padding: 16,
-                borderRadius: 12,
-                border: '1px solid #e5e3df',
-              }}
-            >
-              <Tabs items={tabItems} />
-            </div>
-
-            {/* 右侧：设备列表 */}
-            <div
-              className="flex-1 min-w-0"
-              style={{
-                background: '#ffffff',
-                padding: 20,
-                borderRadius: 12,
-                border: '1px solid #e5e3df',
-                overflow: 'hidden',
-              }}
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h2
-                  className="font-semibold"
-                  style={{ fontSize: 18, color: '#1a1a1a', lineHeight: 1.4 }}
-                >
-                  设备列表
-                </h2>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => openEquipmentDrawer()}
-                >
-                  新增设备
-                </Button>
-              </div>
-              <div style={{ overflowX: 'auto' }}>
-                <Spin spinning={loading}>
-                  <EquipmentTable onRefresh={fetchData} />
-                </Spin>
-              </div>
-            </div>
+            <Tabs items={tabItems} />
           </div>
 
-          {/* 抽屉组件 */}
-          <EquipmentDrawer onRefresh={fetchData} />
-          <CategoryDrawer />
-          <LocationDrawer />
-          <RepairDrawer
-            equipments={(initialEquipments).map(e => ({
-              id: e.id, equipment_no: e.equipment_no, name: e.name, importance: e.importance,
-            }))}
-            onRefresh={fetchData}
-          />
+          {/* 右侧：设备列表 */}
+          <div
+            className="flex-1 min-w-0"
+            style={{
+              background: '#ffffff',
+              padding: 20,
+              borderRadius: 12,
+              border: '1px solid #e5e3df',
+              overflow: 'hidden',
+            }}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2
+                className="font-semibold"
+                style={{ fontSize: 18, color: '#1a1a1a', lineHeight: 1.4 }}
+              >
+                设备列表
+              </h2>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => openEquipmentDrawer()}
+              >
+                新增设备
+              </Button>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <Spin spinning={loading}>
+                <EquipmentTable onRefresh={fetchData} />
+              </Spin>
+            </div>
+          </div>
         </div>
+
+        {/* 抽屉组件 */}
+        <EquipmentDrawer onRefresh={fetchData} />
+        <CategoryDrawer />
+        <LocationDrawer />
+        <RepairDrawer
+          equipments={initialEquipments.map(e => ({
+            id: e.id, equipment_no: e.equipment_no, name: e.name, importance: e.importance,
+          }))}
+          onRefresh={fetchData}
+        />
       </App>
     </ConfigProvider>
   )

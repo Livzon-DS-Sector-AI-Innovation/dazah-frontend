@@ -171,7 +171,7 @@ export interface UpdateFailureCodeInput {
 // ==================== 维修工单 ====================
 export type WorkOrderType = '故障维修' | '计划维护' | '巡检' | '校准'
 export type WorkOrderPriority = '紧急' | '高' | '中' | '低'
-export type WorkOrderStatus = '待处理' | '已指派' | '维修中' | '待验收' | '已完成' | '已关闭'
+export type WorkOrderStatus = '待处理' | '执行中' | '待验收' | '已完成' | '已关闭'
 export type VerificationResult = '合格' | '不合格'
 
 export interface WorkOrder {
@@ -548,6 +548,7 @@ export interface CreateInspectionTemplateInput {
   name: string
   description?: string
   equipment_category_id?: string
+  is_active?: boolean
   items?: CreateInspectionTemplateItemInput[]
 }
 

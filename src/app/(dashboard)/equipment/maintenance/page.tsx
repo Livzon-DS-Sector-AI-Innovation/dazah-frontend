@@ -2,11 +2,11 @@ import { MaintenancePage } from '@/components/equipment'
 import {
   fetchEquipments, fetchWorkOrders, fetchWorkOrderStatistics, fetchFailureCodes,
   fetchCalibrationPlans, fetchCalibrationRecords,
-  fetchMaintenancePlans, fetchInspectionTemplates,
+  fetchMaintenancePlans,
 } from '@/lib/api/equipment'
 import {
   Equipment, FailureCode, WorkOrder, WorkOrderStatistics, CalibrationPlan, CalibrationRecord,
-  MaintenancePlan, InspectionTemplate,
+  MaintenancePlan,
 } from '@/types/equipment'
 
 const defaultStatistics: WorkOrderStatistics = {
@@ -32,8 +32,6 @@ export default async function MaintenancePageWrapper() {
   let calibrationRecordTotal = 0
   let maintenancePlans: MaintenancePlan[] = []
   let maintenancePlanTotal = 0
-  let inspectionTemplates: InspectionTemplate[] = []
-  let inspectionTemplateTotal = 0
 
   try {
     const result = await Promise.all([
@@ -46,7 +44,6 @@ export default async function MaintenancePageWrapper() {
       fetchCalibrationPlans({ page: 1, page_size: 20 }),
       fetchCalibrationRecords({ page: 1, page_size: 20 }),
       fetchMaintenancePlans({ page: 1, page_size: 20 }),
-      fetchInspectionTemplates({ page: 1, page_size: 20 }),
     ])
 
     equipments = result[0].items
@@ -64,8 +61,6 @@ export default async function MaintenancePageWrapper() {
     calibrationRecordTotal = result[7].total
     maintenancePlans = result[8].items
     maintenancePlanTotal = result[8].total
-    inspectionTemplates = result[9].items
-    inspectionTemplateTotal = result[9].total
   } catch (error) {
     console.warn('维护模块数据加载失败，使用空数据:', error)
   }
@@ -83,8 +78,6 @@ export default async function MaintenancePageWrapper() {
       initialCalibrationRecordTotal={calibrationRecordTotal}
       initialMaintenancePlans={maintenancePlans}
       initialMaintenancePlanTotal={maintenancePlanTotal}
-      initialInspectionTemplates={inspectionTemplates}
-      initialInspectionTemplateTotal={inspectionTemplateTotal}
     />
   )
 }

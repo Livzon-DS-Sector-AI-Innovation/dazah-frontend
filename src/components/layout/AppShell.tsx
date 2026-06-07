@@ -1,3 +1,6 @@
+'use client'
+
+import { App } from 'antd'
 import { TopNav } from "./TopNav"
 import { Sidebar } from "./Sidebar"
 
@@ -11,9 +14,11 @@ export function AppShell({ children }: AppShellProps) {
       <TopNav />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-[var(--color-surface)] p-6">
-          {children}
-        </main>
+        <App className="flex-1 overflow-hidden">
+          <main className="h-full overflow-y-auto bg-[var(--color-surface)] p-6">
+            {children}
+          </main>
+        </App>
       </div>
     </div>
   )

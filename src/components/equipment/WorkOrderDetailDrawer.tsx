@@ -16,8 +16,7 @@ const { TextArea } = Input
 
 const statusConfig: Record<WorkOrderStatus, { color: string; label: string }> = {
   '待处理': { color: '#e03131', label: '待处理' },
-  '已指派': { color: '#5645d4', label: '已指派' },
-  '维修中': { color: '#dd5b00', label: '维修中' },
+  '执行中': { color: '#dd5b00', label: '执行中' },
   '待验收': { color: '#d4b106', label: '待验收' },
   '已完成': { color: '#1aae39', label: '已完成' },
   '已关闭': { color: '#787671', label: '已关闭' },
@@ -330,12 +329,12 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
         <Space wrap>
           {wo.status === '待处理' && (
             <>
-              <Button type="primary" icon={<ThunderboltOutlined />} onClick={handleClaim}>抢单</Button>
+              <Button type="primary" onClick={handleStart}>开始执行</Button>
               <Button onClick={handleAssign}>指派维修人</Button>
+              <Button icon={<ThunderboltOutlined />} onClick={handleClaim}>抢单</Button>
             </>
           )}
-          {wo.status === '已指派' && <Button type="primary" onClick={handleStart}>开始维修</Button>}
-          {wo.status === '维修中' && <Button type="primary" onClick={handleComplete}>提交完成</Button>}
+          {wo.status === '执行中' && <Button type="primary" onClick={handleComplete}>提交完成</Button>}
           {wo.status === '待验收' && (
             <>
               <Button type="primary" onClick={() => handleVerify('合格')}>验收通过</Button>

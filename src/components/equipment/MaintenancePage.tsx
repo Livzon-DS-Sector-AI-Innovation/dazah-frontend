@@ -6,14 +6,14 @@ import zhCN from 'antd/locale/zh_CN'
 import { PlusOutlined } from '@ant-design/icons'
 import {
   Equipment, FailureCode, WorkOrder, WorkOrderStatistics, CalibrationPlan, CalibrationRecord,
-  MaintenancePlan, InspectionTemplate,
+  MaintenancePlan,
 } from '@/types/equipment'
 import { useEquipmentStore } from '@/stores/equipment'
 import { antdTheme } from '@/lib/antd-theme'
 import {
   fetchWorkOrdersClient, fetchWorkOrderStatisticsClient,
   fetchFailureCodesClient, fetchCalibrationPlansClient, fetchCalibrationRecordsClient,
-  fetchMaintenancePlansClient, fetchInspectionTemplatesClient,
+  fetchMaintenancePlansClient,
   fetchEquipmentsClient,
   fetchClaimTimeoutConfigClient,
 } from '@/lib/api/equipment-client'
@@ -32,8 +32,6 @@ import { CalibrationRecordTable } from './CalibrationRecordTable'
 import { CalibrationRecordDrawer } from './CalibrationRecordDrawer'
 import { MaintenancePlanTable } from './MaintenancePlanTable'
 import { MaintenancePlanDrawer } from './MaintenancePlanDrawer'
-import { InspectionTemplateTable } from './InspectionTemplateTable'
-import { InspectionTemplateDrawer } from './InspectionTemplateDrawer'
 import { InspectionCompleteDrawer } from './InspectionCompleteDrawer'
 
 interface MaintenancePageProps {
@@ -48,8 +46,6 @@ interface MaintenancePageProps {
   initialCalibrationRecordTotal: number
   initialMaintenancePlans: MaintenancePlan[]
   initialMaintenancePlanTotal: number
-  initialInspectionTemplates: InspectionTemplate[]
-  initialInspectionTemplateTotal: number
 }
 
 export function MaintenancePage({
@@ -59,7 +55,6 @@ export function MaintenancePage({
   initialCalibrationPlans, initialCalibrationPlanTotal,
   initialCalibrationRecords, initialCalibrationRecordTotal,
   initialMaintenancePlans, initialMaintenancePlanTotal,
-  initialInspectionTemplates, initialInspectionTemplateTotal,
 }: MaintenancePageProps) {
   const {
     maintenanceTab, setMaintenanceTab,
@@ -74,10 +69,8 @@ export function MaintenancePage({
     calibrationRecordPage, calibrationRecordPageSize,
     setMaintenancePlans, setMaintenancePlanTotal, setMaintenancePlanLoading,
     maintenancePlanStatusFilter, maintenancePlanPage, maintenancePlanPageSize,
-    setInspectionTemplates, setInspectionTemplateTotal, setInspectionTemplateLoading,
-    inspectionTemplatePage, inspectionTemplatePageSize, inspectionTemplateKeyword,
     openWorkOrderDrawer,
-    openMaintenancePlanDrawer, openInspectionTemplateDrawer,
+    openMaintenancePlanDrawer,
   } = useEquipmentStore()
 
   // 超时配置
@@ -128,19 +121,15 @@ export function MaintenancePage({
     setCalibrationRecordTotal(initialCalibrationRecordTotal)
     setMaintenancePlans(initialMaintenancePlans)
     setMaintenancePlanTotal(initialMaintenancePlanTotal)
-    setInspectionTemplates(initialInspectionTemplates)
-    setInspectionTemplateTotal(initialInspectionTemplateTotal)
   }, [
     initialWorkOrders, initialWorkOrderTotal, initialWorkOrderStatistics,
     initialFailureCodes, initialCalibrationPlans, initialCalibrationPlanTotal,
     initialCalibrationRecords, initialCalibrationRecordTotal,
     initialMaintenancePlans, initialMaintenancePlanTotal,
-    initialInspectionTemplates, initialInspectionTemplateTotal,
     setWorkOrders, setWorkOrderTotal, setWorkOrderStatistics,
     setFailureCodes, setCalibrationPlans, setCalibrationPlanTotal,
     setCalibrationRecords, setCalibrationRecordTotal,
     setMaintenancePlans, setMaintenancePlanTotal,
-    setInspectionTemplates, setInspectionTemplateTotal,
   ])
 
   const fetchWorkOrderData = useCallback(async () => {
@@ -227,22 +216,6 @@ export function MaintenancePage({
     }
   }, [maintenancePlanStatusFilter, maintenancePlanPage, maintenancePlanPageSize, setMaintenancePlans, setMaintenancePlanTotal, setMaintenancePlanLoading])
 
-  const fetchInspectionTemplateData = useCallback(async () => {
-    setInspectionTemplateLoading(true)
-    try {
-      const res = await fetchInspectionTemplatesClient({
-        keyword: inspectionTemplateKeyword || undefined,
-        page: inspectionTemplatePage, page_size: inspectionTemplatePageSize,
-      })
-      setInspectionTemplates(res.items)
-      setInspectionTemplateTotal(res.total)
-    } catch (e) {
-      console.error('获取巡检模板数据失败:', e)
-    } finally {
-      setInspectionTemplateLoading(false)
-    }
-  }, [inspectionTemplateKeyword, inspectionTemplatePage, inspectionTemplatePageSize, setInspectionTemplates, setInspectionTemplateTotal, setInspectionTemplateLoading])
-
   useEffect(() => {
     if (maintenanceTab === 'work-orders') fetchWorkOrderData()
   }, [maintenanceTab, fetchWorkOrderData])
@@ -258,10 +231,6 @@ export function MaintenancePage({
   useEffect(() => {
     if (maintenanceTab === 'maintenance-plans') fetchMaintenancePlanData()
   }, [maintenanceTab, fetchMaintenancePlanData])
-
-  useEffect(() => {
-    if (maintenanceTab === 'inspection') fetchInspectionTemplateData()
-  }, [maintenanceTab, fetchInspectionTemplateData])
 
   const tabItems = [
     {
@@ -351,45 +320,25 @@ export function MaintenancePage({
         </div>
       ),
     },
-    {
-      key: 'inspection',
-      label: '巡检模板',
-      children: (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold" style={{ fontSize: 18, color: '#1a1a1a', lineHeight: 1.4, margin: 0 }}>
-              巡检模板列表
-            </h2>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => openInspectionTemplateDrawer()}>
-              新建巡检模板
-            </Button>
-          </div>
-          <InspectionTemplateTable onRefresh={fetchInspectionTemplateData} categories={categories} />
-        </div>
-      ),
-    },
   ]
 
   return (
     <ConfigProvider theme={antdTheme} locale={zhCN}>
       <App>
-        <div className="p-6">
-          <h1 className="font-semibold mb-4" style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}>
-            维护保养
-          </h1>
-          <div style={{ background: '#ffffff', padding: 20, borderRadius: 12, border: '1px solid #e5e3df' }}>
-            <Tabs activeKey={maintenanceTab} onChange={setMaintenanceTab} items={tabItems} />
-          </div>
-
-          <WorkOrderDrawer equipments={equipments} symptoms={initialFailureCodes.symptoms} onRefresh={fetchWorkOrderData} />
-          <WorkOrderDetailDrawer onRefresh={fetchWorkOrderData} />
-          <FailureCodeDrawer onRefresh={fetchFailureCodeData} />
-          <CalibrationPlanDrawer equipments={equipments} onRefresh={fetchCalibrationPlanData} />
-          <CalibrationRecordDrawer calibrationPlans={calibrationPlans} onRefresh={fetchCalibrationRecordData} />
-          <MaintenancePlanDrawer equipments={equipments} onRefresh={fetchMaintenancePlanData} />
-          <InspectionTemplateDrawer categories={categories} onRefresh={fetchInspectionTemplateData} />
-          <InspectionCompleteDrawer onRefresh={fetchWorkOrderData} />
+        <h1 className="font-semibold mb-4" style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}>
+          维护保养
+        </h1>
+        <div style={{ background: '#ffffff', padding: 20, borderRadius: 12, border: '1px solid #e5e3df' }}>
+          <Tabs activeKey={maintenanceTab} onChange={setMaintenanceTab} items={tabItems} />
         </div>
+
+        <WorkOrderDrawer equipments={equipments} symptoms={initialFailureCodes.symptoms} onRefresh={fetchWorkOrderData} />
+        <WorkOrderDetailDrawer onRefresh={fetchWorkOrderData} />
+        <FailureCodeDrawer onRefresh={fetchFailureCodeData} />
+        <CalibrationPlanDrawer equipments={equipments} onRefresh={fetchCalibrationPlanData} />
+        <CalibrationRecordDrawer calibrationPlans={calibrationPlans} onRefresh={fetchCalibrationRecordData} />
+        <MaintenancePlanDrawer equipments={equipments} onRefresh={fetchMaintenancePlanData} />
+        <InspectionCompleteDrawer onRefresh={fetchWorkOrderData} />
       </App>
     </ConfigProvider>
   )

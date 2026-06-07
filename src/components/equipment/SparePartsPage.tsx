@@ -62,27 +62,25 @@ export function SparePartsPage({
   return (
     <ConfigProvider theme={antdTheme} locale={zhCN}>
       <App>
-        <div className="p-6">
-          <h1
-            className="font-semibold mb-4"
-            style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
-          >
-            备件管理
-          </h1>
-          <div
-            style={{
-              background: '#ffffff',
-              padding: 20,
-              borderRadius: 12,
-              border: '1px solid #e5e3df',
-            }}
-          >
-            <SparePartTable onRefresh={fetchData} />
-          </div>
-
-          <SparePartDrawer onRefresh={fetchData} />
-          <StockInboundDrawer onRefresh={fetchData} />
+        <h1
+          className="font-semibold mb-4"
+          style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
+        >
+          备件管理
+        </h1>
+        <div
+          style={{
+            background: '#ffffff',
+            padding: 20,
+            borderRadius: 12,
+            border: '1px solid #e5e3df',
+          }}
+        >
+          <SparePartTable onRefresh={fetchData} />
         </div>
+
+        <SparePartDrawer onRefresh={fetchData} />
+        <StockInboundDrawer onRefresh={fetchData} />
       </App>
     </ConfigProvider>
   )

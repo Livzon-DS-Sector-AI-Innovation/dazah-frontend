@@ -4,6 +4,7 @@ import { App, Table, Tag, Space, Button, Popconfirm } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableColumnsType } from 'antd'
 import { AlertRule, AlertLevel, EnergyType } from '@/types/energy'
+import { energyTypeLabels } from './constants'
 
 interface AlertRuleTableProps {
   data: AlertRule[]
@@ -19,12 +20,6 @@ const alertLevelLabels: Record<AlertLevel, { text: string; color: string }> = {
   warning: { text: '警告', color: 'orange' },
   critical: { text: '严重', color: 'red' },
   emergency: { text: '紧急', color: 'magenta' },
-}
-
-const energyTypeLabels: Record<EnergyType, { text: string; color: string }> = {
-  electricity: { text: '电力', color: 'blue' },
-  water: { text: '水', color: 'cyan' },
-  gas: { text: '气体', color: 'orange' },
 }
 
 export function AlertRuleTable({

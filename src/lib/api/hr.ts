@@ -15,7 +15,7 @@ import {
   SyncStatusResponse,
 } from '@/types/hr'
 
-const API_BASE = 'http://localhost:8001'
+const API_BASE = 'http://localhost:8000'
 
 export async function fetchEmployees(
   params?: {

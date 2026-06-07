@@ -1168,14 +1168,27 @@ export interface HazardRevisionArchiveQueryParams {
 
 // ============ AI Workflow Config Types ============
 
-export interface ScriptConfigItem {
+/** AI 工作流步骤配置（4 字段结构化提示词） */
+export interface WorkflowStepItem {
   script_number: number
   name: string
-  prompt_template: string
+  /** 输入信息 — 工作流需要读取哪些信息 */
+  input_info: string
+  /** 工作规则 — 明确目的、要求和限制 */
+  work_rules: string
+  /** 调用文档 — 关联的知识库、参考标准、Skill 等 */
+  reference_docs: string
+  /** 输出格式 — 按标准格式输出的规范 */
+  output_format: string
   expected_keys: string[]
   is_enabled: boolean
   description?: string
+  /** @deprecated 旧格式单 prompt 字段，新格式使用上述 4 字段 */
+  prompt_template?: string
 }
+
+/** @deprecated 使用 WorkflowStepItem */
+export type ScriptConfigItem = WorkflowStepItem
 
 export interface AIWorkflowConfig {
   id: string
@@ -1184,7 +1197,7 @@ export interface AIWorkflowConfig {
   workflow_description?: string
   trigger_event?: string
   is_enabled: boolean
-  script_configs?: ScriptConfigItem[]
+  script_configs?: WorkflowStepItem[]
   sort_order: number
   notes?: string
   created_at: string
@@ -1197,7 +1210,7 @@ export interface AIWorkflowConfigFormData {
   workflow_description?: string
   trigger_event?: string
   is_enabled?: boolean
-  script_configs?: ScriptConfigItem[]
+  script_configs?: WorkflowStepItem[]
   sort_order?: number
   notes?: string
 }
@@ -1212,9 +1225,6 @@ export interface AIWorkflowConfigQueryParams {
 export const SAFETY_MODULE_OPTIONS = [
   { value: 'hazard-identification', label: '危险源AI辨识', icon: '🤖' },
   { value: 'regulation', label: '安全操规管理', icon: '📋' },
-  { value: 'regulation-revision', label: '操规AI修订', icon: '📝' },
-  { value: 'hazard-revision', label: '危险源辨识修订', icon: '🔍' },
-  { value: 'hazard', label: '隐患排查治理', icon: '⚠️' },
   { value: 'check', label: '安全检查', icon: '✅' },
 ]
 
@@ -1225,6 +1235,40 @@ export const TRIGGER_EVENT_OPTIONS = [
   { value: 'auto_trigger', label: '自动触发' },
   { value: 'schedule', label: '定时触发' },
 ]
+
+// ═══════════════════════════════════════════
+// AI 工作流 → 菜单分级映射
+// ═══════════════════════════════════════════
+
+export interface MenuMapEntry {
+  group: string
+  subgroup: string
+  path: string
+}
+
+export const WORKFLOW_MENU_MAP: Record<string, MenuMapEntry> = {
+  'hazard-identification': {
+    group: '风险与隐患',
+    subgroup: '风险分级管控',
+    path: '/safety/hazard-identification',
+  },
+  'special-ops-critical': {
+    group: '作业安全',
+    subgroup: '特殊作业报备',
+    path: '/safety/special-ops/report',
+  },
+  'special-ops-export': {
+    group: '作业安全',
+    subgroup: '特殊作业台账',
+    path: '/safety/special-ops',
+  },
+}
+
+export const WORKFLOW_ICONS: Record<string, string> = {
+  'hazard-identification': '🤖',
+  'special-ops-critical': '🏗️',
+  'special-ops-export': '📊',
+}
 
 // ============ API Call Config Types ============
 
@@ -1464,6 +1508,9 @@ export interface SpecialOperationReport {
   rejection_reason?: string
   status: string
   notes?: string
+  is_critical: boolean
+  is_critical_reason?: string
+  is_critical_updated_by?: string
   created_at: string
   updated_at: string
 }
@@ -1499,6 +1546,27 @@ export interface SpecialOperationReportQueryParams {
   operation_type?: string
   department?: string
   keyword?: string
+}
+
+// ── 特殊作业台账 ──
+
+export interface SpecialOperationLedgerQueryParams {
+  page?: number
+  page_size?: number
+  operation_type?: string
+  operation_level?: string
+  risk_level?: string
+  department?: string
+  date_from?: string
+  date_to?: string
+  keyword?: string
+  is_critical?: boolean
+}
+
+export interface SpecialOperationLedgerStats {
+  operation_type: string
+  count: number
+  critical_count: number
 }
 
 // ── 每日风险作业报备 ──

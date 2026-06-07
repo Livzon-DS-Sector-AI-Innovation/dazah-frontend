@@ -716,28 +716,12 @@ export default function RiskReportingPage() {
   return (
     <div className="p-6">
       <div className="mb-4">
-        <Text className="text-lg font-semibold">风险作业报备</Text>
+        <Text className="text-lg font-semibold">关键风险作业报备</Text>
         <br />
-        <Text type="secondary">关键风险作业报备审批管理，包括八大特殊作业报备和每日风险作业报备</Text>
+        <Text type="secondary">每日风险作业报备审批管理</Text>
       </div>
 
-      <Card>
-        <Tabs
-          defaultActiveKey="special-op"
-          items={[
-            {
-              key: 'special-op',
-              label: <span><AlertOutlined /> 特殊作业报备</span>,
-              children: <SpecialOpReportPanel />,
-            },
-            {
-              key: 'daily-risk',
-              label: <span><CalendarOutlined /> 每日风险作业报备</span>,
-              children: <DailyRiskReportPanel />,
-            },
-          ]}
-        />
-      </Card>
+      <DailyRiskReportPanel />
     </div>
   )
 }

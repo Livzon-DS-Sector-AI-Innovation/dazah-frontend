@@ -76,7 +76,27 @@ export default function OffboardingClient({
   }
 
   useEffect(() => {
-    loadData()
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const res = await fetchOffboardingRecordsAction({
+          keyword: searchKeyword || undefined,
+          page,
+          page_size: pageSize,
+        })
+        if (!cancelled) {
+          setRecords(res.data)
+          setTotal(res.meta?.total || 0)
+        }
+      } catch (err: any) {
+        if (!cancelled) message.error(err.message || '加载数据失败')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
   }, [searchKeyword, page, pageSize])
 
   const typeColorMap: Record<string, string> = {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { fetchCpvProduct, fetchCpvParameters, fetchCpvStatistics, fetchCpvTrend } from "@/lib/api/quality-cpv"
@@ -16,25 +16,59 @@ export default function CpvProductDetailPage() {
   const [cqaParams, setCqaParams] = useState<CpvParameter[]>([])
   const [selectedType, setSelectedType] = useState<"CPP" | "CQA">("CPP")
   const [selectedParamId, setSelectedParamId] = useState<string>("")
-  const [allParams, setAllParams] = useState<CpvParameter[]>([])
   const [statistics, setStatistics] = useState<CpvStatistics | null>(null)
   const [trend, setTrend] = useState<CpvTrendResponse | null>(null)
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { loadData() }, [productId])
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const [prod, cpp, cqa] = await Promise.all([
+          fetchCpvProduct(productId),
+          fetchCpvParameters(productId, "CPP"),
+          fetchCpvParameters(productId, "CQA"),
+        ])
+        if (!cancelled) {
+          setProduct(prod)
+          setCppParams(cpp)
+          setCqaParams(cqa)
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [productId])
+
+  const allParams = selectedType === "CPP" ? cppParams : cqaParams
 
   useEffect(() => {
-    const p = selectedType === "CPP" ? cppParams : cqaParams
-    setAllParams(p)
-    if (p.length > 0) setSelectedParamId(p[0].id)
-    else setSelectedParamId("")
-  }, [selectedType, cppParams, cqaParams])
-
-  useEffect(() => {
-    if (selectedParamId) loadTrendAndStats()
-  }, [selectedParamId, startDate, endDate])
+    if (!selectedParamId) return
+    let cancelled = false
+    const load = async () => {
+      try {
+        const [stats, trendData] = await Promise.all([
+          fetchCpvStatistics(productId, selectedParamId, { start_date: startDate || undefined, end_date: endDate || undefined }),
+          fetchCpvTrend(productId, selectedParamId, { start_date: startDate || undefined, end_date: endDate || undefined }),
+        ])
+        if (!cancelled) {
+          setStatistics(stats)
+          setTrend(trendData)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [selectedParamId, startDate, endDate, productId])
 
   async function loadData() {
     try {

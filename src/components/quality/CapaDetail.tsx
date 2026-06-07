@@ -106,8 +106,23 @@ export function CapaDetail() {
   }, [params.id, message, router])
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    let cancelled = false
+    const load = async () => {
+      try {
+        const data = await fetchCapa(params.id as string)
+        if (!cancelled) setCapa(data)
+      } catch (error: any) {
+        if (!cancelled) {
+          message.error(error.message || '加载失败')
+          router.push('/quality/capas')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [params.id, message, router])
 
   const handleEdit = () => {
     if (!capa) return

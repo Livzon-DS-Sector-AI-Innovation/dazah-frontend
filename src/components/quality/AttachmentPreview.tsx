@@ -41,31 +41,36 @@ export function AttachmentPreview({
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const fetchReviews = async () => {
-    if (!attachment?.downloadUrl) return
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      params.append('attachment_url', attachment.downloadUrl)
-      if (deviationId) params.append('deviation_id', deviationId)
-      if (capaId) params.append('capa_id', capaId)
-      
-      const response = await fetch(`${API_BASE_URL}/api/v1/quality/attachment-reviews?${params.toString()}`)
-      if (!response.ok) throw new Error('请求失败')
-      const result = await response.json()
-      setReviews(result?.data || [])
-    } catch {
-      message.error('加载审阅记录失败')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    if (open && attachment) {
-      fetchReviews()
+    if (!open || !attachment) return
+    let cancelled = false
+
+    const fetchReviews = async () => {
+      if (!attachment?.downloadUrl) return
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        params.append('attachment_url', attachment.downloadUrl)
+        if (deviationId) params.append('deviation_id', deviationId)
+        if (capaId) params.append('capa_id', capaId)
+
+        const response = await fetch(`${API_BASE_URL}/api/v1/quality/attachment-reviews?${params.toString()}`)
+        if (!response.ok) throw new Error('请求失败')
+        const result = await response.json()
+        if (!cancelled) setReviews(result?.data || [])
+      } catch {
+        if (!cancelled) message.error('加载审阅记录失败')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-  }, [open, attachment])
+
+    fetchReviews()
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, attachment, deviationId, capaId])
 
   const handleSubmitReview = async () => {
     if (!newComment.trim() || !attachment) return

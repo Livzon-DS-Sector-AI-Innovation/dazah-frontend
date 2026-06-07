@@ -91,12 +91,44 @@ export default function EmployeeProfileClient({
   }
 
   useEffect(() => {
-    loadData()
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const res = await fetchEmployeesAction({
+          department: activeDepartment || undefined,
+          status: filterStatus || undefined,
+          keyword: searchKeyword || undefined,
+          page,
+          page_size: pageSize,
+        })
+        if (!cancelled) {
+          setEmployees(res.data)
+          setTotal(res.meta?.total || 0)
+        }
+      } catch (err: any) {
+        if (!cancelled) message.error(err.message || '加载数据失败')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
   }, [activeDepartment, filterStatus, searchKeyword, page, pageSize])
 
   useEffect(() => {
-    loadDepartments()
-  }, [loadDepartments])
+    let cancelled = false
+    const load = async () => {
+      try {
+        const res = await fetchDepartmentsAction()
+        if (!cancelled) setDepartments(res.data || [])
+      } catch (err: any) {
+        if (!cancelled) message.error(err.message || '加载部门失败')
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
 
   const tabItems = [
     { key: 'all', label: '全部', value: '' },

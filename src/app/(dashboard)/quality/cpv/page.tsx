@@ -10,7 +10,20 @@ export default function CpvProductListPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadProducts()
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const result = await fetchCpvProducts({ page: 1, page_size: 50 })
+        if (!cancelled) setProducts(result.items)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
   }, [])
 
   async function loadProducts() {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { App, Card, Button, Input, Space, Tag, List, Upload, Modal, Typography } from 'antd'
 import { SaveOutlined, EditOutlined, HistoryOutlined, ArrowLeftOutlined, EyeOutlined, FileTextOutlined, UploadOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -59,9 +59,7 @@ export function ReportEditor({
   const [viewingVersion, setViewingVersion] = useState<ReportVersion | null>(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    setContent(initialContent)
-  }, [initialContent])
+  // content tracks initialContent via key prop on parent (no sync needed in render)
 
   const handleSave = async () => {
     setSaving(true)

@@ -32,7 +32,20 @@ export default function FeishuSyncPanel({ onSynced }: { onSynced?: () => void })
   }
 
   useEffect(() => {
-    loadStatus()
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const res = await fetchSyncStatus()
+        if (!cancelled) setStatus(res.data)
+      } catch (err: any) {
+        if (!cancelled) message.error(err.message || '获取同步状态失败')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
   }, [])
 
   const handleSync = async () => {

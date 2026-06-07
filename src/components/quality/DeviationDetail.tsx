@@ -101,8 +101,23 @@ export function DeviationDetail() {
   }, [params.id, message, router])
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    let cancelled = false
+    const load = async () => {
+      try {
+        const data = await fetchDeviation(params.id as string)
+        if (!cancelled) setDeviation(data)
+      } catch (error: any) {
+        if (!cancelled) {
+          message.error(error.message || '加载失败')
+          router.push('/quality/deviations')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [params.id, message, router])
 
   const handleEdit = () => {
     if (!deviation) return

@@ -47,6 +47,8 @@ import type {
   SpecialOperationReport,
   SpecialOperationReportFormData,
   SpecialOperationReportQueryParams,
+  SpecialOperationLedgerQueryParams,
+  SpecialOperationLedgerStats,
   DailyRiskReport,
   DailyRiskReportFormData,
   DailyRiskReportQueryParams,
@@ -1080,6 +1082,7 @@ export async function createAPICallConfig(
     '/safety/api-call-configs',
     { method: 'POST', body: JSON.stringify(data) }
   )
+  revalidatePath('/safety/api-call-config')
   revalidatePath('/safety/ai-workflow-config')
   return response
 }
@@ -1092,6 +1095,7 @@ export async function updateAPICallConfig(
     `/safety/api-call-configs/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
+  revalidatePath('/safety/api-call-config')
   revalidatePath('/safety/ai-workflow-config')
   return response
 }
@@ -1101,6 +1105,7 @@ export async function activateAPICallConfig(id: string) {
     `/safety/api-call-configs/${id}/activate`,
     { method: 'POST' }
   )
+  revalidatePath('/safety/api-call-config')
   revalidatePath('/safety/ai-workflow-config')
   return response
 }
@@ -1109,6 +1114,7 @@ export async function deleteAPICallConfig(id: string) {
   const response = await fetchApi<null>(`/safety/api-call-configs/${id}`, {
     method: 'DELETE',
   })
+  revalidatePath('/safety/api-call-config')
   revalidatePath('/safety/ai-workflow-config')
   return response
 }
@@ -1339,6 +1345,7 @@ export async function createSpecialOperationReport(data: SpecialOperationReportF
     body: JSON.stringify(data),
   })
   revalidatePath('/safety/risk-reporting')
+  revalidatePath('/safety/special-ops/report')
   return response
 }
 
@@ -1348,6 +1355,7 @@ export async function updateSpecialOperationReport(id: string, data: Partial<Spe
     body: JSON.stringify(data),
   })
   revalidatePath('/safety/risk-reporting')
+  revalidatePath('/safety/special-ops/report')
   return response
 }
 
@@ -1360,18 +1368,60 @@ export async function deleteSpecialOperationReport(id: string) {
 export async function submitSpecialOperationReport(id: string) {
   const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/submit`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
+  revalidatePath('/safety/special-ops/report')
+  revalidatePath('/safety/special-ops')
   return response
 }
 
 export async function approveSpecialOperationReport(id: string) {
   const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/approve`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
+  revalidatePath('/safety/special-ops/report')
+  revalidatePath('/safety/special-ops')
   return response
 }
 
 export async function rejectSpecialOperationReport(id: string, reason: string) {
   const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/reject?reason=${encodeURIComponent(reason)}`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
+  revalidatePath('/safety/special-ops/report')
+  revalidatePath('/safety/special-ops')
+  return response
+}
+
+export async function setSpecialOperationReportCritical(id: string, is_critical: boolean, reason?: string) {
+  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/critical`, {
+    method: 'PUT',
+    body: JSON.stringify({ is_critical, reason }),
+  })
+  revalidatePath('/safety/special-ops')
+  revalidatePath('/safety/special-ops/report')
+  return response
+}
+
+// ==================== 特殊作业台账 Actions ====================
+
+export async function getSpecialOperationLedger(params?: SpecialOperationLedgerQueryParams) {
+  const query = new URLSearchParams()
+  if (params) {
+    if (params.page) query.set('page', String(params.page))
+    if (params.page_size) query.set('page_size', String(params.page_size))
+    if (params.operation_type) query.set('operation_type', params.operation_type)
+    if (params.operation_level) query.set('operation_level', params.operation_level)
+    if (params.risk_level) query.set('risk_level', params.risk_level)
+    if (params.department) query.set('department', params.department)
+    if (params.date_from) query.set('date_from', params.date_from)
+    if (params.date_to) query.set('date_to', params.date_to)
+    if (params.keyword) query.set('keyword', params.keyword)
+    if (params.is_critical !== undefined) query.set('is_critical', String(params.is_critical))
+  }
+  const qs = query.toString()
+  const response = await fetchApi<SpecialOperationReport[]>(`/safety/special-operation-ledger${qs ? `?${qs}` : ''}`)
+  return response
+}
+
+export async function getSpecialOperationLedgerStats() {
+  const response = await fetchApi<SpecialOperationLedgerStats[]>('/safety/special-operation-ledger/stats')
   return response
 }
 

@@ -588,112 +588,124 @@ export default function OccupationalHealthPage() {
         <Text type="secondary">职业病危害因素监测与职业健康体检管理，遵循 GBZ 159 / GBZ 2.1 / GBZ 188</Text>
       </div>
 
-      <Tabs defaultActiveKey="monitoring">
-        {/* =============================== Monitoring Tab =============================== */}
-        <Tabs.TabPane tab="危害因素监测" key="monitoring">
-          <Space style={{ marginBottom: 16 }} wrap>
-            <Select
-              allowClear
-              placeholder="检测类型"
-              style={{ width: 130 }}
-              options={DETECTION_TYPE_OPTIONS}
-              value={monitorFilters.detection_type}
-              onChange={(v) => setMonitorFilters((f) => ({ ...f, detection_type: v }))}
-            />
-            <Select
-              allowClear
-              placeholder="状态"
-              style={{ width: 110 }}
-              options={MONITOR_STATUS_OPTIONS}
-              value={monitorFilters.status}
-              onChange={(v) => setMonitorFilters((f) => ({ ...f, status: v }))}
-            />
-            <Input.Search
-              allowClear
-              placeholder="搜索编号/场所/点位"
-              style={{ width: 250 }}
-              value={monitorFilters.keyword}
-              onChange={(e) => setMonitorFilters((f) => ({ ...f, keyword: e.target.value }))}
-              onSearch={() => { setMonitorPagination((p) => ({ ...p, page: 1 })); loadMonitors() }}
-            />
-            <Button type="primary" icon={<PlusOutlined />} onClick={openMonitorCreateModal}>
-              新建监测
-            </Button>
-          </Space>
+      <Tabs
+        defaultActiveKey="monitoring"
+        items={[
+          {
+            key: 'monitoring',
+            label: '危害因素监测',
+            children: (
+              <>
+                <Space style={{ marginBottom: 16 }} wrap>
+                  <Select
+                    allowClear
+                    placeholder="检测类型"
+                    style={{ width: 130 }}
+                    options={DETECTION_TYPE_OPTIONS}
+                    value={monitorFilters.detection_type}
+                    onChange={(v) => setMonitorFilters((f) => ({ ...f, detection_type: v }))}
+                  />
+                  <Select
+                    allowClear
+                    placeholder="状态"
+                    style={{ width: 110 }}
+                    options={MONITOR_STATUS_OPTIONS}
+                    value={monitorFilters.status}
+                    onChange={(v) => setMonitorFilters((f) => ({ ...f, status: v }))}
+                  />
+                  <Input.Search
+                    allowClear
+                    placeholder="搜索编号/场所/点位"
+                    style={{ width: 250 }}
+                    value={monitorFilters.keyword}
+                    onChange={(e) => setMonitorFilters((f) => ({ ...f, keyword: e.target.value }))}
+                    onSearch={() => { setMonitorPagination((p) => ({ ...p, page: 1 })); loadMonitors() }}
+                  />
+                  <Button type="primary" icon={<PlusOutlined />} onClick={openMonitorCreateModal}>
+                    新建监测
+                  </Button>
+                </Space>
 
-          <Table
-            columns={monitorColumns}
-            dataSource={monitors}
-            rowKey="id"
-            loading={monitorLoading}
-            pagination={{
-              current: monitorPagination.page,
-              pageSize: monitorPagination.page_size,
-              total: monitorPagination.total,
-              showSizeChanger: true,
-              showTotal: (t) => `共 ${t} 条`,
-              onChange: (page, page_size) => setMonitorPagination((p) => ({ ...p, page, page_size })),
-            }}
-            size="middle"
-            scroll={{ x: 1300 }}
-          />
-        </Tabs.TabPane>
+                <Table
+                  columns={monitorColumns}
+                  dataSource={monitors}
+                  rowKey="id"
+                  loading={monitorLoading}
+                  pagination={{
+                    current: monitorPagination.page,
+                    pageSize: monitorPagination.page_size,
+                    total: monitorPagination.total,
+                    showSizeChanger: true,
+                    showTotal: (t) => `共 ${t} 条`,
+                    onChange: (page, page_size) => setMonitorPagination((p) => ({ ...p, page, page_size })),
+                  }}
+                  size="middle"
+                  scroll={{ x: 1300 }}
+                />
+              </>
+            ),
+          },
+          {
+            key: 'exams',
+            label: '职业健康体检',
+            children: (
+              <>
+                <Space style={{ marginBottom: 16 }} wrap>
+                  <Select
+                    allowClear
+                    placeholder="体检类型"
+                    style={{ width: 130 }}
+                    options={EXAM_TYPE_OPTIONS}
+                    value={examFilters.exam_type}
+                    onChange={(v) => setExamFilters((f) => ({ ...f, exam_type: v }))}
+                  />
+                  <Select
+                    allowClear
+                    placeholder="状态"
+                    style={{ width: 110 }}
+                    options={EXAM_STATUS_OPTIONS}
+                    value={examFilters.status}
+                    onChange={(v) => setExamFilters((f) => ({ ...f, status: v }))}
+                  />
+                  <Input.Search
+                    allowClear
+                    placeholder="搜索编号/姓名/部门"
+                    style={{ width: 250 }}
+                    value={examFilters.keyword}
+                    onChange={(e) => setExamFilters((f) => ({ ...f, keyword: e.target.value }))}
+                    onSearch={() => { setExamPagination((p) => ({ ...p, page: 1 })); loadExams() }}
+                  />
+                  <Button type="primary" icon={<PlusOutlined />} onClick={openExamCreateModal}>
+                    新建体检
+                  </Button>
+                </Space>
 
-        {/* =============================== Exam Tab =============================== */}
-        <Tabs.TabPane tab="职业健康体检" key="exams">
-          <Space style={{ marginBottom: 16 }} wrap>
-            <Select
-              allowClear
-              placeholder="体检类型"
-              style={{ width: 130 }}
-              options={EXAM_TYPE_OPTIONS}
-              value={examFilters.exam_type}
-              onChange={(v) => setExamFilters((f) => ({ ...f, exam_type: v }))}
-            />
-            <Select
-              allowClear
-              placeholder="状态"
-              style={{ width: 110 }}
-              options={EXAM_STATUS_OPTIONS}
-              value={examFilters.status}
-              onChange={(v) => setExamFilters((f) => ({ ...f, status: v }))}
-            />
-            <Input.Search
-              allowClear
-              placeholder="搜索编号/姓名/部门"
-              style={{ width: 250 }}
-              value={examFilters.keyword}
-              onChange={(e) => setExamFilters((f) => ({ ...f, keyword: e.target.value }))}
-              onSearch={() => { setExamPagination((p) => ({ ...p, page: 1 })); loadExams() }}
-            />
-            <Button type="primary" icon={<PlusOutlined />} onClick={openExamCreateModal}>
-              新建体检
-            </Button>
-          </Space>
-
-          <Table
-            columns={examColumns}
-            dataSource={exams}
-            rowKey="id"
-            loading={examLoading}
-            pagination={{
-              current: exampagination.page,
-              pageSize: exampagination.page_size,
-              total: exampagination.total,
-              showSizeChanger: true,
-              showTotal: (t) => `共 ${t} 条`,
-              onChange: (page, page_size) => setExamPagination((p) => ({ ...p, page, page_size })),
-            }}
-            size="middle"
-            scroll={{ x: 1300 }}
-            onRow={(record) => ({
-              style: ['suspected_od', 'od_diagnosed', 'contraindicated'].includes(record.overall_conclusion || '')
-                ? { backgroundColor: '#fff2f0' }
-                : {},
-            })}
-          />
-        </Tabs.TabPane>
-      </Tabs>
+                <Table
+                  columns={examColumns}
+                  dataSource={exams}
+                  rowKey="id"
+                  loading={examLoading}
+                  pagination={{
+                    current: exampagination.page,
+                    pageSize: exampagination.page_size,
+                    total: exampagination.total,
+                    showSizeChanger: true,
+                    showTotal: (t) => `共 ${t} 条`,
+                    onChange: (page, page_size) => setExamPagination((p) => ({ ...p, page, page_size })),
+                  }}
+                  size="middle"
+                  scroll={{ x: 1300 }}
+                  onRow={(record) => ({
+                    style: ['suspected_od', 'od_diagnosed', 'contraindicated'].includes(record.overall_conclusion || '')
+                      ? { backgroundColor: '#fff2f0' }
+                      : {},
+                  })}
+                />
+              </>
+            ),
+          },
+        ]}
+      />
 
       {/* =============================== Monitor Modal =============================== */}
       <Modal
@@ -771,56 +783,65 @@ export default function OccupationalHealthPage() {
         width={800}
       >
         {selectedMonitor && (
-          <Tabs defaultActiveKey="basic">
-            <Tabs.TabPane tab="基本信息" key="basic">
-              <Descriptions column={2} bordered size="small">
-                <Descriptions.Item label="监测编号">{selectedMonitor.monitor_no}</Descriptions.Item>
-                <Descriptions.Item label="监测场所">{selectedMonitor.workplace}</Descriptions.Item>
-                <Descriptions.Item label="监测点位">{selectedMonitor.location || '-'}</Descriptions.Item>
-                <Descriptions.Item label="关联设备">{selectedMonitor.equipment_info || '-'}</Descriptions.Item>
-                <Descriptions.Item label="检测类型">
-                  <Tag>{DETECTION_TYPE_OPTIONS.find((o) => o.value === selectedMonitor.detection_type)?.label}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="状态">
-                  <Tag color={monitorStatusColorMap[selectedMonitor.status]}>
-                    {monitorStatusLabelMap[selectedMonitor.status]}
-                  </Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="检测机构">{selectedMonitor.detection_agency || '-'}</Descriptions.Item>
-                <Descriptions.Item label="检测日期">{selectedMonitor.detection_date ? new Date(selectedMonitor.detection_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
-                <Descriptions.Item label="检测人员">{selectedMonitor.inspector_name || '-'}</Descriptions.Item>
-                <Descriptions.Item label="验证人员">{selectedMonitor.verifier_name || '-'}</Descriptions.Item>
-                <Descriptions.Item label="创建时间">{new Date(selectedMonitor.created_at).toLocaleString('zh-CN')}</Descriptions.Item>
-                <Descriptions.Item label="更新时间">{new Date(selectedMonitor.updated_at).toLocaleString('zh-CN')}</Descriptions.Item>
-                <Descriptions.Item label="备注" span={2}>{selectedMonitor.notes || '-'}</Descriptions.Item>
-              </Descriptions>
-            </Tabs.TabPane>
-            <Tabs.TabPane
-              tab={`检测结果 (${selectedMonitor.detection_results?.length || 0})`}
-              key="results"
-            >
-              <MonitorResultsTab
-                monitor={selectedMonitor}
-                onRefresh={() => openMonitorDetail(selectedMonitor)}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane
-              tab={`异常处置 (${selectedMonitor.abnormality_records?.length || 0})`}
-              key="abnormalities"
-            >
-              <AbnormalityTab
-                records={selectedMonitor.abnormality_records || []}
-                onAdd={async (data) => {
-                  const res = await addMonitorAbnormality(selectedMonitor.id, data)
-                  if (res.code === 0) { message.success('已添加'); openMonitorDetail(selectedMonitor) }
-                }}
-                onUpdateStatus={async (index, status) => {
-                  const res = await updateMonitorAbnormalityStatus(selectedMonitor.id, index, status)
-                  if (res.code === 0) { message.success('已更新'); openMonitorDetail(selectedMonitor) }
-                }}
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          <Tabs
+            defaultActiveKey="basic"
+            items={[
+              {
+                key: 'basic',
+                label: '基本信息',
+                children: (
+                  <Descriptions column={2} bordered size="small">
+                    <Descriptions.Item label="监测编号">{selectedMonitor.monitor_no}</Descriptions.Item>
+                    <Descriptions.Item label="监测场所">{selectedMonitor.workplace}</Descriptions.Item>
+                    <Descriptions.Item label="监测点位">{selectedMonitor.location || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="关联设备">{selectedMonitor.equipment_info || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="检测类型">
+                      <Tag>{DETECTION_TYPE_OPTIONS.find((o) => o.value === selectedMonitor.detection_type)?.label}</Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="状态">
+                      <Tag color={monitorStatusColorMap[selectedMonitor.status]}>
+                        {monitorStatusLabelMap[selectedMonitor.status]}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="检测机构">{selectedMonitor.detection_agency || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="检测日期">{selectedMonitor.detection_date ? new Date(selectedMonitor.detection_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
+                    <Descriptions.Item label="检测人员">{selectedMonitor.inspector_name || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="验证人员">{selectedMonitor.verifier_name || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="创建时间">{new Date(selectedMonitor.created_at).toLocaleString('zh-CN')}</Descriptions.Item>
+                    <Descriptions.Item label="更新时间">{new Date(selectedMonitor.updated_at).toLocaleString('zh-CN')}</Descriptions.Item>
+                    <Descriptions.Item label="备注" span={2}>{selectedMonitor.notes || '-'}</Descriptions.Item>
+                  </Descriptions>
+                ),
+              },
+              {
+                key: 'results',
+                label: `检测结果 (${selectedMonitor.detection_results?.length || 0})`,
+                children: (
+                  <MonitorResultsTab
+                    monitor={selectedMonitor}
+                    onRefresh={() => openMonitorDetail(selectedMonitor)}
+                  />
+                ),
+              },
+              {
+                key: 'abnormalities',
+                label: `异常处置 (${selectedMonitor.abnormality_records?.length || 0})`,
+                children: (
+                  <AbnormalityTab
+                    records={selectedMonitor.abnormality_records || []}
+                    onAdd={async (data) => {
+                      const res = await addMonitorAbnormality(selectedMonitor.id, data)
+                      if (res.code === 0) { message.success('已添加'); openMonitorDetail(selectedMonitor) }
+                    }}
+                    onUpdateStatus={async (index, status) => {
+                      const res = await updateMonitorAbnormalityStatus(selectedMonitor.id, index, status)
+                      if (res.code === 0) { message.success('已更新'); openMonitorDetail(selectedMonitor) }
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
         )}
       </Drawer>
 
@@ -907,65 +928,74 @@ export default function OccupationalHealthPage() {
         width={800}
       >
         {selectedExam && (
-          <Tabs defaultActiveKey="basic">
-            <Tabs.TabPane tab="基本信息" key="basic">
-              <Descriptions column={2} bordered size="small">
-                <Descriptions.Item label="体检编号">{selectedExam.exam_no}</Descriptions.Item>
-                <Descriptions.Item label="员工姓名">{selectedExam.employee_name}</Descriptions.Item>
-                <Descriptions.Item label="工号">{selectedExam.employee_id || '-'}</Descriptions.Item>
-                <Descriptions.Item label="部门">{selectedExam.department || '-'}</Descriptions.Item>
-                <Descriptions.Item label="岗位">{selectedExam.job_position || '-'}</Descriptions.Item>
-                <Descriptions.Item label="体检类型">
-                  <Tag>{EXAM_TYPE_OPTIONS.find((o) => o.value === selectedExam.exam_type)?.label}</Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="状态">
-                  <Tag color={examStatusColorMap[selectedExam.status]}>
-                    {examStatusLabelMap[selectedExam.status]}
-                  </Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="体检机构">{selectedExam.exam_agency || '-'}</Descriptions.Item>
-                <Descriptions.Item label="计划日期">{selectedExam.scheduled_date ? new Date(selectedExam.scheduled_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
-                <Descriptions.Item label="实际体检日期">{selectedExam.exam_date ? new Date(selectedExam.exam_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
-                <Descriptions.Item label="报告日期">{selectedExam.report_date ? new Date(selectedExam.report_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
-                <Descriptions.Item label="危害因素">{selectedExam.hazard_factors?.join(', ') || '-'}</Descriptions.Item>
-                <Descriptions.Item label="综合结论">
-                  {selectedExam.overall_conclusion ? (
-                    <Tag color={conclusionColorMap[selectedExam.overall_conclusion]}>
-                      {EXAM_CONCLUSION_OPTIONS.find((o) => o.value === selectedExam.overall_conclusion)?.label}
-                    </Tag>
-                  ) : '-'}
-                </Descriptions.Item>
-                <Descriptions.Item label="创建时间">{new Date(selectedExam.created_at).toLocaleString('zh-CN')}</Descriptions.Item>
-                <Descriptions.Item label="更新时间">{new Date(selectedExam.updated_at).toLocaleString('zh-CN')}</Descriptions.Item>
-                <Descriptions.Item label="备注" span={2}>{selectedExam.notes || '-'}</Descriptions.Item>
-              </Descriptions>
-            </Tabs.TabPane>
-            <Tabs.TabPane
-              tab={`体检项目 (${selectedExam.exam_items?.length || 0})`}
-              key="items"
-            >
-              <ExamItemsTab
-                exam={selectedExam}
-                onRefresh={() => openExamDetail(selectedExam)}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane
-              tab={`异常处置 (${selectedExam.abnormality_records?.length || 0})`}
-              key="abnormalities"
-            >
-              <AbnormalityTab
-                records={selectedExam.abnormality_records || []}
-                onAdd={async (data) => {
-                  const res = await addExamAbnormality(selectedExam.id, data)
-                  if (res.code === 0) { message.success('已添加'); openExamDetail(selectedExam) }
-                }}
-                onUpdateStatus={async (index, status) => {
-                  const res = await updateExamAbnormalityStatus(selectedExam.id, index, status)
-                  if (res.code === 0) { message.success('已更新'); openExamDetail(selectedExam) }
-                }}
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          <Tabs
+            defaultActiveKey="basic"
+            items={[
+              {
+                key: 'basic',
+                label: '基本信息',
+                children: (
+                  <Descriptions column={2} bordered size="small">
+                    <Descriptions.Item label="体检编号">{selectedExam.exam_no}</Descriptions.Item>
+                    <Descriptions.Item label="员工姓名">{selectedExam.employee_name}</Descriptions.Item>
+                    <Descriptions.Item label="工号">{selectedExam.employee_id || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="部门">{selectedExam.department || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="岗位">{selectedExam.job_position || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="体检类型">
+                      <Tag>{EXAM_TYPE_OPTIONS.find((o) => o.value === selectedExam.exam_type)?.label}</Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="状态">
+                      <Tag color={examStatusColorMap[selectedExam.status]}>
+                        {examStatusLabelMap[selectedExam.status]}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="体检机构">{selectedExam.exam_agency || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="计划日期">{selectedExam.scheduled_date ? new Date(selectedExam.scheduled_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
+                    <Descriptions.Item label="实际体检日期">{selectedExam.exam_date ? new Date(selectedExam.exam_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
+                    <Descriptions.Item label="报告日期">{selectedExam.report_date ? new Date(selectedExam.report_date).toLocaleDateString('zh-CN') : '-'}</Descriptions.Item>
+                    <Descriptions.Item label="危害因素">{selectedExam.hazard_factors?.join(', ') || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="综合结论">
+                      {selectedExam.overall_conclusion ? (
+                        <Tag color={conclusionColorMap[selectedExam.overall_conclusion]}>
+                          {EXAM_CONCLUSION_OPTIONS.find((o) => o.value === selectedExam.overall_conclusion)?.label}
+                        </Tag>
+                      ) : '-'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="创建时间">{new Date(selectedExam.created_at).toLocaleString('zh-CN')}</Descriptions.Item>
+                    <Descriptions.Item label="更新时间">{new Date(selectedExam.updated_at).toLocaleString('zh-CN')}</Descriptions.Item>
+                    <Descriptions.Item label="备注" span={2}>{selectedExam.notes || '-'}</Descriptions.Item>
+                  </Descriptions>
+                ),
+              },
+              {
+                key: 'items',
+                label: `体检项目 (${selectedExam.exam_items?.length || 0})`,
+                children: (
+                  <ExamItemsTab
+                    exam={selectedExam}
+                    onRefresh={() => openExamDetail(selectedExam)}
+                  />
+                ),
+              },
+              {
+                key: 'abnormalities',
+                label: `异常处置 (${selectedExam.abnormality_records?.length || 0})`,
+                children: (
+                  <AbnormalityTab
+                    records={selectedExam.abnormality_records || []}
+                    onAdd={async (data) => {
+                      const res = await addExamAbnormality(selectedExam.id, data)
+                      if (res.code === 0) { message.success('已添加'); openExamDetail(selectedExam) }
+                    }}
+                    onUpdateStatus={async (index, status) => {
+                      const res = await updateExamAbnormalityStatus(selectedExam.id, index, status)
+                      if (res.code === 0) { message.success('已更新'); openExamDetail(selectedExam) }
+                    }}
+                  />
+                ),
+              },
+            ]}
+          />
         )}
       </Drawer>
     </div>

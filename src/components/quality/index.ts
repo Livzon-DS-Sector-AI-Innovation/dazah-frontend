@@ -1,1 +1,12 @@
-// quality module components
+export { QualityLanding } from './QualityLanding'
+export { DeviationPage } from './DeviationPage'
+export { DeviationTable } from './DeviationTable'
+export { DeviationDetail } from './DeviationDetail'
+export { CreateDeviation } from './CreateDeviation'
+export { CapaPage } from './CapaPage'
+export { CapaTable } from './CapaTable'
+export { CapaDetail } from './CapaDetail'
+export { CreateCapa } from './CreateCapa'
+export { DepartmentContactPage } from './DepartmentContactPage'
+export { ReportEditor } from './ReportEditor'
+export { AttachmentPreview } from './AttachmentPreview'

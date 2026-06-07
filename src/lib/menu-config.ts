@@ -89,10 +89,9 @@ export const moduleMenus: ModuleMenu[] = [
     icon: "check-circle",
     path: "/quality",
     children: [
-      { key: "inspection", label: "质量检验", path: "/quality/inspection" },
-      { key: "deviation", label: "偏差管理", path: "/quality/deviation" },
-      { key: "capa", label: "CAPA管理", path: "/quality/capa" },
-      { key: "change", label: "变更控制", path: "/quality/change" },
+      { key: "deviations", label: "偏差管理", path: "/quality/deviations" },
+      { key: "capas", label: "CAPA管理", path: "/quality/capas" },
+      { key: "department-contacts", label: "部门联系人", path: "/quality/department-contacts" },
     ],
   },
   {

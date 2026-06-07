@@ -37,7 +37,7 @@ export default function EmployeeForm({ open, employee, onClose, onSuccess }: Emp
         const values: any = { ...employee }
         dateFields.forEach((f) => {
           if (employee[f as keyof Employee]) {
-            values[f] = dayjs(employee[f as keyof Employee])
+            values[f] = dayjs(employee[f as keyof Employee] as string)
           }
         })
         form.setFieldsValue(values)

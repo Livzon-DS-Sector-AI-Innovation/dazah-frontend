@@ -37,6 +37,18 @@ export function AttachmentPreview({
 }: AttachmentPreviewProps) {
   const { message } = App.useApp()
   const [reviews, setReviews] = useState<AttachmentReview[]>([])
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/quality/attachment-reviews?attachment_url=${encodeURIComponent(attachment?.downloadUrl || '')}`)
+      if (response.ok) {
+        const data = await response.json()
+        setReviews(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch reviews:', err)
+    }
+  }
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)

@@ -5,7 +5,13 @@ import { EquipmentCategory, Location, Equipment, EquipmentStatistics } from '@/t
 // 默认空数据
 const defaultStatistics: EquipmentStatistics = {
   total: 0,
-  by_status: {},
+  by_status: {
+    '在用': 0,
+    '备用': 0,
+    '维修中': 0,
+    '停用': 0,
+    '报废': 0,
+  },
   by_category: {},
   by_location: {},
 }

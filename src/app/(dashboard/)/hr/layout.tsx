@@ -1,5 +1,3 @@
-import HrChatbot from '@/components/hr/HrChatbot'
-
 export default function HrLayout({
   children,
 }: {
@@ -8,7 +6,6 @@ export default function HrLayout({
   return (
     <>
       {children}
-      <HrChatbot />
     </>
   )
 }

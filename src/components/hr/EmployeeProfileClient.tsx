@@ -28,6 +28,7 @@ export default function EmployeeProfileClient({
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [activeTab, setActiveTab] = useState('all')
   const [departments, setDepartments] = useState<Department[]>([])
+  const [loading, setLoading] = useState(false)
 
   const { searchKeyword, filterStatus } = useHrStore()
 
@@ -120,7 +121,7 @@ export default function EmployeeProfileClient({
     let cancelled = false
     const load = async () => {
       try {
-        const res = await fetchDepartmentsAction()
+        const res = await fetchDepartments({ page_size: 100 })
         if (!cancelled) setDepartments(res.data || [])
       } catch (err: any) {
         if (!cancelled) message.error(err.message || '加载部门失败')

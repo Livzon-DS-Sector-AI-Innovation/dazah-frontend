@@ -1,6 +1,7 @@
 // equipment module components
 export { EquipmentPage } from './EquipmentPage'
 export { StatsCards } from './StatsCards'
+export { StatsDashboard } from './StatsDashboard'
 export { EquipmentTable } from './EquipmentTable'
 export { EquipmentDrawer } from './EquipmentDrawer'
 export { CategoryDrawer } from './CategoryDrawer'

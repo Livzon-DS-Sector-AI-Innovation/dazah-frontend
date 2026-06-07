@@ -62,12 +62,17 @@ export function SparePartsPage({
   return (
     <ConfigProvider theme={antdTheme} locale={zhCN}>
       <App>
-        <h1
-          className="font-semibold mb-4"
-          style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
-        >
-          备件管理
-        </h1>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{
+            fontSize: 22, fontWeight: 600, color: '#1a1a1a',
+            margin: 0, marginBottom: 4, lineHeight: 1.3,
+          }}>
+            备件管理
+          </h2>
+          <p style={{ fontSize: 14, color: '#787671', margin: 0, lineHeight: 1.5 }}>
+            备件库存 · 入库管理 · 库存预警 · 物料追踪
+          </p>
+        </div>
         <div
           style={{
             background: '#ffffff',

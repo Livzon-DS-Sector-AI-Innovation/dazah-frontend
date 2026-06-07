@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo, useCallback, type CSSProperties } from 'react'
-import { App, Table, Space, Input, Select } from 'antd'
-import { EditOutlined, DeleteOutlined, SearchOutlined, ToolOutlined } from '@ant-design/icons'
+import { App, Table, Space, Input, Select, Button } from 'antd'
+import { EditOutlined, DeleteOutlined, SearchOutlined, ToolOutlined, PlusOutlined } from '@ant-design/icons'
 import { Equipment, EquipmentStatus, EquipmentCategory, Location } from '@/types/equipment'
 import { useEquipmentStore } from '@/stores/equipment'
 import { deleteEquipment } from '@/actions/equipment'
-import { statusPill, actionLink, linkDanger, linkPrimary, linkWarning, pillPurple, pillNeutral } from '@/components/equipment/shared-styles'
+import { statusPill, linkDanger, linkPrimary, linkWarning, pillPurple, pillNeutral } from '@/components/equipment/shared-styles'
 
 const statusConfig: Record<EquipmentStatus, { color: string; bg: string }> = {
   '在用':   { color: '#1aae39', bg: '#d9f3e1' },
@@ -91,7 +91,7 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       title: '设备编号',
       dataIndex: 'equipment_no',
       key: 'equipment_no',
-      width: 130,
+      width: 140,
       fixed: 'start' as const,
     },
     {
@@ -100,26 +100,27 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       key: 'name',
       width: 180,
       fixed: 'start' as const,
+      ellipsis: true,
     },
     {
       title: '设备分类',
       dataIndex: 'category_id',
       key: 'category',
-      width: 110,
+      width: 120,
       render: (categoryId: string) => categoryNameMap[categoryId] || '-',
     },
     {
       title: '设备位置',
       dataIndex: 'location_id',
       key: 'location',
-      width: 110,
+      width: 120,
       render: (locationId: string) => locationNameMap[locationId] || '-',
     },
     {
       title: '设备状态',
       dataIndex: 'status',
       key: 'status',
-      width: 100,
+      width: 90,
       render: (status: EquipmentStatus) => (
         <span style={statusPillMap[status] || statusPill('#787671', '#f0eeec')}>{status}</span>
       ),
@@ -142,27 +143,29 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
       title: '型号',
       dataIndex: 'model',
       key: 'model',
-      width: 120,
+      width: 140,
+      ellipsis: true,
     },
     {
       title: '供应商',
       dataIndex: 'supplier',
       key: 'supplier',
-      width: 140,
+      width: 150,
+      ellipsis: true,
     },
     {
       title: '投用日期',
       dataIndex: 'commissioning_date',
       key: 'commissioning_date',
-      width: 110,
+      width: 120,
     },
     {
       title: '操作',
       key: 'action',
-      width: 180,
+      width: 170,
       fixed: 'end' as const,
       render: (_: unknown, record: Equipment) => (
-        <Space size={12}>
+        <Space size={8}>
           <span role="button" onClick={() => openRepairDrawer(record.id)} style={linkWarning}>
             <ToolOutlined />报修
           </span>
@@ -179,7 +182,7 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
+      <div style={{ marginBottom: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
         <Select
           placeholder="设备状态"
           allowClear
@@ -196,6 +199,14 @@ export function EquipmentTable({ loading = false, onRefresh }: EquipmentTablePro
           onChange={(e) => setKeyword(e.target.value)}
           allowClear
         />
+        <div style={{ flex: 1 }} />
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => openEquipmentDrawer()}
+        >
+          新增设备
+        </Button>
       </div>
       <Table
         columns={columns}

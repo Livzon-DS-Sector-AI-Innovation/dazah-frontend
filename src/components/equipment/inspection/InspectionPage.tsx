@@ -33,7 +33,7 @@ export function InspectionPage({ initialTemplates, initialEquipments, initialCat
   } = useInspectionStore()
 
   const {
-    inspectionTemplates, setInspectionTemplates, setInspectionTemplateTotal,
+    setInspectionTemplates, setInspectionTemplateTotal,
     inspectionTemplatePage, inspectionTemplatePageSize, inspectionTemplateKeyword,
     setInspectionTemplateLoading, openInspectionTemplateDrawer,
   } = useEquipmentStore()
@@ -53,12 +53,15 @@ export function InspectionPage({ initialTemplates, initialEquipments, initialCat
       })
       setInspectionTemplates(res.items)
       setInspectionTemplateTotal(res.total)
+      // 同步活跃模板到巡检 store，确保任务/路线抽屉下拉即时更新
+      const activeRes = await fetchInspectionTemplatesClient({ is_active: true, page: 1, page_size: 200 })
+      setTemplates(activeRes.items)
     } catch (e) {
       console.error('获取巡检模板数据失败:', e)
     } finally {
       setInspectionTemplateLoading(false)
     }
-  }, [inspectionTemplateKeyword, inspectionTemplatePage, inspectionTemplatePageSize, setInspectionTemplates, setInspectionTemplateTotal, setInspectionTemplateLoading])
+  }, [inspectionTemplateKeyword, inspectionTemplatePage, inspectionTemplatePageSize, setInspectionTemplates, setInspectionTemplateTotal, setInspectionTemplateLoading, setTemplates])
 
   useEffect(() => {
     if (activeTab === 'templates') fetchTemplateData()

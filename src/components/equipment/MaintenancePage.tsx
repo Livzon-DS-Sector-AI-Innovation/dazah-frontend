@@ -325,9 +325,17 @@ export function MaintenancePage({
   return (
     <ConfigProvider theme={antdTheme} locale={zhCN}>
       <App>
-        <h1 className="font-semibold mb-4" style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}>
-          维护保养
-        </h1>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{
+            fontSize: 22, fontWeight: 600, color: '#1a1a1a',
+            margin: 0, marginBottom: 4, lineHeight: 1.3,
+          }}>
+            维护保养
+          </h2>
+          <p style={{ fontSize: 14, color: '#787671', margin: 0, lineHeight: 1.5 }}>
+            工单管理 · 故障代码 · 校准计划 · 维护计划 · 巡检模板
+          </p>
+        </div>
         <div style={{ background: '#ffffff', padding: 20, borderRadius: 12, border: '1px solid #e5e3df' }}>
           <Tabs activeKey={maintenanceTab} onChange={setMaintenanceTab} items={tabItems} />
         </div>

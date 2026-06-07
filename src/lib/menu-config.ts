@@ -34,6 +34,7 @@ export const moduleMenus: ModuleMenu[] = [
     icon: "cog",
     path: "/equipment",
     children: [
+      { key: "stats", label: "设备仪表盘", path: "/equipment/stats" },
       { key: "assets", label: "设备台账", path: "/equipment/assets" },
       { key: "maintenance", label: "维护保养", path: "/equipment/maintenance" },
       { key: "inspection", label: "设备巡检", path: "/equipment/inspection" },

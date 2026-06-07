@@ -92,6 +92,9 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "deviations", label: "偏差管理", path: "/quality/deviations" },
       { key: "capas", label: "CAPA管理", path: "/quality/capas" },
       { key: "department-contacts", label: "部门联系人", path: "/quality/department-contacts" },
+      { key: "inspection", label: "质量检验", path: "/quality/inspection" },
+      { key: "change", label: "变更控制", path: "/quality/change" },
+      { key: "cpv", label: "持续工艺验证", path: "/quality/cpv" },
     ],
   },
   {
@@ -100,9 +103,9 @@ export const moduleMenus: ModuleMenu[] = [
     icon: "building",
     path: "/admin",
     children: [
-      { key: "notice", label: "公告通知", path: "/admin/notice" },
-      { key: "meeting", label: "会议管理", path: "/admin/meeting" },
-      { key: "approval", label: "文件审批", path: "/admin/approval" },
+      { key: "meeting", label: "会议室管理", path: "/admin/meeting" },
+      { key: "vehicle", label: "车辆管理", path: "/admin/vehicle" },
+      { key: "asset", label: "资产管理", path: "/admin/asset" },
     ],
   },
   {

@@ -52,6 +52,7 @@ import type {
   DailyRiskReport,
   DailyRiskReportFormData,
   DailyRiskReportQueryParams,
+  HazardRiskOption,
   TrainingRecord,
   TrainingRecordFormData,
   ApiResponse,
@@ -1436,6 +1437,7 @@ export async function getDailyRiskReports(params?: DailyRiskReportQueryParams) {
     if (params.department) query.set('department', params.department)
     if (params.report_date) query.set('report_date', params.report_date)
     if (params.keyword) query.set('keyword', params.keyword)
+    if (params.report_type) query.set('report_type', params.report_type)
   }
   const qs = query.toString()
   const response = await fetchApi<DailyRiskReport[]>(`/safety/daily-risk-reports${qs ? `?${qs}` : ''}`)
@@ -1486,6 +1488,24 @@ export async function approveDailyRiskReport(id: string) {
 export async function rejectDailyRiskReport(id: string, reason: string) {
   const response = await fetchApi<DailyRiskReport>(`/safety/daily-risk-reports/${id}/reject?reason=${encodeURIComponent(reason)}`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
+  return response
+}
+
+export async function getHazardRiskOptions(params?: {
+  department?: string
+  keyword?: string
+  page?: number
+  page_size?: number
+}) {
+  const query = new URLSearchParams()
+  if (params) {
+    if (params.page) query.set('page', String(params.page))
+    if (params.page_size) query.set('page_size', String(params.page_size))
+    if (params.department) query.set('department', params.department)
+    if (params.keyword) query.set('keyword', params.keyword)
+  }
+  const qs = query.toString()
+  const response = await fetchApi<HazardRiskOption[]>(`/safety/hazard-identifications/risk-options${qs ? `?${qs}` : ''}`)
   return response
 }
 

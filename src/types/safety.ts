@@ -1575,6 +1575,7 @@ export interface DailyRiskReport {
   id: string
   report_no: string
   report_date: string
+  report_type: string
   department?: string
   hazard_identification_id?: string
   operation_description: string
@@ -1600,6 +1601,7 @@ export interface DailyRiskReport {
 export interface DailyRiskReportFormData {
   report_no: string
   report_date: string
+  report_type: string
   department?: string
   hazard_identification_id?: string
   operation_description: string
@@ -1624,7 +1626,32 @@ export interface DailyRiskReportQueryParams {
   department?: string
   report_date?: string
   keyword?: string
+  report_type?: string
 }
+
+// ── 危险源风险选项（常规作业报备用） ──
+
+export interface HazardRiskOption {
+  id: string
+  hazard_id_no: string
+  department: string
+  position: string
+  production_step: string
+  specific_activity?: string
+  inherent_risk_level?: string
+  inherent_risk_label?: string
+  hazard_type?: string
+  possible_accident?: string
+  existing_engineering_controls?: string
+  existing_management_controls?: string
+  existing_ppe?: string
+  existing_emergency_measures?: string
+}
+
+export const REPORT_TYPE_OPTIONS = [
+  { value: 'regular', label: '常规作业', color: 'purple' },
+  { value: 'non_regular', label: '非常规作业', color: 'orange' },
+]
 
 
 // ============ EHS变更管理 (MOC) ============

@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { fetchCpvProducts } from "@/lib/api/quality-cpv"
+import { CpvProductCreateDrawer } from "@/components/quality/cpv-product-create-drawer"
 import { CpvProductWithStats } from "@/types/quality-cpv"
 
 export default function CpvProductListPage() {
   const [products, setProducts] = useState<CpvProductWithStats[]>([])
   const [loading, setLoading] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     loadProducts()
@@ -32,7 +34,9 @@ export default function CpvProductListPage() {
           <h1 className="text-2xl font-bold text-gray-900">持续工艺验证</h1>
           <p className="text-sm text-gray-500 mt-1">原料药 CPV 产品管理与数据统计</p>
         </div>
-        <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium">
+        <button 
+          onClick={() => setDrawerOpen(true)}
+          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium">
           新增产品
         </button>
       </div>
@@ -94,6 +98,12 @@ export default function CpvProductListPage() {
           )}
         </div>
       )}
+
+      <CpvProductCreateDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSuccess={loadProducts}
+      />
     </div>
   )
 }

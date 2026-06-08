@@ -1,13 +1,32 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Dropdown, Avatar } from "antd"
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons"
 import { moduleMenus } from "@/lib/menu-config"
 import { ModuleIcon, SearchIcon, BellIcon } from "@/components/icons"
+import { logout, getCurrentUser } from "@/actions/auth"
+import type { User } from "@/types/user"
 
 export function TopNav() {
   const pathname = usePathname()
   const activeModule = pathname.split("/")[1] || "production"
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    getCurrentUser().then(setUser)
+  }, [])
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    await logout()
+  }
+
+  const avatarSrc = user?.avatar_url || undefined
+  const displayName = user?.name || "API"
 
   return (
     <header className="h-16 bg-[var(--color-canvas)] border-b border-[var(--color-hairline)] flex items-center px-5 shrink-0">
@@ -56,9 +75,36 @@ export function TopNav() {
           <BellIcon className="w-[18px] h-[18px]" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[var(--color-error)] rounded-full" />
         </button>
-        <div className="ml-2 w-8 h-8 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white text-xs font-semibold">
-          J
-        </div>
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: 'logout',
+                label: '退出登录',
+                icon: <LogoutOutlined />,
+                danger: true,
+              },
+            ],
+            onClick: (info) => {
+              if (info.key === 'logout') handleLogout()
+            },
+          }}
+          placement="bottomRight"
+        >
+          <button
+            className="ml-2 flex items-center gap-2 h-8 px-2 rounded-[var(--rounded-md)] hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
+            disabled={loggingOut}
+          >
+            {avatarSrc ? (
+              <Avatar src={avatarSrc} size={28} />
+            ) : (
+              <Avatar size={28} icon={<UserOutlined />} />
+            )}
+            <span className="text-[13px] text-[var(--color-ink)] hidden md:inline">
+              {displayName}
+            </span>
+          </button>
+        </Dropdown>
       </div>
     </header>
   )

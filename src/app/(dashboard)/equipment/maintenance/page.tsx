@@ -1,6 +1,13 @@
 import { MaintenancePage } from '@/components/equipment'
-import { fetchEquipments, fetchWorkOrders, fetchWorkOrderStatistics, fetchFailureCodes, fetchCalibrationPlans, fetchCalibrationRecords } from '@/lib/api/equipment'
-import { Equipment, FailureCode, WorkOrder, WorkOrderStatistics, CalibrationPlan, CalibrationRecord } from '@/types/equipment'
+import {
+  fetchEquipments, fetchWorkOrders, fetchWorkOrderStatistics, fetchFailureCodes,
+  fetchCalibrationPlans, fetchCalibrationRecords,
+  fetchMaintenancePlans,
+} from '@/lib/api/equipment'
+import {
+  Equipment, FailureCode, WorkOrder, WorkOrderStatistics, CalibrationPlan, CalibrationRecord,
+  MaintenancePlan,
+} from '@/types/equipment'
 
 const defaultStatistics: WorkOrderStatistics = {
   total: 0,
@@ -23,6 +30,8 @@ export default async function MaintenancePageWrapper() {
   let calibrationPlanTotal = 0
   let calibrationRecords: CalibrationRecord[] = []
   let calibrationRecordTotal = 0
+  let maintenancePlans: MaintenancePlan[] = []
+  let maintenancePlanTotal = 0
 
   try {
     const result = await Promise.all([
@@ -34,6 +43,7 @@ export default async function MaintenancePageWrapper() {
       fetchFailureCodes('actions'),
       fetchCalibrationPlans({ page: 1, page_size: 20 }),
       fetchCalibrationRecords({ page: 1, page_size: 20 }),
+      fetchMaintenancePlans({ page: 1, page_size: 20 }),
     ])
 
     equipments = result[0].items
@@ -49,6 +59,8 @@ export default async function MaintenancePageWrapper() {
     calibrationPlanTotal = result[6].total
     calibrationRecords = result[7].items
     calibrationRecordTotal = result[7].total
+    maintenancePlans = result[8].items
+    maintenancePlanTotal = result[8].total
   } catch (error) {
     console.warn('维护模块数据加载失败，使用空数据:', error)
   }
@@ -64,6 +76,8 @@ export default async function MaintenancePageWrapper() {
       initialCalibrationPlanTotal={calibrationPlanTotal}
       initialCalibrationRecords={calibrationRecords}
       initialCalibrationRecordTotal={calibrationRecordTotal}
+      initialMaintenancePlans={maintenancePlans}
+      initialMaintenancePlanTotal={maintenancePlanTotal}
     />
   )
 }

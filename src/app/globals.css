@@ -34,6 +34,16 @@
   --color-success: #1aae39;
   --color-warning: #dd5b00;
   --color-error: #e03131;
+
+  /* Border Radius */
+  --rounded-xs: 4px;
+  --rounded-sm: 6px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-xxl: 20px;
+  --rounded-xxxl: 24px;
+  --rounded-full: 9999px;
 }
 
 @theme inline {

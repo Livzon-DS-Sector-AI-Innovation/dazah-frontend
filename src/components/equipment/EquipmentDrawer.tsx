@@ -4,10 +4,16 @@ import { useState, useEffect } from 'react'
 import { App, Drawer, Form, Input, Select, DatePicker, Button, Space } from 'antd'
 import dayjs from 'dayjs'
 import { useEquipmentStore } from '@/stores/equipment'
-import { EquipmentStatus, EquipmentCategory, Location } from '@/types/equipment'
+import { EquipmentStatus, EquipmentImportance, EquipmentCategory, Location } from '@/types/equipment'
 import { createEquipment, updateEquipment } from '@/actions/equipment'
 
 const { TextArea } = Input
+
+const importanceOptions: { label: string; value: EquipmentImportance }[] = [
+  { label: '高', value: '高' },
+  { label: '中', value: '中' },
+  { label: '低', value: '低' },
+]
 
 const statusOptions: { label: string; value: EquipmentStatus }[] = [
   { label: '在用', value: '在用' },
@@ -76,6 +82,7 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
           production_date: editingEquipment.production_date ? dayjs(editingEquipment.production_date) : undefined,
           commissioning_date: editingEquipment.commissioning_date ? dayjs(editingEquipment.commissioning_date) : undefined,
           description: editingEquipment.description ?? undefined,
+          importance: editingEquipment.importance ?? '低',
         })
       } else {
         form.resetFields()
@@ -178,6 +185,13 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
           rules={[{ required: true, message: '请选择设备状态' }]}
         >
           <Select placeholder="请选择设备状态" options={statusOptions} />
+        </Form.Item>
+        <Form.Item
+          name="importance"
+          label="设备重要性"
+          rules={[{ required: true, message: '请选择设备重要性' }]}
+        >
+          <Select placeholder="请选择设备重要性" options={importanceOptions} />
         </Form.Item>
         <Form.Item name="model" label="设备型号">
           <Input placeholder="请输入设备型号" />

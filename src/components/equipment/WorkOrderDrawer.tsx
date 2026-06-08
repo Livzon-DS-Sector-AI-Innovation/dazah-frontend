@@ -1,13 +1,21 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { App, Drawer, Form, Input, Select, Button, Space } from 'antd'
 import { useEquipmentStore } from '@/stores/equipment'
-import { createWorkOrder } from '@/actions/equipment'
-import { CreateWorkOrderInput, FailureCode } from '@/types/equipment'
+import { createWorkOrder, updateWorkOrder } from '@/actions/equipment'
+import { CreateWorkOrderInput, UpdateWorkOrderInput, FailureCode, WorkOrderStatus } from '@/types/equipment'
 import { Equipment } from '@/types/equipment'
 
 const { TextArea } = Input
+
+const statusOptions: { label: string; value: WorkOrderStatus }[] = [
+  { label: '待处理', value: '待处理' },
+  { label: '执行中', value: '执行中' },
+  { label: '待验收', value: '待验收' },
+  { label: '已完成', value: '已完成' },
+  { label: '已关闭', value: '已关闭' },
+]
 
 interface WorkOrderDrawerProps {
   equipments: Equipment[]
@@ -20,35 +28,55 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
   const [form] = Form.useForm()
   const { workOrderDrawerOpen, editingWorkOrder, closeWorkOrderDrawer } = useEquipmentStore()
 
-  useEffect(() => {
-    if (workOrderDrawerOpen) {
-      if (editingWorkOrder) {
-        form.setFieldsValue({
-          equipment_id: editingWorkOrder.equipment_id,
-          order_type: editingWorkOrder.order_type,
-          priority: editingWorkOrder.priority,
-          fault_symptom_id: editingWorkOrder.fault_symptom_id,
-          fault_description: editingWorkOrder.fault_description,
-        })
-      } else {
-        form.resetFields()
-        form.setFieldsValue({ order_type: '故障维修', priority: '中' })
+  const isEditing = !!editingWorkOrder
+
+  // 构建 initialValues：编辑时填充已有数据，新建时给默认值
+  const initialValues = useMemo(() => {
+    if (editingWorkOrder) {
+      return {
+        equipment_id: editingWorkOrder.equipment_id,
+        order_type: editingWorkOrder.order_type,
+        priority: editingWorkOrder.priority,
+        status: editingWorkOrder.status,
+        fault_symptom_id: editingWorkOrder.fault_symptom_id ?? undefined,
+        fault_description: editingWorkOrder.fault_description ?? undefined,
       }
     }
-  }, [workOrderDrawerOpen, editingWorkOrder, form])
+    return { order_type: '故障维修', priority: '中' }
+  }, [editingWorkOrder])
+
+  // 每次打开/关闭时重置表单
+  useEffect(() => {
+    if (workOrderDrawerOpen) {
+      form.setFieldsValue(initialValues)
+    }
+  }, [workOrderDrawerOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
-      const data: CreateWorkOrderInput = {
-        equipment_id: values.equipment_id,
-        order_type: values.order_type,
-        priority: values.priority,
-        fault_symptom_id: values.fault_symptom_id || undefined,
-        fault_description: values.fault_description || undefined,
+      if (isEditing && editingWorkOrder) {
+        const data: UpdateWorkOrderInput = {
+          equipment_id: values.equipment_id,
+          order_type: values.order_type,
+          priority: values.priority,
+          status: values.status,
+          fault_symptom_id: values.fault_symptom_id || undefined,
+          fault_description: values.fault_description || undefined,
+        }
+        await updateWorkOrder(editingWorkOrder.id, data)
+        message.success('更新工单成功')
+      } else {
+        const data: CreateWorkOrderInput = {
+          equipment_id: values.equipment_id,
+          order_type: values.order_type,
+          priority: values.priority,
+          fault_symptom_id: values.fault_symptom_id || undefined,
+          fault_description: values.fault_description || undefined,
+        }
+        await createWorkOrder(data)
+        message.success('创建工单成功')
       }
-      await createWorkOrder(data)
-      message.success('创建工单成功')
       closeWorkOrderDrawer()
       onRefresh?.()
     } catch (error: any) {
@@ -58,7 +86,7 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
 
   return (
     <Drawer
-      title="新建维修工单"
+      title={isEditing ? '编辑维修工单' : '新建维修工单'}
       size={480}
       open={workOrderDrawerOpen}
       onClose={closeWorkOrderDrawer}
@@ -66,11 +94,11 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
       extra={
         <Space>
           <Button onClick={closeWorkOrderDrawer}>取消</Button>
-          <Button type="primary" onClick={handleSubmit}>提交</Button>
+          <Button type="primary" onClick={handleSubmit}>{isEditing ? '保存' : '提交'}</Button>
         </Space>
       }
     >
-      <Form form={form} layout="vertical" requiredMark="optional" preserve={false}>
+      <Form form={form} layout="vertical" requiredMark="optional">
         <Form.Item name="equipment_id" label="关联设备" rules={[{ required: true, message: '请选择设备' }]}>
           <Select
             placeholder="选择设备"
@@ -85,6 +113,11 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
         <Form.Item name="priority" label="优先级" rules={[{ required: true, message: '请选择优先级' }]}>
           <Select options={[{ label: '紧急', value: '紧急' }, { label: '高', value: '高' }, { label: '中', value: '中' }, { label: '低', value: '低' }]} />
         </Form.Item>
+        {isEditing && (
+          <Form.Item name="status" label="工单状态" rules={[{ required: true, message: '请选择工单状态' }]}>
+            <Select options={statusOptions} />
+          </Form.Item>
+        )}
         <Form.Item name="fault_symptom_id" label="故障现象">
           <Select
             placeholder="选择故障现象（可选）"

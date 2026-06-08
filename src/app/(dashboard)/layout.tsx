@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/AppShell"
+import { AntdProvider } from "@/components/AntdProvider"
 import '@/lib/dayjs-config'
 
 export default function DashboardLayout({
@@ -6,5 +7,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <AppShell>{children}</AppShell>
+  return (
+    <AntdProvider>
+      <AppShell>{children}</AppShell>
+    </AntdProvider>
+  )
 }

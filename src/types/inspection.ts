@@ -1,0 +1,191 @@
+// ==================== 巡检枚举 ====================
+export type InspectionPeriodType = '每日' | '每周' | '每月' | '专项'
+export type InspectionTaskStatus = '待执行' | '执行中' | '已完成' | '已关闭'
+export type InspectionPlanType = '日常巡检' | '周巡检' | '月巡检' | '专项巡检'
+export type InspectionOverallResult = '正常' | '异常'
+export type CheckResult = '正常' | '异常' | '跳过'
+
+// ==================== 巡检路线 ====================
+export interface InspectionRoute {
+  id: string
+  name: string
+  description: string | null
+  area: string | null
+  is_active: boolean
+  period_type: InspectionPeriodType
+  period_value: number | null
+  template_id: string | null
+  equipment_count: number
+  created_at: string
+  updated_at: string
+  created_by: string | null
+  updated_by: string | null
+}
+
+export interface InspectionRouteDetail extends InspectionRoute {
+  equipments: RouteEquipment[]
+}
+
+export interface RouteEquipment {
+  id: string
+  equipment_id: string
+  sort_order: number
+  equipment_name?: string
+  equipment_no?: string
+}
+
+export interface CreateInspectionRouteInput {
+  name: string
+  description?: string
+  area?: string
+  period_type?: InspectionPeriodType
+  period_value?: number
+  template_id?: string
+}
+
+export interface UpdateInspectionRouteInput {
+  name?: string
+  description?: string
+  area?: string
+  is_active?: boolean
+  period_type?: InspectionPeriodType
+  period_value?: number
+  template_id?: string
+}
+
+export interface RouteEquipmentItem {
+  equipment_id: string
+  sort_order: number
+}
+
+export interface InspectionRouteFilters {
+  is_active?: boolean
+  area?: string
+  period_type?: InspectionPeriodType
+  keyword?: string
+  page?: number
+  page_size?: number
+}
+
+export interface InspectionRouteListResponse {
+  items: InspectionRoute[]
+  total: number
+  page: number
+  page_size: number
+}
+
+// ==================== 巡检任务 ====================
+export interface InspectionTask {
+  id: string
+  task_no: string
+  route_id: string | null
+  equipment_id: string | null
+  equipment_ids: string[] | null
+  template_id: string
+  plan_type: InspectionPlanType
+  assigned_to: string | null
+  planned_date: string
+  status: InspectionTaskStatus
+  overall_result: InspectionOverallResult | null
+  started_at: string | null
+  completed_at: string | null
+  closed_at: string | null
+  closure_remark: string | null
+  created_at: string
+  updated_at: string
+  route_name?: string
+  equipment_name?: string
+  equipment_no?: string
+  template_name?: string
+  assignee_name?: string
+  equipment_count?: number
+  completed_count?: number
+  photo_count?: number
+}
+
+export interface CreateInspectionTaskInput {
+  route_id?: string
+  equipment_id?: string
+  equipment_ids?: string[]
+  template_id: string
+  plan_type?: InspectionPlanType
+  assigned_to?: string
+  planned_date: string
+}
+
+export interface InspectionTaskFilters {
+  status?: InspectionTaskStatus
+  route_id?: string
+  assigned_to?: string
+  equipment_id?: string
+  planned_date_from?: string
+  planned_date_to?: string
+  page?: number
+  page_size?: number
+}
+
+export interface InspectionTaskListResponse {
+  items: InspectionTask[]
+  total: number
+  page: number
+  page_size: number
+}
+
+// ==================== 巡检执行 ====================
+export interface InspectionRecordItem {
+  template_item_id: string
+  result: CheckResult
+  actual_value?: string
+  remark?: string
+}
+
+export interface EquipmentCheckResult {
+  records: InspectionRecordItem[]
+}
+
+export interface InspectionRecord {
+  id: string
+  task_id: string
+  equipment_id: string | null
+  equipment_name: string | null
+  template_item_id: string
+  result: string
+  actual_value: string | null
+  remark: string | null
+  item_name?: string
+  expected_result?: string
+  created_at: string
+}
+
+// ==================== 巡检照片 ====================
+export interface InspectionPhoto {
+  id: string
+  task_id: string
+  equipment_id: string
+  file_name: string
+  file_size: number | null
+  uploaded_at: string
+}
+
+// ==================== 历史记录 ====================
+export interface InspectionTaskDetail extends InspectionTask {
+  records: InspectionRecord[]
+  photos: InspectionPhoto[]
+}
+
+export interface InspectionHistoryFilters {
+  date_from?: string
+  date_to?: string
+  equipment_id?: string
+  route_id?: string
+  result?: InspectionOverallResult
+  page?: number
+  page_size?: number
+}
+
+export interface InspectionHistoryListResponse {
+  items: InspectionTask[]
+  total: number
+  page: number
+  page_size: number
+}

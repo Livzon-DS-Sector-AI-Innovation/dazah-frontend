@@ -14,9 +14,11 @@ FROM base AS builder
 ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
 WORKDIR /app
 
-# Build argument for client-side API URL (baked into bundle)
+# Build arguments for both client and server API URLs
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+ARG API_BASE_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV API_BASE_URL=$API_BASE_URL
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

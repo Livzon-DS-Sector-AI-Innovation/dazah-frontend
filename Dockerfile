@@ -13,6 +13,11 @@ RUN corepack enable pnpm && pnpm install --frozen-lockfile
 FROM base AS builder
 ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
 WORKDIR /app
+
+# Build argument for client-side API URL (baked into bundle)
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 

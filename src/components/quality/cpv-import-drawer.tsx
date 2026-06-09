@@ -13,6 +13,12 @@ interface CpvImportDrawerProps {
   onSuccess: () => void
 }
 
+const modeLabels: Record<string, { label: string; desc: string }> = {
+  create: { label: "新增", desc: "仅导入新批次，已存在的批号将被跳过" },
+  update: { label: "更新", desc: "新批次新增，已存在的批次追加参数值" },
+  overwrite: { label: "覆盖", desc: "删除该产品下所有当前类型数据后重新导入" },
+}
+
 export function CpvImportDrawer({ isOpen, onClose, productId, productName, dataType, onSuccess }: CpvImportDrawerProps) {
   const [importMode, setImportMode] = useState<"create" | "update" | "overwrite">("create")
   const [file, setFile] = useState<File | null>(null)
@@ -82,20 +88,12 @@ export function CpvImportDrawer({ isOpen, onClose, productId, productName, dataT
     }
   }
 
-  const modeLabels = {
-    create: { label: "新增", desc: "仅导入新批次，已存在的批号将被跳过" },
-    update: { label: "更新", desc: "新批次新增，已存在的批次追加参数值" },
-    overwrite: { label: "覆盖", desc: "删除该产品下所有当前类型数据后重新导入" },
-  }
-
   return (
     <>
-      {/* Backdrop */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/30 z-40 transition-opacity" onClick={handleClose} />
       )}
 
-      {/* Drawer */}
       <div className={`fixed top-0 right-0 h-full w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -158,7 +156,6 @@ export function CpvImportDrawer({ isOpen, onClose, productId, productName, dataT
                   <div className="text-sm text-gray-600">
                     {file ? file.name : "点击选择 Excel 文件"}
                   </div>
-                  <div className="text-xs text-gray-400 mt-1">支持 .xlsx / .xls</div>
                 </label>
               </div>
             </div>
@@ -177,64 +174,36 @@ export function CpvImportDrawer({ isOpen, onClose, productId, productName, dataT
               </div>
             )}
 
-            {/* Preview Results */}
+            {/* Simplified Preview Results */}
             {preview && (
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900">预览结果</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-xl font-bold text-gray-900">{preview.total_rows}</div>
-                    <div className="text-xs text-gray-500 mt-1">总行数</div>
+                <h3 className="text-sm font-semibold text-gray-900">导入预览</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">产品名称</span>
+                    <span className="font-medium text-gray-900">{productName}</span>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-3 text-center">
-                    <div className="text-xl font-bold text-green-700">{preview.valid_rows}</div>
-                    <div className="text-xs text-gray-500 mt-1">可导入</div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">数据类型</span>
+                    <span className="font-medium text-gray-900">{dataType}</span>
                   </div>
-                  <div className="bg-red-50 rounded-lg p-3 text-center">
-                    <div className="text-xl font-bold text-red-700">{preview.error_rows.length}</div>
-                    <div className="text-xs text-gray-500 mt-1">错误行</div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">导入模式</span>
+                    <span className="font-medium text-gray-900">{modeLabels[importMode].label}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">文件名</span>
+                    <span className="font-medium text-gray-900 truncate ml-4">{file?.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">可导入行数</span>
+                    <span className="font-bold text-green-700">{preview.valid_rows}</span>
                   </div>
                 </div>
 
-                {/* Matched Parameters */}
-                {preview.matched_parameters.length > 0 && (
-                  <div className="text-xs text-gray-500">
-                    匹配参数：{preview.matched_parameters.join("、")}
-                  </div>
-                )}
-
-                {/* Unmatched Columns */}
-                {preview.unmatched_columns.length > 0 && (
-                  <div className="text-xs text-amber-600">
-                    未匹配列：{preview.unmatched_columns.join("、")}
-                  </div>
-                )}
-
-                {/* Error Details */}
-                {preview.error_rows.length > 0 && (
-                  <div>
-                    <div className="text-sm font-medium text-red-600 mb-2">错误明细（前 20 行）</div>
-                    <div className="max-h-48 overflow-y-auto border border-red-200 rounded-lg">
-                      <table className="w-full text-xs">
-                        <thead className="bg-red-50 sticky top-0">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-red-700">行号</th>
-                            <th className="px-3 py-2 text-left text-red-700">错误信息</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-red-100">
-                          {preview.error_rows.slice(0, 20).map((err) => (
-                            <tr key={err.row_number}>
-                              <td className="px-3 py-2 text-gray-700">{err.row_number}</td>
-                              <td className="px-3 py-2 text-red-600">{err.error_message}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    {preview.error_rows.length > 20 && (
-                      <div className="text-xs text-gray-400 mt-1">还有 {preview.error_rows.length - 20} 行错误未显示</div>
-                    )}
+                {importMode === "overwrite" && (
+                  <div className="bg-amber-50 border border-amber-300 text-amber-800 text-sm rounded-lg p-3">
+                    ⚠️ 覆盖导入会清空当前产品当前数据类型下的历史数据，再导入本文件，请谨慎确认。
                   </div>
                 )}
               </div>

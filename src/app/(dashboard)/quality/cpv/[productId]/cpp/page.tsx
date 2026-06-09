@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import * as XLSX from "xlsx"
 import { fetchCppBatchesWide, fetchCpvParameters, fetchCpvProduct } from "@/lib/api/quality-cpv"
 import { CpvParameter, CpvBatchWide, CpvProduct } from "@/types/quality-cpv"
 import { CpvImportDrawer } from "@/components/quality/cpv-import-drawer"
@@ -17,6 +18,7 @@ export default function CppBatchDataPage() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const [batchNo, setBatchNo] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -47,19 +49,43 @@ export default function CppBatchDataPage() {
 
   function handleSearch() { setPage(1); loadData() }
 
-  function handleExport() {
-    const headers = ["批号", "生产日期", ...parameters.map(p => p.name + (p.unit ? `(${p.unit})` : "")), "状态"]
-    const rows = batches.map(b => [
-      b.batch_no, b.production_date,
-      ...parameters.map(p => b.parameters[p.name]?.value || "-"),
-      b.has_abnormal ? "异常" : "正常"
-    ])
-    const csv = [headers, ...rows].map(r => r.join(",")).join("\n")
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url; a.download = `cpp_batches_${new Date().toISOString().slice(0,10)}.csv`
-    a.click(); URL.revokeObjectURL(url)
+  async function handleExport() {
+    try {
+      setExporting(true);
+      const allItems: CpvBatchWide[] = [];
+      let currentPage = 1;
+      const pageSize = 200;
+      let totalPages = 1;
+      while (currentPage <= totalPages) {
+        const result = await fetchCppBatchesWide(productId, {
+          batch_no: batchNo || undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined,
+          page: currentPage,
+          page_size: pageSize,
+        });
+        allItems.push(...result.items);
+        totalPages = Math.ceil(result.total / pageSize);
+        currentPage++;
+      }
+      const headers = ["批号", "生产日期", ...parameters.map(p => p.name + (p.unit ? `(${p.unit})` : "")), "状态"];
+      const rows = allItems.map(b => [
+        b.batch_no,
+        b.production_date,
+        ...parameters.map(p => b.parameters[p.name]?.value ?? "-"),
+        b.has_abnormal ? "异常" : "正常"
+      ]);
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "CPP数据");
+      const productName = product?.name || "未知产品";
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `cpp_batches_${productName}_${dateStr}.xlsx`);
+    } catch (err) {
+      console.error("导出失败:", err);
+    } finally {
+      setExporting(false);
+    }
   }
 
   const totalPages = Math.ceil(total / 20)
@@ -82,8 +108,8 @@ export default function CppBatchDataPage() {
           <button onClick={() => setDrawerOpen(true)} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
             上传 Excel
           </button>
-          <button onClick={handleExport} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
-            导出 CSV
+          <button onClick={handleExport} disabled={exporting} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+            {exporting ? "导出中..." : "导出 Excel"}
           </button>
         </div>
       </div>

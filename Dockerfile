@@ -5,7 +5,10 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml* ./
+# Use Chinese npm mirror for faster downloads
+ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
+
+COPY .npmrc package.json pnpm-lock.yaml* ./
 RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed

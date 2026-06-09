@@ -13,6 +13,7 @@ RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
+ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
 WORKDIR /app
 
 # Only NEXT_PUBLIC_* variables need to be set at build time (for client-side)

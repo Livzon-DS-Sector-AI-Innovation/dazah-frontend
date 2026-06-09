@@ -58,7 +58,7 @@ import type {
   ApiResponse,
 } from '@/types/safety'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002/api/v1'
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000/api/v1'
 
 // ============ Helper Functions ============
 
@@ -712,7 +712,7 @@ export async function uploadHazardAttachment(id: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/safety/hazard-identifications/${id}/upload`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/hazard-identifications/${id}/upload`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/hazard-identification')
@@ -780,7 +780,7 @@ export async function uploadRegulationDocument(id: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/safety/regulations/${id}/upload`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/regulations/${id}/upload`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/regulation')
@@ -837,7 +837,7 @@ export async function manualRevisionComplete(revisionId: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/safety/revisions/${revisionId}/manual-complete`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/revisions/${revisionId}/manual-complete`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/regulation-revision')
@@ -941,7 +941,7 @@ export async function uploadHazardRevisionDocument(recordId: string, file: File)
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/safety/hazard-revision-records/${recordId}/upload`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/hazard-revision-records/${recordId}/upload`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/hazard-revision')

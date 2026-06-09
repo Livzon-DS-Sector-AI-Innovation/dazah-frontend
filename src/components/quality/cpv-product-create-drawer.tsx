@@ -45,11 +45,11 @@ export function CpvProductCreateDrawer({ isOpen, onClose, onSuccess }: CpvProduc
       setErrorMsg("产品名称不能为空")
       return
     }
-    if (!formData.specification.trim()) {
+    if (!formData.specification?.trim()) {
       setErrorMsg("规格不能为空")
       return
     }
-    if (!formData.process_version.trim()) {
+    if (!formData.process_version?.trim()) {
       setErrorMsg("工艺版本不能为空")
       return
     }

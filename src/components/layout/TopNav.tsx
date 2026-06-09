@@ -31,17 +31,22 @@ export function TopNav() {
   return (
     <header className="h-16 bg-[var(--color-canvas)] border-b border-[var(--color-hairline)] flex items-center px-5 shrink-0">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 mr-10 shrink-0">
+      <div className="flex items-center gap-2.5 mr-6 shrink-0">
         <div className="w-7 h-7 rounded-[var(--rounded-md)] bg-[var(--color-primary)] flex items-center justify-center">
           <span className="text-white text-xs font-semibold">API</span>
         </div>
-        <span className="text-[var(--color-charcoal)] text-[15px] font-semibold tracking-tight">
-          原料药
-        </span>
+        <div className="flex flex-col">
+          <span className="text-[var(--color-charcoal)] text-[15px] font-semibold tracking-tight leading-tight">
+            原料药
+          </span>
+          <span className="text-[var(--color-steel)] text-[11px] leading-tight">
+            珠海保税区丽珠合成制药有限公司
+          </span>
+        </div>
       </div>
 
       {/* Module Tabs */}
-      <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-hide h-full">
+      <nav className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-hide h-full ml-8">
         {moduleMenus.map((mod) => {
           const isActive = activeModule === mod.key
           return (

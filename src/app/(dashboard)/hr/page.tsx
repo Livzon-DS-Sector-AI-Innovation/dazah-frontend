@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link'
 import { Card, Row, Col } from 'antd'
 import { TeamOutlined, ClockCircleOutlined, BookOutlined } from '@ant-design/icons'

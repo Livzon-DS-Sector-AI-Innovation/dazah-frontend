@@ -2,14 +2,16 @@ FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
+ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml* ./
+COPY .npmrc package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
 RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
+ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

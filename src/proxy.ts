@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const PUBLIC_PATHS = ['/login', '/auth/callback']
-
 export function proxy(request: NextRequest) {
-  const token = request.cookies.get('auth_token')
-  const { pathname } = request.nextUrl
-
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next()
-  }
-
-  if (!token?.value) {
-    const loginUrl = new URL('/login', request.url)
-    return NextResponse.redirect(loginUrl)
-  }
-
+  // Skip authentication for now
   return NextResponse.next()
 }
 

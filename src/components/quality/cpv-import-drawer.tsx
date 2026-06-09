@@ -13,7 +13,7 @@ interface CpvImportDrawerProps {
   onSuccess: () => void
 }
 
-const modeLabels: Record<string, { label: string; desc: string }> = {
+const modeLabels: Record<"create" | "update" | "overwrite", { label: string; desc: string }> = {
   create: { label: "新增", desc: "仅导入新批次，已存在的批号将被跳过" },
   update: { label: "更新", desc: "新批次新增，已存在的批次追加参数值" },
   overwrite: { label: "覆盖", desc: "删除该产品下所有当前类型数据后重新导入" },

@@ -1,7 +1,7 @@
 // ==================== 巡检枚举 ====================
 export type InspectionPeriodType = '每日' | '每周' | '每月' | '专项'
 export type InspectionTaskStatus = '待执行' | '执行中' | '已完成' | '已关闭'
-export type InspectionPlanType = '日常巡检' | '周巡检' | '月巡检' | '专项巡检'
+export type InspectionPlanType = '线路巡检' | '设备巡检'
 export type InspectionOverallResult = '正常' | '异常'
 export type CheckResult = '正常' | '异常' | '跳过'
 
@@ -91,6 +91,7 @@ export interface InspectionTask {
   completed_at: string | null
   closed_at: string | null
   closure_remark: string | null
+  route_summary?: string | null
   created_at: string
   updated_at: string
   route_name?: string
@@ -107,7 +108,7 @@ export interface CreateInspectionTaskInput {
   route_id?: string
   equipment_id?: string
   equipment_ids?: string[]
-  template_id: string
+  template_id?: string
   plan_type?: InspectionPlanType
   assigned_to?: string
   planned_date: string
@@ -157,11 +158,17 @@ export interface InspectionRecord {
   created_at: string
 }
 
+// ==================== 线路巡检提交 ====================
+export interface RouteCheckSubmitInput {
+  overall_result: InspectionOverallResult
+  route_summary?: string
+}
+
 // ==================== 巡检照片 ====================
 export interface InspectionPhoto {
   id: string
   task_id: string
-  equipment_id: string
+  equipment_id: string | null
   file_name: string
   file_size: number | null
   uploaded_at: string
@@ -188,4 +195,19 @@ export interface InspectionHistoryListResponse {
   total: number
   page: number
   page_size: number
+}
+
+// ==================== AI 分析 ====================
+export interface InspectionAIAnalyzeRequest {
+  image_base64: string
+  image_mime_type: string
+}
+
+export interface InspectionAIItemResult {
+  template_item_id: string
+  item_name: string
+  expected_result: string | null
+  result: CheckResult
+  actual_value: string | null
+  remark: string | null
 }

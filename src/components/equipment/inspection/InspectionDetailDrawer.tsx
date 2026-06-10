@@ -100,7 +100,28 @@ export function InspectionDetailDrawer() {
             <Descriptions.Item label="状态">{detail.status}</Descriptions.Item>
             <Descriptions.Item label="开始时间">{detail.started_at ? dayjs(detail.started_at).format('YYYY-MM-DD HH:mm') : '-'}</Descriptions.Item>
             <Descriptions.Item label="完成时间">{detail.completed_at ? dayjs(detail.completed_at).format('YYYY-MM-DD HH:mm') : '-'}</Descriptions.Item>
+            {detail.overall_result && (
+              <Descriptions.Item label="巡检结果">
+                <Tag style={{
+                  color: detail.overall_result === '正常' ? '#1aae39' : '#e03131',
+                  background: detail.overall_result === '正常' ? '#d9f3e1' : '#fde0ec',
+                  border: 'none', borderRadius: 4, fontWeight: 500,
+                }}>{detail.overall_result}</Tag>
+              </Descriptions.Item>
+            )}
           </Descriptions>
+
+          {/* 线路巡检现场描述 */}
+          {detail.plan_type === '线路巡检' && detail.route_summary && (
+            <div style={{
+              padding: 16, marginBottom: 24,
+              background: '#fafaf9', borderRadius: 8,
+              border: '1px solid #ede9e4',
+            }}>
+              <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>📝 现场描述</Text>
+              <Text style={{ fontSize: 13, color: '#5d5b54', whiteSpace: 'pre-wrap' }}>{detail.route_summary}</Text>
+            </div>
+          )}
 
           {/* Photos */}
           {detail.photos && detail.photos.length > 0 && (
@@ -125,7 +146,11 @@ export function InspectionDetailDrawer() {
           {/* Records — 按设备分组 */}
           <div>
             <Text strong style={{ fontSize: 15, display: 'block', marginBottom: 12 }}>📋 检查记录</Text>
-            {recordGroups.length === 0 && <Text type="secondary">无记录</Text>}
+            {recordGroups.length === 0 && (
+              <Text type="secondary">
+                {detail.plan_type === '线路巡检' ? '线路巡检模式，无逐设备检查记录' : '无记录'}
+              </Text>
+            )}
             {recordGroups.map((group, idx) => (
               <div key={group.equipmentId} style={{ marginBottom: idx < recordGroups.length - 1 ? 24 : 0 }}>
                 {/* 多设备时显示设备标题 */}

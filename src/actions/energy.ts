@@ -8,9 +8,15 @@ import {
   updateEnergyDevice as apiUpdateDevice,
   deleteEnergyDevice as apiDeleteDevice,
   fetchEnergyData,
-  fetchEnergyStatistics,
+  fetchEnergyOverview,
   triggerCollect as apiTriggerCollect,
   fetchCollectLogs,
+  fetchAlertRules,
+  createAlertRule as apiCreateAlertRule,
+  updateAlertRule as apiUpdateAlertRule,
+  deleteAlertRule as apiDeleteAlertRule,
+  fetchAlertRecords,
+  processAlertRecord as apiProcessAlertRecord,
 } from '@/lib/api/energy'
 import {
   CreateDeviceInput,
@@ -19,9 +25,12 @@ import {
   DataQueryParams,
   StatisticsParams,
   LogQueryParams,
+  CreateRuleInput,
+  UpdateRuleInput,
+  ProcessRecordInput,
 } from '@/types/energy'
 
-// 设备配置 Server Actions
+// 数据源配置 Server Actions
 export async function getEnergyDevices(params: DeviceQueryParams = {}) {
   return fetchEnergyDevices(params)
 }
@@ -52,17 +61,50 @@ export async function getEnergyData(params: DataQueryParams = {}) {
   return fetchEnergyData(params)
 }
 
-export async function getEnergyStatistics(params: StatisticsParams = {}) {
-  return fetchEnergyStatistics(params)
+export async function getEnergyOverview(params: StatisticsParams = {}) {
+  return fetchEnergyOverview(params)
 }
 
 // 数据采集 Server Actions
-export async function triggerCollect(deviceIds?: string[]) {
-  const result = await apiTriggerCollect(deviceIds)
+export async function triggerCollect(platformCode?: string) {
+  const result = await apiTriggerCollect(platformCode)
   revalidatePath('/energy/collect-logs')
   return result
 }
 
 export async function getCollectLogs(params: LogQueryParams = {}) {
   return fetchCollectLogs(params)
+}
+
+// 预警规则 Server Actions
+export async function getAlertRules(params: Record<string, unknown> = {}) {
+  return fetchAlertRules(params)
+}
+
+export async function createAlertRule(data: CreateRuleInput) {
+  const result = await apiCreateAlertRule(data)
+  revalidatePath('/energy/alerts')
+  return result
+}
+
+export async function updateAlertRule(id: string, data: UpdateRuleInput) {
+  const result = await apiUpdateAlertRule(id, data)
+  revalidatePath('/energy/alerts')
+  return result
+}
+
+export async function deleteAlertRule(id: string) {
+  await apiDeleteAlertRule(id)
+  revalidatePath('/energy/alerts')
+}
+
+// 预警记录 Server Actions
+export async function getAlertRecords(params: Record<string, unknown> = {}) {
+  return fetchAlertRecords(params)
+}
+
+export async function processAlertRecord(id: string, data: ProcessRecordInput) {
+  const result = await apiProcessAlertRecord(id, data)
+  revalidatePath('/energy/alerts')
+  return result
 }

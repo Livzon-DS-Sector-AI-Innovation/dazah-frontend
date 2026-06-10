@@ -1103,8 +1103,7 @@ export function StatsDashboard({ initialData }: StatsDashboardProps) {
       <div
         style={{
           maxWidth: 1280,
-          margin: '0 auto',
-          padding: '24px 24px 48px',
+          margin: '0 auto'
         }}
       >
         {/* ========== 页面标题 ========== */}

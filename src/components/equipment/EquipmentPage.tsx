@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useCallback, useState } from 'react'
-import { App, ConfigProvider, Tabs, Button, Spin } from 'antd'
+import { App, ConfigProvider, Tabs, Button } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 import { EquipmentCategory, Location, Equipment, EquipmentStatistics } from '@/types/equipment'
@@ -23,6 +23,7 @@ interface EquipmentPageProps {
   initialEquipments: Equipment[]
   initialTotal: number
   initialStatistics: EquipmentStatistics
+  initialDepartments: import('@/lib/api/equipment').DepartmentOption[]
 }
 
 const SIDEBAR_WIDTH = 280
@@ -33,6 +34,7 @@ export function EquipmentPage({
   initialEquipments,
   initialTotal,
   initialStatistics,
+  initialDepartments,
 }: EquipmentPageProps) {
   const {
     categories,
@@ -41,9 +43,9 @@ export function EquipmentPage({
     selectedCategory,
     selectedLocation,
     statusFilter,
+    departmentFilter,
+    departments,
     keyword,
-    page,
-    pageSize,
     loading,
     setCategories,
     setLocations,
@@ -51,31 +53,37 @@ export function EquipmentPage({
     setStatistics,
     setTotal,
     setLoading,
+    setDepartments,
   } = useEquipmentStore()
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [resetKey, setResetKey] = useState(0)
 
-  // 初始化数据
+  // 初始化分类和位置
   useEffect(() => {
     setCategories(initialCategories)
     setLocations(initialLocations)
-    setEquipments(initialEquipments)
     setStatistics(initialStatistics)
-    setTotal(initialTotal)
-  }, [initialCategories, initialLocations, initialEquipments, initialStatistics, initialTotal, setCategories, setLocations, setEquipments, setStatistics, setTotal])
+  }, [])
 
-  // 筛选/翻页时重新获取数据
-  const fetchData = useCallback(async () => {
+  // 初始化部门列表（服务端数据）
+  useEffect(() => {
+    setDepartments(initialDepartments)
+  }, [])
+
+  // 获取数据
+  const fetchData = useCallback(async (p: number, ps: number) => {
     setLoading(true)
     try {
       const [equipmentsResponse, stats] = await Promise.all([
         fetchEquipmentsClient({
           category_id: selectedCategory,
           location_id: selectedLocation,
+          department_id: departmentFilter,
           status: statusFilter || undefined,
           keyword: keyword || undefined,
-          page,
-          page_size: pageSize,
+          page: p,
+          page_size: ps,
         }),
         fetchEquipmentStatisticsClient(),
       ])
@@ -87,12 +95,18 @@ export function EquipmentPage({
     } finally {
       setLoading(false)
     }
-  }, [selectedCategory, selectedLocation, statusFilter, keyword, page, pageSize, setEquipments, setTotal, setStatistics, setLoading])
+  }, [selectedCategory, selectedLocation, departmentFilter, statusFilter, keyword, setEquipments, setTotal, setStatistics, setLoading])
 
-  // 监听筛选状态变化
+  // 首次加载
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData(1, 20)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 筛选变化时重置到第一页
+  useEffect(() => {
+    fetchData(1, 20)
+    setResetKey(k => k + 1)
+  }, [selectedCategory, selectedLocation, departmentFilter])
 
   const tabItems = [
     {
@@ -127,7 +141,7 @@ export function EquipmentPage({
           </p>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4" style={{ height: 'calc(100vh - 210px)', minHeight: 400 }}>
           {/* 左侧：可折叠分类/位置树 */}
           {!sidebarCollapsed && (
             <div
@@ -138,9 +152,13 @@ export function EquipmentPage({
                 padding: 16,
                 borderRadius: 12,
                 border: '1px solid #e5e3df',
+                display: 'flex', flexDirection: 'column',
+                overflow: 'hidden',
               }}
             >
-              <Tabs items={tabItems} />
+              <div style={{ flex: 1, overflow: 'auto' }}>
+                <Tabs items={tabItems} />
+              </div>
             </div>
           )}
 
@@ -152,11 +170,12 @@ export function EquipmentPage({
               padding: '16px 20px',
               borderRadius: 12,
               border: '1px solid #e5e3df',
+              display: 'flex', flexDirection: 'column',
               overflow: 'hidden',
             }}
           >
             {/* 折叠按钮 + 统计 + 标题 */}
-            <div className="mb-3 flex items-center gap-3">
+            <div className="mb-3 flex items-center gap-3" style={{ flexShrink: 0 }}>
               <Button
                 type="text"
                 icon={sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -167,23 +186,21 @@ export function EquipmentPage({
             </div>
 
             {/* 表格区域 */}
-            <div style={{ overflowX: 'auto' }}>
-              <Spin spinning={loading}>
-                <EquipmentTable onRefresh={fetchData} />
-              </Spin>
+            <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
+              <EquipmentTable loading={loading} resetKey={resetKey} onPageChange={(p, ps) => fetchData(p, ps)} />
             </div>
           </div>
         </div>
 
         {/* 抽屉组件 */}
-        <EquipmentDrawer onRefresh={fetchData} />
+        <EquipmentDrawer onRefresh={() => { fetchData(1, 20); setResetKey(k => k + 1) }} />
         <CategoryDrawer />
         <LocationDrawer />
         <RepairDrawer
           equipments={initialEquipments.map(e => ({
             id: e.id, equipment_no: e.equipment_no, name: e.name, importance: e.importance,
           }))}
-          onRefresh={fetchData}
+          onRefresh={() => fetchData(1, 20)}
         />
       </App>
     </ConfigProvider>

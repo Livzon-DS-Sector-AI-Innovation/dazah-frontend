@@ -1,5 +1,6 @@
 import { EquipmentPage } from '@/components/equipment'
-import { fetchCategoryTree, fetchLocationTree, fetchEquipments, fetchEquipmentStatistics } from '@/lib/api/equipment'
+import { fetchCategoryTree, fetchLocationTree, fetchEquipments, fetchEquipmentStatistics, fetchDepartments } from '@/lib/api/equipment'
+import type { DepartmentOption } from '@/lib/api/equipment'
 import { EquipmentCategory, Location, Equipment, EquipmentStatistics } from '@/types/equipment'
 
 // 默认空数据
@@ -16,6 +17,7 @@ export default async function EquipmentPageWrapper() {
   let equipments: Equipment[] = []
   let total = 0
   let statistics = defaultStatistics
+  let departments: DepartmentOption[] = []
 
   try {
     // 获取初始数据
@@ -24,12 +26,14 @@ export default async function EquipmentPageWrapper() {
       fetchLocationTree(),
       fetchEquipments({ page: 1, page_size: 20 }),
       fetchEquipmentStatistics(),
+      fetchDepartments(),
     ])
     categories = result[0]
     locations = result[1]
     equipments = result[2].items
     total = result[2].total
     statistics = result[3]
+    departments = result[4]
   } catch (error) {
     // 后端服务不可用时，使用空数据降级
     console.warn('设备模块数据加载失败，使用空数据:', error)
@@ -42,6 +46,7 @@ export default async function EquipmentPageWrapper() {
       initialEquipments={equipments}
       initialTotal={total}
       initialStatistics={statistics}
+      initialDepartments={departments}
     />
   )
 }

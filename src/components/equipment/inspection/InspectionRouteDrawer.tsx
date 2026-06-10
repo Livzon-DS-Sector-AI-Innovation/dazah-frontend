@@ -20,9 +20,16 @@ export function InspectionRouteDrawer({ templates }: InspectionRouteDrawerProps)
   useEffect(() => {
     if (routeDrawerOpen) {
       if (editingRoute) {
-        form.setFieldsValue(editingRoute)
+        form.setFieldsValue({
+          name: editingRoute.name,
+          area: editingRoute.area ?? undefined,
+          period_type: editingRoute.period_type,
+          period_value: editingRoute.period_value ?? undefined,
+          template_id: editingRoute.template_id ?? undefined,
+          description: editingRoute.description ?? undefined,
+        })
       } else {
-        form.resetFields()
+        form.setFieldsValue({ period_type: '每日' })
       }
     }
   }, [routeDrawerOpen, editingRoute, form])
@@ -62,7 +69,7 @@ export function InspectionRouteDrawer({ templates }: InspectionRouteDrawerProps)
         </Space>
       }
     >
-      <Form form={form} layout="vertical" preserve={false}>
+      <Form form={form} layout="vertical">
         <Form.Item name="name" label="路线名称" rules={[{ required: true, message: '请输入路线名称' }]}>
           <Input placeholder="如：A车间一楼日检路线" style={{ borderRadius: 8 }} />
         </Form.Item>

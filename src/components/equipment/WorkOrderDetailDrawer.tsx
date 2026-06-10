@@ -285,8 +285,12 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
       <Descriptions column={2} size="small" styles={{ label: { color: '#787671', fontSize: 13 }, content: { color: '#1a1a1a', fontSize: 14 } }}>
         <Descriptions.Item label="工单类型">
           <Tag style={{
-            color: wo.order_type === '故障维修' ? '#dd5b00' : '#5645d4',
-            background: wo.order_type === '故障维修' ? '#fff7e6' : '#ede9f7',
+            color: wo.order_type === '故障维修' || wo.order_type === '异常处理' ? '#dd5b00'
+                 : wo.order_type === '日常维护' ? '#0075de'
+                 : '#5645d4',
+            background: wo.order_type === '故障维修' || wo.order_type === '异常处理' ? '#fff7e6'
+                      : wo.order_type === '日常维护' ? '#dcecfa'
+                      : '#ede9f7',
             border: 'none', borderRadius: 4,
           }}>{wo.order_type}</Tag>
         </Descriptions.Item>
@@ -298,6 +302,7 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
         <Descriptions.Item label="故障描述" span={2}>{wo.fault_description || '-'}</Descriptions.Item>
         <Descriptions.Item label="报修人">{wo.reporter_name || '-'}</Descriptions.Item>
         <Descriptions.Item label="维修人">{wo.assignee_name || '-'}</Descriptions.Item>
+        <Descriptions.Item label="责任人">{wo.responsible_person_name || '-'}</Descriptions.Item>
         <Descriptions.Item label="报修时间">{formatTime(wo.reported_at)}</Descriptions.Item>
         <Descriptions.Item label="维修耗时">{formatDuration(wo.actual_duration)}</Descriptions.Item>
       </Descriptions>

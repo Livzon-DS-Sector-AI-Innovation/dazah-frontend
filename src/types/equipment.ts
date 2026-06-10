@@ -62,7 +62,8 @@ export interface Equipment {
   id: string
   equipment_no: string
   name: string
-  category_id: string
+  category_ids: string[]
+  category_names?: string | null
   location_id: string
   status: EquipmentStatus
   importance: EquipmentImportance
@@ -77,13 +78,17 @@ export interface Equipment {
   updated_at: string
   created_by: string | null
   updated_by: string | null
+  department_id: string | null
+  department_name: string | null
+  responsible_person_name: string | null
   category?: EquipmentCategory
   location?: Location
 }
 
 export interface CreateEquipmentInput {
   name: string
-  category_id: string
+  equipment_no: string
+  category_ids: string[]
   location_id: string
   status?: EquipmentStatus
   importance?: EquipmentImportance
@@ -94,11 +99,12 @@ export interface CreateEquipmentInput {
   production_date?: string
   commissioning_date?: string
   description?: string
+  department_id?: string
 }
 
 export interface UpdateEquipmentInput {
   name?: string
-  category_id?: string
+  category_ids?: string[]
   location_id?: string
   status?: EquipmentStatus
   importance?: EquipmentImportance
@@ -109,12 +115,14 @@ export interface UpdateEquipmentInput {
   production_date?: string
   commissioning_date?: string
   description?: string
+  department_id?: string
 }
 
 // 列表和筛选
 export interface EquipmentFilters {
   category_id?: string
   location_id?: string
+  department_id?: string
   status?: EquipmentStatus
   keyword?: string
   page?: number
@@ -169,7 +177,7 @@ export interface UpdateFailureCodeInput {
 }
 
 // ==================== 维修工单 ====================
-export type WorkOrderType = '故障维修' | '计划维护' | '巡检' | '校准'
+export type WorkOrderType = '故障维修' | '计划维护' | '巡检' | '校准' | '异常处理' | '日常维护'
 export type WorkOrderPriority = '紧急' | '高' | '中' | '低'
 export type WorkOrderStatus = '待处理' | '执行中' | '待验收' | '已完成' | '已关闭'
 export type VerificationResult = '合格' | '不合格'
@@ -187,6 +195,8 @@ export interface WorkOrder {
   fault_description: string | null
   reporter_id: string
   assignee_id: string | null
+  responsible_person_id: string | null
+  responsible_person_name?: string
   verified_by: string | null
   reported_at: string
   assigned_at: string | null
@@ -226,6 +236,7 @@ export interface CreateWorkOrderInput {
   maintenance_plan_id?: string
   planned_start_date?: string
   checklist_template_id?: string
+  responsible_person_id?: string
 }
 
 export interface UpdateWorkOrderInput {
@@ -238,6 +249,7 @@ export interface UpdateWorkOrderInput {
   fault_action_id?: string
   fault_description?: string
   planned_start_date?: string
+  responsible_person_id?: string
 }
 
 export interface AssignWorkOrderInput {
@@ -654,4 +666,12 @@ export interface Maintainer {
   name: string
   employee_no: string
   department_id: string
+}
+
+// ==================== 部门（供下拉选择） ====================
+export interface DepartmentOption {
+  id: string
+  name: string
+  leader_name: string | null
+  leader_user_id: string | null
 }

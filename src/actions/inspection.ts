@@ -5,7 +5,8 @@ import { getServerToken } from '@/lib/auth'
 import {
   CreateInspectionRouteInput, UpdateInspectionRouteInput, RouteEquipmentItem,
   CreateInspectionTaskInput, EquipmentCheckResult,
-  InspectionRecordItem,
+  InspectionRecordItem, InspectionAIItemResult,
+  RouteCheckSubmitInput,
 } from '@/types/inspection'
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000'
@@ -126,4 +127,48 @@ export async function deleteInspectionPhoto(taskId: string, photoId: string) {
   const result = await actionFetch(`${BASE}/tasks/${taskId}/photos/${photoId}`, { method: 'DELETE' })
   revalidate()
   return result
+}
+
+// ==================== 线路巡检 ====================
+export async function submitRouteCheck(taskId: string, data: RouteCheckSubmitInput) {
+  const result = await actionFetch(`${BASE}/tasks/${taskId}/route-check`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+  revalidate()
+  return result
+}
+
+// 任务级照片上传（线路巡检用）
+export async function uploadTaskPhoto(taskId: string, formData: FormData) {
+  const token = await getServerToken()
+  const response = await fetch(`${BASE}/tasks/${taskId}/photos`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error((err as Record<string, unknown>).message as string || '上传失败')
+  }
+  revalidate()
+  const json = await response.json()
+  return json.data
+}
+
+// ==================== AI 分析 ====================
+export async function analyzeInspectionPhoto(
+  taskId: string,
+  equipmentId: string,
+  imageBase64: string,
+  imageMimeType: string,
+): Promise<InspectionAIItemResult[]> {
+  const result = await actionFetch<InspectionAIItemResult[]>(
+    `${BASE}/tasks/${taskId}/equipments/${equipmentId}/ai-analyze`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ image_base64: imageBase64, image_mime_type: imageMimeType }),
+    },
+  )
+  return result ?? []
 }

@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { App, Drawer, Form, Input, Select, Button, Space } from 'antd'
 import { useEquipmentStore } from '@/stores/equipment'
 import { createWorkOrder, updateWorkOrder } from '@/actions/equipment'
-import { CreateWorkOrderInput, UpdateWorkOrderInput, FailureCode, WorkOrderStatus } from '@/types/equipment'
+import { CreateWorkOrderInput, UpdateWorkOrderInput, FailureCode, WorkOrderStatus, Maintainer } from '@/types/equipment'
 import { Equipment } from '@/types/equipment'
+import { fetchMaintainersClient } from '@/lib/api/equipment-client'
 
 const { TextArea } = Input
 
@@ -27,8 +28,15 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const { workOrderDrawerOpen, editingWorkOrder, closeWorkOrderDrawer } = useEquipmentStore()
+  const [maintainers, setMaintainers] = useState<Maintainer[]>([])
 
   const isEditing = !!editingWorkOrder
+
+  useEffect(() => {
+    if (workOrderDrawerOpen) {
+      fetchMaintainersClient().then(setMaintainers).catch(() => {})
+    }
+  }, [workOrderDrawerOpen])
 
   // 构建 initialValues：编辑时填充已有数据，新建时给默认值
   const initialValues = useMemo(() => {
@@ -40,6 +48,7 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
         status: editingWorkOrder.status,
         fault_symptom_id: editingWorkOrder.fault_symptom_id ?? undefined,
         fault_description: editingWorkOrder.fault_description ?? undefined,
+        responsible_person_id: editingWorkOrder.responsible_person_id ?? undefined,
       }
     }
     return { order_type: '故障维修', priority: '中' }
@@ -63,6 +72,7 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
           status: values.status,
           fault_symptom_id: values.fault_symptom_id || undefined,
           fault_description: values.fault_description || undefined,
+          responsible_person_id: values.responsible_person_id || undefined,
         }
         await updateWorkOrder(editingWorkOrder.id, data)
         message.success('更新工单成功')
@@ -73,6 +83,7 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
           priority: values.priority,
           fault_symptom_id: values.fault_symptom_id || undefined,
           fault_description: values.fault_description || undefined,
+          responsible_person_id: values.responsible_person_id || undefined,
         }
         await createWorkOrder(data)
         message.success('创建工单成功')
@@ -108,10 +119,29 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
           />
         </Form.Item>
         <Form.Item name="order_type" label="工单类型" rules={[{ required: true, message: '请选择工单类型' }]}>
-          <Select options={[{ label: '故障维修', value: '故障维修' }, { label: '校准', value: '校准' }]} />
+          <Select options={[
+            { label: '故障维修', value: '故障维修' },
+            { label: '计划维护', value: '计划维护' },
+            { label: '巡检', value: '巡检' },
+            { label: '校准', value: '校准' },
+            { label: '异常处理', value: '异常处理' },
+            { label: '日常维护', value: '日常维护' },
+          ]} />
         </Form.Item>
         <Form.Item name="priority" label="优先级" rules={[{ required: true, message: '请选择优先级' }]}>
           <Select options={[{ label: '紧急', value: '紧急' }, { label: '高', value: '高' }, { label: '中', value: '中' }, { label: '低', value: '低' }]} />
+        </Form.Item>
+        <Form.Item name="responsible_person_id" label="责任人">
+          <Select
+            placeholder="选择责任人（可选）"
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            options={maintainers.map((m) => ({
+              label: `${m.name} (${m.employee_no || '-'})`,
+              value: m.user_id,
+            }))}
+          />
         </Form.Item>
         {isEditing && (
           <Form.Item name="status" label="工单状态" rules={[{ required: true, message: '请选择工单状态' }]}>

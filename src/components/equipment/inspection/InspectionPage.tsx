@@ -93,16 +93,6 @@ export function InspectionPage({ initialTemplates, initialEquipments, initialCat
       children: <InspectionRoutesTab templates={templates} equipments={initialEquipments} />,
     },
     {
-      key: 'history',
-      label: (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-          <HistoryOutlined style={{ fontSize: 15 }} />
-          历史记录
-        </span>
-      ),
-      children: <InspectionHistoryTab equipments={initialEquipments} />,
-    },
-    {
       key: 'templates',
       label: (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
@@ -125,6 +115,16 @@ export function InspectionPage({ initialTemplates, initialEquipments, initialCat
         </div>
       ),
     },
+    {
+      key: 'history',
+      label: (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+          <HistoryOutlined style={{ fontSize: 15 }} />
+          历史记录
+        </span>
+      ),
+      children: <InspectionHistoryTab equipments={initialEquipments} />,
+    }
   ]
 
   return (

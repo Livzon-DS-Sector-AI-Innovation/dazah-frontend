@@ -5,4 +5,18 @@ export { DistributionChart } from './DistributionChart'
 export { DeviceTable } from './DeviceTable'
 export { DeviceDrawer } from './DeviceDrawer'
 export { CollectLogTable } from './CollectLogTable'
+export { CollectLogDetailDrawer } from './CollectLogDetailDrawer'
 export { AlertRuleTable } from './AlertRuleTable'
+export {
+  statusPill,
+  pillSuccess,
+  pillWarning,
+  pillError,
+  pillNeutral,
+  pillInfo,
+  pillPurple,
+  actionLink,
+  linkPrimary,
+  linkDanger,
+  linkPurple,
+} from './shared-styles'

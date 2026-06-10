@@ -33,6 +33,7 @@ interface InspectionStore {
 
   // 执行视图
   executingTaskId: string | null
+  executingPlanType: string
   executingRouteDetail: InspectionRouteDetail | null
   executingTemplateItems: InspectionTemplateItem[]
   executingTemplateName: string
@@ -43,6 +44,7 @@ interface InspectionStore {
   executingEquipments: { id: string; name: string; no: string }[]
   setExecutingTask: (
     taskId: string,
+    planType: string,
     routeDetail: InspectionRouteDetail | null,
     templateItems: InspectionTemplateItem[],
     templateName: string,
@@ -138,6 +140,7 @@ export const useInspectionStore = create<InspectionStore>()((set) => ({
   closeTaskDrawer: () => set({ taskDrawerOpen: false }),
 
   executingTaskId: null,
+  executingPlanType: '',
   executingRouteDetail: null,
   executingTemplateItems: [],
   executingTemplateName: '',
@@ -146,8 +149,9 @@ export const useInspectionStore = create<InspectionStore>()((set) => ({
   executingEquipmentNo: '',
   executingEquipmentIds: null,
   executingEquipments: [],
-  setExecutingTask: (taskId, routeDetail, templateItems, templateName, equipmentId, equipmentName, equipmentNo, equipmentIds, equipments) => set({
+  setExecutingTask: (taskId, planType, routeDetail, templateItems, templateName, equipmentId, equipmentName, equipmentNo, equipmentIds, equipments) => set({
     executingTaskId: taskId,
+    executingPlanType: planType,
     executingRouteDetail: routeDetail,
     executingTemplateItems: templateItems,
     executingTemplateName: templateName,
@@ -159,6 +163,7 @@ export const useInspectionStore = create<InspectionStore>()((set) => ({
   }),
   clearExecuting: () => set({
     executingTaskId: null,
+    executingPlanType: '',
     executingRouteDetail: null,
     executingTemplateItems: [],
     executingTemplateName: '',

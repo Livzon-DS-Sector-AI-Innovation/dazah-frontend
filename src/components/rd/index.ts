@@ -1,1 +1,1 @@
-// rd module components
+export { BayesianOptimizationPage } from './BayesianOptimizationPage'

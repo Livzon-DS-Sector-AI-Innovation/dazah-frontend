@@ -1,14 +1,13 @@
 import { EquipmentPage } from '@/components/equipment'
 import { fetchCategoryTree, fetchLocationTree, fetchEquipments, fetchEquipmentStatistics } from '@/lib/api/equipment'
-import { EquipmentCategory, Location, Equipment, EquipmentStatistics } from '@/types/equipment'
+import { EquipmentCategory, Location, Equipment, EquipmentStatistics, EquipmentStatus } from '@/types/equipment'
 
 // 默认空数据
 const defaultStatistics: EquipmentStatistics = {
   total: 0,
-  running: 0,
-  idle: 0,
-  maintenance: 0,
-  fault: 0,
+  by_status: {} as Record<EquipmentStatus, number>,
+  by_category: {},
+  by_location: {},
 }
 
 export default async function EquipmentPageWrapper() {

@@ -28,6 +28,8 @@ export interface BayesianProject {
   status: 'draft' | 'running' | 'completed' | 'failed'
   components?: BayesianComponent[]
   objectives?: BayesianObjective[]
+  experiments?: BayesianExperiment[]
+  reaction_scopes?: ReactionScope[]
   created_at: string
   updated_at: string
 }

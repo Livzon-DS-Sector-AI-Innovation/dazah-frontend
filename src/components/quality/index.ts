@@ -1,1 +1,1 @@
-// quality module components
+export { default as LabelVerificationClient } from './LabelVerificationClient'

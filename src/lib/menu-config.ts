@@ -93,6 +93,7 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "deviation", label: "偏差管理", path: "/quality/deviation" },
       { key: "capa", label: "CAPA管理", path: "/quality/capa" },
       { key: "change", label: "变更控制", path: "/quality/change" },
+      { key: "label-verification", label: "标签复核", path: "/quality/label-verification" },
     ],
   },
   {

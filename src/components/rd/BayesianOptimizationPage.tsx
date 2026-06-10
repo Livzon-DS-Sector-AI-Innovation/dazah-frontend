@@ -35,11 +35,16 @@ import {
   fetchProject, 
   createProject, 
   deleteProject,
+  updateProject,
   addComponent,
+  deleteComponent,
   addObjective,
+  deleteObjective,
   suggestExperiments,
   generateReactionScope,
   fetchExperiments,
+  recordExperimentResult,
+  fetchReactionScopes,
   importCSV,
   exportCSV
 } from '@/lib/api/rd'
@@ -59,9 +64,14 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
   const [createModalVisible, setCreateModalVisible] = useState(false)
   const [componentModalVisible, setComponentModalVisible] = useState(false)
   const [objectiveModalVisible, setObjectiveModalVisible] = useState(false)
+  const [editProjectModalVisible, setEditProjectModalVisible] = useState(false)
+  const [recordResultModalVisible, setRecordResultModalVisible] = useState(false)
+  const [currentExperiment, setCurrentExperiment] = useState<any>(null)
   const [form] = Form.useForm()
   const [componentForm] = Form.useForm()
   const [objectiveForm] = Form.useForm()
+  const [editProjectForm] = Form.useForm()
+  const [recordResultForm] = Form.useForm()
 
   // 加载项目列表
   const loadProjects = async () => {
@@ -122,12 +132,12 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     }
   }
 
-  // 添加组件
+  // 添加参数
   const handleAddComponent = async (values: any) => {
     if (!currentProject) return
     try {
       await addComponent(currentProject.id, values)
-      message.success('组件添加成功')
+      message.success('参数添加成功')
       setComponentModalVisible(false)
       componentForm.resetFields()
       loadProjectDetail(currentProject.id)
@@ -177,6 +187,77 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       message.error(error.message || '生成失败')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 编辑项目
+  const handleEditProject = () => {
+    if (!currentProject) return
+    editProjectForm.setFieldsValue({
+      name: currentProject.name,
+      description: currentProject.description,
+      status: currentProject.status,
+    })
+    setEditProjectModalVisible(true)
+  }
+
+  const handleUpdateProject = async (values: any) => {
+    if (!currentProject) return
+    try {
+      await updateProject(currentProject.id, values)
+      message.success('项目更新成功')
+      setEditProjectModalVisible(false)
+      editProjectForm.resetFields()
+      loadProjectDetail(currentProject.id)
+      loadProjects()
+    } catch (error: any) {
+      message.error(error.message || '更新失败')
+    }
+  }
+
+  // 删除参数
+  const handleDeleteComponent = async (componentId: string) => {
+    if (!currentProject) return
+    try {
+      await deleteComponent(componentId)
+      message.success('参数删除成功')
+      loadProjectDetail(currentProject.id)
+    } catch (error: any) {
+      message.error(error.message || '删除失败')
+    }
+  }
+
+  // 删除目标
+  const handleDeleteObjective = async (objectiveId: string) => {
+    if (!currentProject) return
+    try {
+      await deleteObjective(objectiveId)
+      message.success('目标删除成功')
+      loadProjectDetail(currentProject.id)
+    } catch (error: any) {
+      message.error(error.message || '删除失败')
+    }
+  }
+
+  // 记录实验结果
+  const handleRecordResult = (experiment: any) => {
+    setCurrentExperiment(experiment)
+    recordResultForm.resetFields()
+    setRecordResultModalVisible(true)
+  }
+
+  const handleSubmitResult = async (values: any) => {
+    if (!currentExperiment) return
+    try {
+      await recordExperimentResult(currentExperiment.id, values)
+      message.success('实验结果记录成功')
+      setRecordResultModalVisible(false)
+      recordResultForm.resetFields()
+      if (currentProject) {
+        loadProjectDetail(currentProject.id)
+      }
+    } catch (error: any) {
+      message.error(error.message || '记录失败')
     }
   }
 
@@ -477,7 +558,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
               items={[
                 {
                   key: 'components',
-                  label: '反应组件',
+                  label: '反应参数',
                   children: (
                     <>
                       <Button 
@@ -486,14 +567,14 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
                         onClick={() => setComponentModalVisible(true)}
                         style={{ marginBottom: 16 }}
                       >
-                        添加组件
+                        添加参数
                       </Button>
                       <Table
                         columns={componentColumns}
                         dataSource={currentProject.components || []}
                         rowKey="id"
                         pagination={false}
-                        locale={{ emptyText: <Empty description="暂无组件" /> }}
+                        locale={{ emptyText: <Empty description="暂无参数" /> }}
                       />
                     </>
                   ),
@@ -534,6 +615,28 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
                     />
                   ),
                 },
+                {
+                  key: 'reaction_scopes',
+                  label: '反应范围',
+                  children: (
+                    <Table
+                      columns={[
+                        { title: '范围名称', dataIndex: 'name', key: 'name' },
+                        { title: '总组合数', dataIndex: 'total_combinations', key: 'total_combinations' },
+                        { 
+                          title: '创建时间', 
+                          dataIndex: 'created_at', 
+                          key: 'created_at',
+                          render: (v) => new Date(v).toLocaleString('zh-CN')
+                        },
+                      ]}
+                      dataSource={currentProject.reaction_scopes || []}
+                      rowKey="id"
+                      pagination={false}
+                      locale={{ emptyText: <Empty description="暂无反应范围" /> }}
+                    />
+                  ),
+                },
               ]}
             />
           </Card>
@@ -562,13 +665,13 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
           <Form.Item name="description" label="项目描述">
             <TextArea rows={3} placeholder="描述项目目标和范围" />
           </Form.Item>
-          <Divider>反应组件（可选）</Divider>
+          <Divider>反应参数（可选）</Divider>
           <Form.List name="components">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
                   <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                    <Form.Item {...restField} name={[name, 'name']} rules={[{ required: true, message: '组件名称' }]}>
+                    <Form.Item {...restField} name={[name, 'name']} rules={[{ required: true, message: '参数名称' }]}>
                       <Input placeholder="名称" />
                     </Form.Item>
                     <Form.Item {...restField} name={[name, 'lower_bound']} rules={[{ required: true, message: '下限' }]}>
@@ -590,7 +693,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
                 ))}
                 <Form.Item>
                   <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                    添加组件
+                    添加参数
                   </Button>
                 </Form.Item>
               </>
@@ -631,9 +734,9 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
         </Form>
       </Modal>
 
-      {/* 添加组件弹窗 */}
+      {/* 添加参数弹窗 */}
       <Modal
-        title="添加反应组件"
+        title="添加反应参数"
         open={componentModalVisible}
         onCancel={() => {
           setComponentModalVisible(false)
@@ -644,8 +747,8 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
         <Form form={componentForm} layout="vertical" onFinish={handleAddComponent}>
           <Form.Item
             name="name"
-            label="组件名称"
-            rules={[{ required: true, message: '请输入组件名称' }]}
+            label="参数名称"
+            rules={[{ required: true, message: '请输入参数名称' }]}
           >
             <Input placeholder="例如：温度、压力、催化剂用量" />
           </Form.Item>
@@ -710,6 +813,70 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
             <InputNumber style={{ width: '100%' }} min={0} step={0.1} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 编辑项目弹窗 */}
+      <Modal
+        title="编辑项目"
+        open={editProjectModalVisible}
+        onCancel={() => {
+          setEditProjectModalVisible(false)
+          editProjectForm.resetFields()
+        }}
+        onOk={() => editProjectForm.submit()}
+      >
+        <Form form={editProjectForm} layout="vertical" onFinish={handleUpdateProject}>
+          <Form.Item
+            name="name"
+            label="项目名称"
+            rules={[{ required: true, message: '请输入项目名称' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="项目描述">
+            <TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="status" label="项目状态">
+            <Select>
+              <Option value="draft">草稿</Option>
+              <Option value="running">进行中</Option>
+              <Option value="completed">已完成</Option>
+              <Option value="failed">失败</Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 记录实验结果弹窗 */}
+      <Modal
+        title="记录实验结果"
+        open={recordResultModalVisible}
+        onCancel={() => {
+          setRecordResultModalVisible(false)
+          recordResultForm.resetFields()
+        }}
+        onOk={() => recordResultForm.submit()}
+      >
+        {currentExperiment && (
+          <Form form={recordResultForm} layout="vertical" onFinish={handleSubmitResult}>
+            <Descriptions bordered size="small" column={1} style={{ marginBottom: 16 }}>
+              <Descriptions.Item label="批次号">{currentExperiment.batch_number}</Descriptions.Item>
+              <Descriptions.Item label="参数">
+                {Object.entries(currentExperiment.parameters).map(([k, v]) => `${k}: ${v}`).join(', ')}
+              </Descriptions.Item>
+            </Descriptions>
+            {currentProject?.objectives?.map((obj) => (
+              <Form.Item
+                key={obj.id}
+                name={obj.name}
+                label={`${obj.name} (${obj.direction === 'maximize' ? '最大化' : '最小化'})`}
+                rules={[{ required: true, message: `请输入${obj.name}` }]}
+              >
+                <InputNumber style={{ width: '100%' }} step={0.01} />
+              </Form.Item>
+            ))}
+          </Form>
+        )}
       </Modal>
     </div>
   )

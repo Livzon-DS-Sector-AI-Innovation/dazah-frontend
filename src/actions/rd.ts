@@ -41,6 +41,14 @@ export async function deleteProject(projectId: string) {
   })
 }
 
+export async function updateProject(projectId: string, data: { name?: string; description?: string; status?: string }) {
+  return apiCall(`/research/projects/${projectId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+
 // 组件管理
 export async function addComponent(projectId: string, data: Omit<BayesianComponent, 'id' | 'project_id' | 'created_at'>) {
   return apiCall(`/research/projects/${projectId}/components`, {
@@ -48,6 +56,13 @@ export async function addComponent(projectId: string, data: Omit<BayesianCompone
     body: JSON.stringify(data),
   })
 }
+
+export async function deleteComponent(componentId: string) {
+  return apiCall(`/research/components/${componentId}`, {
+    method: 'DELETE',
+  })
+}
+
 
 // 目标管理
 export async function addObjective(projectId: string, data: Omit<BayesianObjective, 'id' | 'project_id' | 'created_at'>) {
@@ -57,6 +72,13 @@ export async function addObjective(projectId: string, data: Omit<BayesianObjecti
   })
 }
 
+export async function deleteObjective(objectiveId: string) {
+  return apiCall(`/research/objectives/${objectiveId}`, {
+    method: 'DELETE',
+  })
+}
+
+
 // 实验推荐
 export async function suggestExperiments(data: SuggestExperimentsRequest) {
   return apiCall('/research/experiments/suggest', {
@@ -64,6 +86,14 @@ export async function suggestExperiments(data: SuggestExperimentsRequest) {
     body: JSON.stringify(data),
   })
 }
+
+export async function recordExperimentResult(experimentId: string, data: Record<string, number>) {
+  return apiCall(`/research/experiments/${experimentId}/result`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
 
 // 反应范围生成
 export async function generateReactionScope(projectId: string, name: string) {

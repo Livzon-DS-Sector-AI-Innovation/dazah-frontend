@@ -51,6 +51,14 @@ export async function deleteProject(projectId: string): Promise<void> {
   })
 }
 
+export async function updateProject(projectId: string, data: { name?: string; description?: string; status?: string }): Promise<BayesianProject> {
+  return fetchAPI(`/research/projects/${projectId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+
 // 组件管理
 export async function fetchComponents(projectId: string): Promise<BayesianComponent[]> {
   return fetchAPI(`/research/projects/${projectId}/components`)
@@ -62,6 +70,13 @@ export async function addComponent(projectId: string, data: Omit<BayesianCompone
     body: JSON.stringify(data),
   })
 }
+
+export async function deleteComponent(componentId: string): Promise<void> {
+  return fetchAPI(`/research/components/${componentId}`, {
+    method: 'DELETE',
+  })
+}
+
 
 // 目标管理
 export async function fetchObjectives(projectId: string): Promise<BayesianObjective[]> {
@@ -75,6 +90,13 @@ export async function addObjective(projectId: string, data: Omit<BayesianObjecti
   })
 }
 
+export async function deleteObjective(objectiveId: string): Promise<void> {
+  return fetchAPI(`/research/objectives/${objectiveId}`, {
+    method: 'DELETE',
+  })
+}
+
+
 // 实验管理
 export async function fetchExperiments(projectId: string): Promise<BayesianExperiment[]> {
   return fetchAPI(`/research/projects/${projectId}/experiments`)
@@ -86,6 +108,14 @@ export async function suggestExperiments(data: SuggestExperimentsRequest): Promi
     body: JSON.stringify(data),
   })
 }
+
+export async function recordExperimentResult(experimentId: string, data: Record<string, number>): Promise<BayesianExperiment> {
+  return fetchAPI(`/research/experiments/${experimentId}/result`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
 
 // 反应范围
 export async function fetchReactionScopes(projectId: string): Promise<ReactionScope[]> {

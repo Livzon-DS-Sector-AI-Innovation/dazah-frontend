@@ -9,10 +9,10 @@ import {
   BayesianObjective
 } from '@/types/rd'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const res = await fetch(`${API_BASE}/api/v1${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export async function importCSV(projectId: string, file: File): Promise<{ succes
   const formData = new FormData()
   formData.append('file', file)
   
-  const res = await fetch(`${API_BASE}/research/projects/${projectId}/import-csv`, {
+  const res = await fetch(`${API_BASE}/api/v1/research/projects/${projectId}/import-csv`, {
     method: 'POST',
     body: formData,
   })
@@ -149,7 +149,7 @@ export async function importCSV(projectId: string, file: File): Promise<{ succes
 }
 
 export async function exportCSV(projectId: string): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/research/projects/${projectId}/export-csv`)
+  const res = await fetch(`${API_BASE}/api/v1/research/projects/${projectId}/export-csv`)
   
   if (!res.ok) {
     throw new Error('导出失败')

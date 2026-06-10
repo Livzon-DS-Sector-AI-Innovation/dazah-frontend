@@ -58,7 +58,7 @@ import type {
   ApiResponse,
 } from '@/types/safety'
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000/api/v1'
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000'
 
 // ============ Helper Functions ============
 
@@ -123,16 +123,16 @@ export async function getChecks(params: SafetyCheckQueryParams = {}) {
   if (params.department) searchParams.set('department', params.department)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/checks${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/checks${queryString ? `?${queryString}` : ''}`
   return fetchApi<SafetyCheck[]>(endpoint)
 }
 
 export async function getCheck(id: string) {
-  return fetchApi<SafetyCheck>(`/safety/checks/${id}`)
+  return fetchApi<SafetyCheck>(`/api/v1/safety/checks/${id}`)
 }
 
 export async function createCheck(data: SafetyCheckFormData) {
-  const response = await fetchApi<SafetyCheck>('/safety/checks', {
+  const response = await fetchApi<SafetyCheck>('/api/v1/safety/checks', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -141,7 +141,7 @@ export async function createCheck(data: SafetyCheckFormData) {
 }
 
 export async function updateCheck(id: string, data: Partial<SafetyCheckFormData>) {
-  const response = await fetchApi<SafetyCheck>(`/safety/checks/${id}`, {
+  const response = await fetchApi<SafetyCheck>(`/api/v1/safety/checks/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -150,7 +150,7 @@ export async function updateCheck(id: string, data: Partial<SafetyCheckFormData>
 }
 
 export async function submitCheck(id: string) {
-  const response = await fetchApi<SafetyCheck>(`/safety/checks/${id}/submit`, {
+  const response = await fetchApi<SafetyCheck>(`/api/v1/safety/checks/${id}/submit`, {
     method: 'POST',
   })
   revalidatePath('/safety/check')
@@ -159,7 +159,7 @@ export async function submitCheck(id: string) {
 
 export async function reviewCheck(id: string, result: string) {
   const response = await fetchApi<SafetyCheck>(
-    `/safety/checks/${id}/review?result=${result}`,
+    `/api/v1/safety/checks/${id}/review?result=${result}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/check')
@@ -167,7 +167,7 @@ export async function reviewCheck(id: string, result: string) {
 }
 
 export async function deleteCheck(id: string) {
-  const response = await fetchApi<null>(`/safety/checks/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/checks/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/check')
@@ -188,16 +188,16 @@ export async function getHazards(params: HazardReportQueryParams = {}) {
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/hazards${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/hazards${queryString ? `?${queryString}` : ''}`
   return fetchApi<HazardReport[]>(endpoint)
 }
 
 export async function getHazard(id: string) {
-  return fetchApi<HazardReport>(`/safety/hazards/${id}`)
+  return fetchApi<HazardReport>(`/api/v1/safety/hazards/${id}`)
 }
 
 export async function createHazard(data: HazardReportFormData) {
-  const response = await fetchApi<HazardReport>('/safety/hazards', {
+  const response = await fetchApi<HazardReport>('/api/v1/safety/hazards', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -206,7 +206,7 @@ export async function createHazard(data: HazardReportFormData) {
 }
 
 export async function updateHazard(id: string, data: Partial<HazardReportFormData>) {
-  const response = await fetchApi<HazardReport>(`/safety/hazards/${id}`, {
+  const response = await fetchApi<HazardReport>(`/api/v1/safety/hazards/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -216,7 +216,7 @@ export async function updateHazard(id: string, data: Partial<HazardReportFormDat
 
 export async function startRectification(id: string) {
   const response = await fetchApi<HazardReport>(
-    `/safety/hazards/${id}/rectification/start`,
+    `/api/v1/safety/hazards/${id}/rectification/start`,
     { method: 'POST' }
   )
   revalidatePath('/safety/hazard')
@@ -225,7 +225,7 @@ export async function startRectification(id: string) {
 
 export async function completeRectification(id: string, data?: CompleteRectificationRequest) {
   const response = await fetchApi<HazardReport>(
-    `/safety/hazards/${id}/rectification/complete`,
+    `/api/v1/safety/hazards/${id}/rectification/complete`,
     { method: 'POST', body: JSON.stringify(data || {}) }
   )
   revalidatePath('/safety/hazard')
@@ -234,7 +234,7 @@ export async function completeRectification(id: string, data?: CompleteRectifica
 
 export async function assignRectification(id: string, data: AssignRectificationRequest) {
   const response = await fetchApi<HazardReport>(
-    `/safety/hazards/${id}/assign`,
+    `/api/v1/safety/hazards/${id}/assign`,
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard')
@@ -243,7 +243,7 @@ export async function assignRectification(id: string, data: AssignRectificationR
 
 export async function extendDeadline(id: string, data: ExtendDeadlineRequest) {
   const response = await fetchApi<HazardReport>(
-    `/safety/hazards/${id}/extend`,
+    `/api/v1/safety/hazards/${id}/extend`,
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard')
@@ -252,7 +252,7 @@ export async function extendDeadline(id: string, data: ExtendDeadlineRequest) {
 
 export async function confirmCheck(id: string, data: ConfirmCheckRequest) {
   const response = await fetchApi<SafetyCheck>(
-    `/safety/checks/${id}/confirm`,
+    `/api/v1/safety/checks/${id}/confirm`,
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety')
@@ -261,7 +261,7 @@ export async function confirmCheck(id: string, data: ConfirmCheckRequest) {
 
 export async function verifyRectification(id: string, passed: boolean) {
   const response = await fetchApi<HazardReport>(
-    `/safety/hazards/${id}/rectification/verify?passed=${passed}`,
+    `/api/v1/safety/hazards/${id}/rectification/verify?passed=${passed}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/hazard')
@@ -269,7 +269,7 @@ export async function verifyRectification(id: string, passed: boolean) {
 }
 
 export async function deleteHazard(id: string) {
-  const response = await fetchApi<null>(`/safety/hazards/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/hazards/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/hazard')
@@ -291,16 +291,16 @@ export async function getAccidents(params: AccidentQueryParams = {}) {
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/accidents${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/accidents${queryString ? `?${queryString}` : ''}`
   return fetchApi<Accident[]>(endpoint)
 }
 
 export async function getAccident(id: string) {
-  return fetchApi<Accident>(`/safety/accidents/${id}`)
+  return fetchApi<Accident>(`/api/v1/safety/accidents/${id}`)
 }
 
 export async function createAccident(data: AccidentFormData) {
-  const response = await fetchApi<Accident>('/safety/accidents', {
+  const response = await fetchApi<Accident>('/api/v1/safety/accidents', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -309,7 +309,7 @@ export async function createAccident(data: AccidentFormData) {
 }
 
 export async function updateAccident(id: string, data: Partial<AccidentFormData>) {
-  const response = await fetchApi<Accident>(`/safety/accidents/${id}`, {
+  const response = await fetchApi<Accident>(`/api/v1/safety/accidents/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -319,7 +319,7 @@ export async function updateAccident(id: string, data: Partial<AccidentFormData>
 
 export async function investigateAccident(id: string) {
   const response = await fetchApi<Accident>(
-    `/safety/accidents/${id}/investigate`,
+    `/api/v1/safety/accidents/${id}/investigate`,
     { method: 'POST' }
   )
   revalidatePath('/safety/accident')
@@ -341,7 +341,7 @@ export async function resolveAccident(
   if (investigationMethod) params.set('investigation_method', investigationMethod)
 
   const response = await fetchApi<Accident>(
-    `/safety/accidents/${id}/resolve?${params.toString()}`,
+    `/api/v1/safety/accidents/${id}/resolve?${params.toString()}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/accident')
@@ -355,7 +355,7 @@ export async function startCapa(
 ) {
   const params = new URLSearchParams({ corrective_action_deadline: deadline, corrective_action_responsible: responsible })
   const response = await fetchApi<Accident>(
-    `/safety/accidents/${id}/start-capa?${params.toString()}`,
+    `/api/v1/safety/accidents/${id}/start-capa?${params.toString()}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/accident')
@@ -364,7 +364,7 @@ export async function startCapa(
 
 export async function verifyCapa(id: string) {
   const response = await fetchApi<Accident>(
-    `/safety/accidents/${id}/verify-capa`,
+    `/api/v1/safety/accidents/${id}/verify-capa`,
     { method: 'POST' }
   )
   revalidatePath('/safety/accident')
@@ -373,7 +373,7 @@ export async function verifyCapa(id: string) {
 
 export async function closeAccident(id: string) {
   const response = await fetchApi<Accident>(
-    `/safety/accidents/${id}/close`,
+    `/api/v1/safety/accidents/${id}/close`,
     { method: 'POST' }
   )
   revalidatePath('/safety/accident')
@@ -381,7 +381,7 @@ export async function closeAccident(id: string) {
 }
 
 export async function deleteAccident(id: string) {
-  const response = await fetchApi<null>(`/safety/accidents/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/accidents/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/accident')
@@ -400,16 +400,16 @@ export async function getContractors(params: ContractorQueryParams = {}) {
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/contractors${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/contractors${queryString ? `?${queryString}` : ''}`
   return fetchApi<Contractor[]>(endpoint)
 }
 
 export async function getContractor(id: string) {
-  return fetchApi<Contractor>(`/safety/contractors/${id}`)
+  return fetchApi<Contractor>(`/api/v1/safety/contractors/${id}`)
 }
 
 export async function createContractor(data: ContractorFormData) {
-  const response = await fetchApi<Contractor>('/safety/contractors', {
+  const response = await fetchApi<Contractor>('/api/v1/safety/contractors', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -418,7 +418,7 @@ export async function createContractor(data: ContractorFormData) {
 }
 
 export async function updateContractor(id: string, data: Partial<ContractorFormData>) {
-  const response = await fetchApi<Contractor>(`/safety/contractors/${id}`, {
+  const response = await fetchApi<Contractor>(`/api/v1/safety/contractors/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -427,19 +427,19 @@ export async function updateContractor(id: string, data: Partial<ContractorFormD
 }
 
 export async function deleteContractor(id: string) {
-  const response = await fetchApi<null>(`/safety/contractors/${id}`, { method: 'DELETE' })
+  const response = await fetchApi<null>(`/api/v1/safety/contractors/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/contractor')
   return response
 }
 
 export async function blacklistContractor(id: string) {
-  const response = await fetchApi<Contractor>(`/safety/contractors/${id}/blacklist`, { method: 'POST' })
+  const response = await fetchApi<Contractor>(`/api/v1/safety/contractors/${id}/blacklist`, { method: 'POST' })
   revalidatePath('/safety/contractor')
   return response
 }
 
 export async function activateContractor(id: string) {
-  const response = await fetchApi<Contractor>(`/safety/contractors/${id}/activate`, { method: 'POST' })
+  const response = await fetchApi<Contractor>(`/api/v1/safety/contractors/${id}/activate`, { method: 'POST' })
   revalidatePath('/safety/contractor')
   return response
 }
@@ -447,7 +447,7 @@ export async function activateContractor(id: string) {
 export async function updateContractorTraining(id: string, trainingStatus: string) {
   const params = new URLSearchParams({ training_status: trainingStatus })
   const response = await fetchApi<Contractor>(
-    `/safety/contractors/${id}/update-training?${params.toString()}`,
+    `/api/v1/safety/contractors/${id}/update-training?${params.toString()}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/contractor')
@@ -455,12 +455,12 @@ export async function updateContractorTraining(id: string, trainingStatus: strin
 }
 
 export async function getWorkRecords(contractorId: string) {
-  return fetchApi<ContractorWorkRecord[]>(`/safety/contractors/${contractorId}/work-records`)
+  return fetchApi<ContractorWorkRecord[]>(`/api/v1/safety/contractors/${contractorId}/work-records`)
 }
 
 export async function createWorkRecord(contractorId: string, data: ContractorWorkRecordFormData) {
   const response = await fetchApi<ContractorWorkRecord>(
-    `/safety/contractors/${contractorId}/work-records`,
+    `/api/v1/safety/contractors/${contractorId}/work-records`,
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/contractor')
@@ -471,7 +471,7 @@ export async function updateWorkRecord(
   contractorId: string, recordId: string, data: Partial<ContractorWorkRecordFormData>
 ) {
   const response = await fetchApi<ContractorWorkRecord>(
-    `/safety/contractors/${contractorId}/work-records/${recordId}`,
+    `/api/v1/safety/contractors/${contractorId}/work-records/${recordId}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/contractor')
@@ -480,7 +480,7 @@ export async function updateWorkRecord(
 
 export async function deleteWorkRecord(contractorId: string, recordId: string) {
   const response = await fetchApi<null>(
-    `/safety/contractors/${contractorId}/work-records/${recordId}`,
+    `/api/v1/safety/contractors/${contractorId}/work-records/${recordId}`,
     { method: 'DELETE' }
   )
   revalidatePath('/safety/contractor')
@@ -491,7 +491,7 @@ export async function evaluateWorkRecord(
   contractorId: string, recordId: string, score: number, comments?: string, evaluator?: string
 ) {
   const response = await fetchApi<ContractorWorkRecord>(
-    `/safety/contractors/${contractorId}/work-records/${recordId}/evaluate`,
+    `/api/v1/safety/contractors/${contractorId}/work-records/${recordId}/evaluate`,
     { method: 'POST', body: JSON.stringify({ score, comments, evaluator }) }
   )
   revalidatePath('/safety/contractor')
@@ -509,16 +509,16 @@ export async function getTrainings(params: SafetyTrainingQueryParams = {}) {
   if (params.department) searchParams.set('department', params.department)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/trainings${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/trainings${queryString ? `?${queryString}` : ''}`
   return fetchApi<SafetyTraining[]>(endpoint)
 }
 
 export async function getTraining(id: string) {
-  return fetchApi<SafetyTraining>(`/safety/trainings/${id}`)
+  return fetchApi<SafetyTraining>(`/api/v1/safety/trainings/${id}`)
 }
 
 export async function createTraining(data: SafetyTrainingFormData) {
-  const response = await fetchApi<SafetyTraining>('/safety/trainings', {
+  const response = await fetchApi<SafetyTraining>('/api/v1/safety/trainings', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -527,7 +527,7 @@ export async function createTraining(data: SafetyTrainingFormData) {
 }
 
 export async function updateTraining(id: string, data: Partial<SafetyTrainingFormData>) {
-  const response = await fetchApi<SafetyTraining>(`/safety/trainings/${id}`, {
+  const response = await fetchApi<SafetyTraining>(`/api/v1/safety/trainings/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -537,7 +537,7 @@ export async function updateTraining(id: string, data: Partial<SafetyTrainingFor
 
 export async function startTraining(id: string) {
   const response = await fetchApi<SafetyTraining>(
-    `/safety/trainings/${id}/start`,
+    `/api/v1/safety/trainings/${id}/start`,
     { method: 'POST' }
   )
   revalidatePath('/safety/training')
@@ -546,7 +546,7 @@ export async function startTraining(id: string) {
 
 export async function completeTraining(id: string) {
   const response = await fetchApi<SafetyTraining>(
-    `/safety/trainings/${id}/complete`,
+    `/api/v1/safety/trainings/${id}/complete`,
     { method: 'POST' }
   )
   revalidatePath('/safety/training')
@@ -554,7 +554,7 @@ export async function completeTraining(id: string) {
 }
 
 export async function deleteTraining(id: string) {
-  const response = await fetchApi<null>(`/safety/trainings/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/trainings/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/training')
@@ -564,12 +564,12 @@ export async function deleteTraining(id: string) {
 // ============ TrainingRecord Actions ============
 
 export async function getTrainingRecords(trainingId: string) {
-  return fetchApi<TrainingRecord[]>(`/safety/trainings/${trainingId}/records`)
+  return fetchApi<TrainingRecord[]>(`/api/v1/safety/trainings/${trainingId}/records`)
 }
 
 export async function createTrainingRecord(trainingId: string, data: TrainingRecordFormData) {
   const response = await fetchApi<TrainingRecord>(
-    `/safety/trainings/${trainingId}/records`,
+    `/api/v1/safety/trainings/${trainingId}/records`,
     {
       method: 'POST',
       body: JSON.stringify({ ...data, training_id: trainingId }),
@@ -581,7 +581,7 @@ export async function createTrainingRecord(trainingId: string, data: TrainingRec
 
 export async function updateTrainingRecord(recordId: string, data: Partial<TrainingRecordFormData>) {
   const response = await fetchApi<TrainingRecord>(
-    `/safety/training-records/${recordId}`,
+    `/api/v1/safety/training-records/${recordId}`,
     {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -593,7 +593,7 @@ export async function updateTrainingRecord(recordId: string, data: Partial<Train
 
 export async function deleteTrainingRecord(recordId: string) {
   const response = await fetchApi<null>(
-    `/safety/training-records/${recordId}`,
+    `/api/v1/safety/training-records/${recordId}`,
     { method: 'DELETE' }
   )
   revalidatePath('/safety/training')
@@ -611,12 +611,12 @@ export async function getTrainingCertificates(
   if (params.certificate_status) searchParams.set('certificate_status', params.certificate_status)
   if (params.keyword) searchParams.set('keyword', params.keyword)
   const qs = searchParams.toString()
-  const endpoint = `/safety/training-certificates${qs ? `?${qs}` : ''}`
+  const endpoint = `/api/v1/safety/training-certificates${qs ? `?${qs}` : ''}`
   return fetchApi<TrainingRecord[]>(endpoint)
 }
 
 export async function getExpiringCertificates() {
-  return fetchApi<TrainingRecord[]>('/safety/training-certificates/expiring')
+  return fetchApi<TrainingRecord[]>('/api/v1/safety/training-certificates/expiring')
 }
 
 // ============ HazardIdentification Actions ============
@@ -633,13 +633,13 @@ export async function getHazardIdentifications(
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/hazard-identifications${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/hazard-identifications${queryString ? `?${queryString}` : ''}`
   return fetchApi<import('@/types/safety').HazardIdentification[]>(endpoint)
 }
 
 export async function getHazardIdentification(id: string) {
   return fetchApi<import('@/types/safety').HazardIdentification>(
-    `/safety/hazard-identifications/${id}`
+    `/api/v1/safety/hazard-identifications/${id}`
   )
 }
 
@@ -647,7 +647,7 @@ export async function createHazardIdentification(
   data: import('@/types/safety').HazardIdentificationFormData
 ) {
   const response = await fetchApi<import('@/types/safety').HazardIdentification>(
-    '/safety/hazard-identifications',
+    '/api/v1/safety/hazard-identifications',
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard-identification')
@@ -659,7 +659,7 @@ export async function updateHazardIdentification(
   data: Partial<import('@/types/safety').HazardIdentification>
 ) {
   const response = await fetchApi<import('@/types/safety').HazardIdentification>(
-    `/safety/hazard-identifications/${id}`,
+    `/api/v1/safety/hazard-identifications/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard-identification')
@@ -668,7 +668,7 @@ export async function updateHazardIdentification(
 
 export async function submitHazardIdentification(id: string) {
   const response = await fetchApi<import('@/types/safety').HazardIdentification>(
-    `/safety/hazard-identifications/${id}/submit`,
+    `/api/v1/safety/hazard-identifications/${id}/submit`,
     { method: 'POST' }
   )
   revalidatePath('/safety/hazard-identification')
@@ -685,7 +685,7 @@ export async function runHazardScript(
     body.ai_output = aiOutput
   }
   const response = await fetchApi<import('@/types/safety').HazardIdentification>(
-    `/safety/hazard-identifications/${id}/run-script`,
+    `/api/v1/safety/hazard-identifications/${id}/run-script`,
     { method: 'POST', body: JSON.stringify(body) }
   )
   revalidatePath('/safety/hazard-identification')
@@ -698,7 +698,7 @@ export async function reviewHazardScript(
   action: 'approved' | 'rejected'
 ) {
   const response = await fetchApi<import('@/types/safety').HazardIdentification>(
-    `/safety/hazard-identifications/${id}/review`,
+    `/api/v1/safety/hazard-identifications/${id}/review`,
     {
       method: 'POST',
       body: JSON.stringify({ script_number: scriptNumber, action }),
@@ -712,7 +712,7 @@ export async function uploadHazardAttachment(id: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/hazard-identifications/${id}/upload`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000'}/safety/hazard-identifications/${id}/upload`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/hazard-identification')
@@ -721,7 +721,7 @@ export async function uploadHazardAttachment(id: string, file: File) {
 
 export async function deleteHazardIdentification(id: string) {
   const response = await fetchApi<null>(
-    `/safety/hazard-identifications/${id}`,
+    `/api/v1/safety/hazard-identifications/${id}`,
     { method: 'DELETE' }
   )
   revalidatePath('/safety/hazard-identification')
@@ -729,7 +729,7 @@ export async function deleteHazardIdentification(id: string) {
 }
 
 export async function getSafetyEnums() {
-  return fetchApi<Record<string, Array<{ value: string; label: string }>>>('/safety/enums')
+  return fetchApi<Record<string, Array<{ value: string; label: string }>>>('/api/v1/safety/enums')
 }
 
 // ============ OperationRegulation Actions ============
@@ -742,16 +742,16 @@ export async function getRegulations(params: OperationRegulationQueryParams = {}
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/regulations${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/regulations${queryString ? `?${queryString}` : ''}`
   return fetchApi<OperationRegulation[]>(endpoint)
 }
 
 export async function getRegulation(id: string) {
-  return fetchApi<OperationRegulation>(`/safety/regulations/${id}`)
+  return fetchApi<OperationRegulation>(`/api/v1/safety/regulations/${id}`)
 }
 
 export async function createRegulation(data: OperationRegulationFormData) {
-  const response = await fetchApi<OperationRegulation>('/safety/regulations', {
+  const response = await fetchApi<OperationRegulation>('/api/v1/safety/regulations', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -760,7 +760,7 @@ export async function createRegulation(data: OperationRegulationFormData) {
 }
 
 export async function updateRegulation(id: string, data: Partial<OperationRegulationFormData>) {
-  const response = await fetchApi<OperationRegulation>(`/safety/regulations/${id}`, {
+  const response = await fetchApi<OperationRegulation>(`/api/v1/safety/regulations/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -769,7 +769,7 @@ export async function updateRegulation(id: string, data: Partial<OperationRegula
 }
 
 export async function deleteRegulation(id: string) {
-  const response = await fetchApi<null>(`/safety/regulations/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/regulations/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/regulation')
@@ -780,7 +780,7 @@ export async function uploadRegulationDocument(id: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/regulations/${id}/upload`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000'}/safety/regulations/${id}/upload`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/regulation')
@@ -799,16 +799,16 @@ export async function getRevisions(params: RegulationRevisionQueryParams = {}) {
   if (params.revision_scope) searchParams.set('revision_scope', params.revision_scope)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/revisions${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/revisions${queryString ? `?${queryString}` : ''}`
   return fetchApi<RegulationRevision[]>(endpoint)
 }
 
 export async function getRevision(id: string) {
-  return fetchApi<RegulationRevision>(`/safety/revisions/${id}`)
+  return fetchApi<RegulationRevision>(`/api/v1/safety/revisions/${id}`)
 }
 
 export async function createRevision(data: RegulationRevisionFormData) {
-  const response = await fetchApi<RegulationRevision>('/safety/revisions', {
+  const response = await fetchApi<RegulationRevision>('/api/v1/safety/revisions', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -817,7 +817,7 @@ export async function createRevision(data: RegulationRevisionFormData) {
 }
 
 export async function updateRevision(id: string, data: Partial<RegulationRevision>) {
-  const response = await fetchApi<RegulationRevision>(`/safety/revisions/${id}`, {
+  const response = await fetchApi<RegulationRevision>(`/api/v1/safety/revisions/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -826,7 +826,7 @@ export async function updateRevision(id: string, data: Partial<RegulationRevisio
 }
 
 export async function deleteRevision(id: string) {
-  const response = await fetchApi<null>(`/safety/revisions/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/revisions/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/regulation-revision')
@@ -837,7 +837,7 @@ export async function manualRevisionComplete(revisionId: string, file: File) {
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/revisions/${revisionId}/manual-complete`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000'}/safety/revisions/${revisionId}/manual-complete`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/regulation-revision')
@@ -846,7 +846,7 @@ export async function manualRevisionComplete(revisionId: string, file: File) {
 
 export async function aiRevisionGenerate(revisionId: string) {
   const response = await fetchApi<{ generated_content: string }>(
-    `/safety/revisions/${revisionId}/ai-generate`,
+    `/api/v1/safety/revisions/${revisionId}/ai-generate`,
     { method: 'POST' }
   )
   return response
@@ -861,7 +861,7 @@ export async function aiRevisionConfirm(
   if (documentName) params.set('document_name', documentName)
 
   const response = await fetchApi<RegulationRevision>(
-    `/safety/revisions/${revisionId}/ai-confirm?${params.toString()}`,
+    `/api/v1/safety/revisions/${revisionId}/ai-confirm?${params.toString()}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/regulation-revision')
@@ -870,7 +870,7 @@ export async function aiRevisionConfirm(
 
 export async function identifyRevisionScope(revisionId: string) {
   const response = await fetchApi<RegulationRevision>(
-    `/safety/revisions/${revisionId}/identify-scope`,
+    `/api/v1/safety/revisions/${revisionId}/identify-scope`,
     { method: 'POST' }
   )
   revalidatePath('/safety/regulation-revision')
@@ -891,16 +891,16 @@ export async function getHazardRevisionRecords(
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/hazard-revision-records${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/hazard-revision-records${queryString ? `?${queryString}` : ''}`
   return fetchApi<HazardRevisionRecord[]>(endpoint)
 }
 
 export async function getHazardRevisionRecord(id: string) {
-  return fetchApi<HazardRevisionRecord>(`/safety/hazard-revision-records/${id}`)
+  return fetchApi<HazardRevisionRecord>(`/api/v1/safety/hazard-revision-records/${id}`)
 }
 
 export async function createHazardRevisionRecord(data: HazardRevisionRecordFormData) {
-  const response = await fetchApi<HazardRevisionRecord>('/safety/hazard-revision-records', {
+  const response = await fetchApi<HazardRevisionRecord>('/api/v1/safety/hazard-revision-records', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -913,7 +913,7 @@ export async function updateHazardRevisionRecord(
   data: Partial<HazardRevisionRecord>
 ) {
   const response = await fetchApi<HazardRevisionRecord>(
-    `/safety/hazard-revision-records/${id}`,
+    `/api/v1/safety/hazard-revision-records/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard-revision')
@@ -922,7 +922,7 @@ export async function updateHazardRevisionRecord(
 
 export async function approveHazardRevision(recordId: string) {
   const response = await fetchApi<HazardRevisionRecord>(
-    `/safety/hazard-revision-records/${recordId}/approve`,
+    `/api/v1/safety/hazard-revision-records/${recordId}/approve`,
     { method: 'POST' }
   )
   revalidatePath('/safety/hazard-revision')
@@ -930,7 +930,7 @@ export async function approveHazardRevision(recordId: string) {
 }
 
 export async function deleteHazardRevisionRecord(id: string) {
-  const response = await fetchApi<null>(`/safety/hazard-revision-records/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/hazard-revision-records/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/hazard-revision')
@@ -941,7 +941,7 @@ export async function uploadHazardRevisionDocument(recordId: string, file: File)
   const formData = new FormData()
   formData.append('file', file)
   const response = await fetch(
-    `${process.env.API_BASE_URL || 'http://localhost:8000/api/v1'}/safety/hazard-revision-records/${recordId}/upload`,
+    `${process.env.API_BASE_URL || 'http://localhost:8000'}/safety/hazard-revision-records/${recordId}/upload`,
     { method: 'POST', body: formData }
   )
   revalidatePath('/safety/hazard-revision')
@@ -950,7 +950,7 @@ export async function uploadHazardRevisionDocument(recordId: string, file: File)
 
 export async function linkRevisionToArchive(recordId: string, archiveId: string) {
   const response = await fetchApi<HazardRevisionRecord>(
-    `/safety/hazard-revision-records/${recordId}/link-archive/${archiveId}`,
+    `/api/v1/safety/hazard-revision-records/${recordId}/link-archive/${archiveId}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/hazard-revision')
@@ -969,16 +969,16 @@ export async function getHazardRevisionArchives(
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/hazard-revision-archives${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/hazard-revision-archives${queryString ? `?${queryString}` : ''}`
   return fetchApi<HazardRevisionArchive[]>(endpoint)
 }
 
 export async function getHazardRevisionArchive(id: string) {
-  return fetchApi<HazardRevisionArchive>(`/safety/hazard-revision-archives/${id}`)
+  return fetchApi<HazardRevisionArchive>(`/api/v1/safety/hazard-revision-archives/${id}`)
 }
 
 export async function createHazardRevisionArchive(data: HazardRevisionArchiveFormData) {
-  const response = await fetchApi<HazardRevisionArchive>('/safety/hazard-revision-archives', {
+  const response = await fetchApi<HazardRevisionArchive>('/api/v1/safety/hazard-revision-archives', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -991,7 +991,7 @@ export async function updateHazardRevisionArchive(
   data: Partial<HazardRevisionArchive>
 ) {
   const response = await fetchApi<HazardRevisionArchive>(
-    `/safety/hazard-revision-archives/${id}`,
+    `/api/v1/safety/hazard-revision-archives/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard-revision')
@@ -999,7 +999,7 @@ export async function updateHazardRevisionArchive(
 }
 
 export async function deleteHazardRevisionArchive(id: string) {
-  const response = await fetchApi<null>(`/safety/hazard-revision-archives/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/hazard-revision-archives/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/hazard-revision')
@@ -1018,13 +1018,13 @@ export async function getAIWorkflowConfigs(
   if (params.is_enabled !== undefined) searchParams.set('is_enabled', String(params.is_enabled))
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/ai-workflow-configs${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/ai-workflow-configs${queryString ? `?${queryString}` : ''}`
   return fetchApi<import('@/types/safety').AIWorkflowConfig[]>(endpoint)
 }
 
 export async function getAIWorkflowConfig(id: string) {
   return fetchApi<import('@/types/safety').AIWorkflowConfig>(
-    `/safety/ai-workflow-configs/${id}`
+    `/api/v1/safety/ai-workflow-configs/${id}`
   )
 }
 
@@ -1032,7 +1032,7 @@ export async function createAIWorkflowConfig(
   data: import('@/types/safety').AIWorkflowConfigFormData
 ) {
   const response = await fetchApi<import('@/types/safety').AIWorkflowConfig>(
-    '/safety/ai-workflow-configs',
+    '/api/v1/safety/ai-workflow-configs',
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/ai-workflow-config')
@@ -1044,7 +1044,7 @@ export async function updateAIWorkflowConfig(
   data: Partial<import('@/types/safety').AIWorkflowConfig>
 ) {
   const response = await fetchApi<import('@/types/safety').AIWorkflowConfig>(
-    `/safety/ai-workflow-configs/${id}`,
+    `/api/v1/safety/ai-workflow-configs/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/ai-workflow-config')
@@ -1052,7 +1052,7 @@ export async function updateAIWorkflowConfig(
 }
 
 export async function deleteAIWorkflowConfig(id: string) {
-  const response = await fetchApi<null>(`/safety/ai-workflow-configs/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/ai-workflow-configs/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/ai-workflow-config')
@@ -1066,13 +1066,13 @@ export async function getAPICallConfigs(isActive?: boolean) {
   if (isActive !== undefined) searchParams.set('is_active', String(isActive))
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/api-call-configs${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/api-call-configs${queryString ? `?${queryString}` : ''}`
   return fetchApi<import('@/types/safety').APICallConfig[]>(endpoint)
 }
 
 export async function getAPICallConfig(id: string) {
   return fetchApi<import('@/types/safety').APICallConfig>(
-    `/safety/api-call-configs/${id}`
+    `/api/v1/safety/api-call-configs/${id}`
   )
 }
 
@@ -1080,7 +1080,7 @@ export async function createAPICallConfig(
   data: import('@/types/safety').APICallConfigFormData
 ) {
   const response = await fetchApi<import('@/types/safety').APICallConfig>(
-    '/safety/api-call-configs',
+    '/api/v1/safety/api-call-configs',
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/api-call-config')
@@ -1093,7 +1093,7 @@ export async function updateAPICallConfig(
   data: Partial<import('@/types/safety').APICallConfig>
 ) {
   const response = await fetchApi<import('@/types/safety').APICallConfig>(
-    `/safety/api-call-configs/${id}`,
+    `/api/v1/safety/api-call-configs/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/api-call-config')
@@ -1103,7 +1103,7 @@ export async function updateAPICallConfig(
 
 export async function activateAPICallConfig(id: string) {
   const response = await fetchApi<import('@/types/safety').APICallConfig>(
-    `/safety/api-call-configs/${id}/activate`,
+    `/api/v1/safety/api-call-configs/${id}/activate`,
     { method: 'POST' }
   )
   revalidatePath('/safety/api-call-config')
@@ -1112,7 +1112,7 @@ export async function activateAPICallConfig(id: string) {
 }
 
 export async function deleteAPICallConfig(id: string) {
-  const response = await fetchApi<null>(`/safety/api-call-configs/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/api-call-configs/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/api-call-config')
@@ -1132,17 +1132,17 @@ export async function getPersonnelList(params: SpecialOperationPersonnelQueryPar
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/special-operation-personnel${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/special-operation-personnel${queryString ? `?${queryString}` : ''}`
   return fetchApi<SpecialOperationPersonnel[]>(endpoint)
 }
 
 export async function getPersonnel(id: string) {
-  return fetchApi<SpecialOperationPersonnel>(`/safety/special-operation-personnel/${id}`)
+  return fetchApi<SpecialOperationPersonnel>(`/api/v1/safety/special-operation-personnel/${id}`)
 }
 
 export async function createPersonnel(data: SpecialOperationPersonnelFormData) {
   const response = await fetchApi<SpecialOperationPersonnel>(
-    '/safety/special-operation-personnel',
+    '/api/v1/safety/special-operation-personnel',
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/special-ops-personnel')
@@ -1151,7 +1151,7 @@ export async function createPersonnel(data: SpecialOperationPersonnelFormData) {
 
 export async function updatePersonnel(id: string, data: Partial<SpecialOperationPersonnelFormData>) {
   const response = await fetchApi<SpecialOperationPersonnel>(
-    `/safety/special-operation-personnel/${id}`,
+    `/api/v1/safety/special-operation-personnel/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/special-ops-personnel')
@@ -1159,7 +1159,7 @@ export async function updatePersonnel(id: string, data: Partial<SpecialOperation
 }
 
 export async function deletePersonnel(id: string) {
-  const response = await fetchApi<null>(`/safety/special-operation-personnel/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/special-operation-personnel/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/special-ops-personnel')
@@ -1178,17 +1178,17 @@ export async function getPermitList(params: SpecialOperationPermitQueryParams = 
   if (params.keyword) searchParams.set('keyword', params.keyword)
 
   const queryString = searchParams.toString()
-  const endpoint = `/safety/special-operation-permits${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/safety/special-operation-permits${queryString ? `?${queryString}` : ''}`
   return fetchApi<SpecialOperationPermit[]>(endpoint)
 }
 
 export async function getPermit(id: string) {
-  return fetchApi<SpecialOperationPermit>(`/safety/special-operation-permits/${id}`)
+  return fetchApi<SpecialOperationPermit>(`/api/v1/safety/special-operation-permits/${id}`)
 }
 
 export async function createPermit(data: SpecialOperationPermitFormData) {
   const response = await fetchApi<SpecialOperationPermit>(
-    '/safety/special-operation-permits',
+    '/api/v1/safety/special-operation-permits',
     { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1197,7 +1197,7 @@ export async function createPermit(data: SpecialOperationPermitFormData) {
 
 export async function updatePermit(id: string, data: Partial<SpecialOperationPermitFormData>) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}`,
+    `/api/v1/safety/special-operation-permits/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1205,7 +1205,7 @@ export async function updatePermit(id: string, data: Partial<SpecialOperationPer
 }
 
 export async function deletePermit(id: string) {
-  const response = await fetchApi<null>(`/safety/special-operation-permits/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/safety/special-operation-permits/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/safety/special-ops-permits')
@@ -1214,7 +1214,7 @@ export async function deletePermit(id: string) {
 
 export async function submitPermit(id: string) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}/submit`,
+    `/api/v1/safety/special-operation-permits/${id}/submit`,
     { method: 'POST' }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1223,7 +1223,7 @@ export async function submitPermit(id: string) {
 
 export async function approvePermit(id: string) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}/approve`,
+    `/api/v1/safety/special-operation-permits/${id}/approve`,
     { method: 'POST' }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1232,7 +1232,7 @@ export async function approvePermit(id: string) {
 
 export async function rejectPermit(id: string, reason: string) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}/reject?reason=${encodeURIComponent(reason)}`,
+    `/api/v1/safety/special-operation-permits/${id}/reject?reason=${encodeURIComponent(reason)}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1241,7 +1241,7 @@ export async function rejectPermit(id: string, reason: string) {
 
 export async function startPermit(id: string) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}/start`,
+    `/api/v1/safety/special-operation-permits/${id}/start`,
     { method: 'POST' }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1250,7 +1250,7 @@ export async function startPermit(id: string) {
 
 export async function completePermit(id: string, method: string) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}/complete?method=${encodeURIComponent(method)}`,
+    `/api/v1/safety/special-operation-permits/${id}/complete?method=${encodeURIComponent(method)}`,
     { method: 'POST' }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1259,7 +1259,7 @@ export async function completePermit(id: string, method: string) {
 
 export async function archivePermit(id: string) {
   const response = await fetchApi<SpecialOperationPermit>(
-    `/safety/special-operation-permits/${id}/archive`,
+    `/api/v1/safety/special-operation-permits/${id}/archive`,
     { method: 'POST' }
   )
   revalidatePath('/safety/special-ops-permits')
@@ -1276,16 +1276,16 @@ export async function getKnowledgeArticles(params: SafetyKnowledgeArticleQueryPa
   if (params.status) searchParams.set('status', params.status)
   if (params.keyword) searchParams.set('keyword', params.keyword)
   const queryString = searchParams.toString()
-  const endpoint = `/safety/knowledge-articles${queryString ? '?' + queryString : ''}`
+  const endpoint = `/api/v1/safety/knowledge-articles${queryString ? '?' + queryString : ''}`
   return fetchApi<SafetyKnowledgeArticle[]>(endpoint)
 }
 
 export async function getKnowledgeArticle(id: string) {
-  return fetchApi<SafetyKnowledgeArticle>(`/safety/knowledge-articles/${id}`)
+  return fetchApi<SafetyKnowledgeArticle>(`/api/v1/safety/knowledge-articles/${id}`)
 }
 
 export async function createKnowledgeArticle(data: SafetyKnowledgeArticleFormData) {
-  const response = await fetchApi<SafetyKnowledgeArticle>('/safety/knowledge-articles', {
+  const response = await fetchApi<SafetyKnowledgeArticle>('/api/v1/safety/knowledge-articles', {
     method: 'POST', body: JSON.stringify(data),
   })
   revalidatePath('/safety/knowledge-base')
@@ -1293,7 +1293,7 @@ export async function createKnowledgeArticle(data: SafetyKnowledgeArticleFormDat
 }
 
 export async function updateKnowledgeArticle(id: string, data: Partial<SafetyKnowledgeArticleFormData>) {
-  const response = await fetchApi<SafetyKnowledgeArticle>(`/safety/knowledge-articles/${id}`, {
+  const response = await fetchApi<SafetyKnowledgeArticle>(`/api/v1/safety/knowledge-articles/${id}`, {
     method: 'PUT', body: JSON.stringify(data),
   })
   revalidatePath('/safety/knowledge-base')
@@ -1301,19 +1301,19 @@ export async function updateKnowledgeArticle(id: string, data: Partial<SafetyKno
 }
 
 export async function deleteKnowledgeArticle(id: string) {
-  const response = await fetchApi<null>(`/safety/knowledge-articles/${id}`, { method: 'DELETE' })
+  const response = await fetchApi<null>(`/api/v1/safety/knowledge-articles/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/knowledge-base')
   return response
 }
 
 export async function publishKnowledgeArticle(id: string) {
-  const response = await fetchApi<SafetyKnowledgeArticle>(`/safety/knowledge-articles/${id}/publish`, { method: 'POST' })
+  const response = await fetchApi<SafetyKnowledgeArticle>(`/api/v1/safety/knowledge-articles/${id}/publish`, { method: 'POST' })
   revalidatePath('/safety/knowledge-base')
   return response
 }
 
 export async function archiveKnowledgeArticle(id: string) {
-  const response = await fetchApi<SafetyKnowledgeArticle>(`/safety/knowledge-articles/${id}/archive`, { method: 'POST' })
+  const response = await fetchApi<SafetyKnowledgeArticle>(`/api/v1/safety/knowledge-articles/${id}/archive`, { method: 'POST' })
   revalidatePath('/safety/knowledge-base')
   return response
 }
@@ -1331,17 +1331,17 @@ export async function getSpecialOperationReports(params?: SpecialOperationReport
     if (params.keyword) query.set('keyword', params.keyword)
   }
   const qs = query.toString()
-  const response = await fetchApi<SpecialOperationReport[]>(`/safety/special-operation-reports${qs ? `?${qs}` : ''}`)
+  const response = await fetchApi<SpecialOperationReport[]>(`/api/v1/safety/special-operation-reports${qs ? `?${qs}` : ''}`)
   return response
 }
 
 export async function getSpecialOperationReport(id: string) {
-  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}`)
+  const response = await fetchApi<SpecialOperationReport>(`/api/v1/safety/special-operation-reports/${id}`)
   return response
 }
 
 export async function createSpecialOperationReport(data: SpecialOperationReportFormData) {
-  const response = await fetchApi<SpecialOperationReport>('/safety/special-operation-reports', {
+  const response = await fetchApi<SpecialOperationReport>('/api/v1/safety/special-operation-reports', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1351,7 +1351,7 @@ export async function createSpecialOperationReport(data: SpecialOperationReportF
 }
 
 export async function updateSpecialOperationReport(id: string, data: Partial<SpecialOperationReportFormData>) {
-  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}`, {
+  const response = await fetchApi<SpecialOperationReport>(`/api/v1/safety/special-operation-reports/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1361,13 +1361,13 @@ export async function updateSpecialOperationReport(id: string, data: Partial<Spe
 }
 
 export async function deleteSpecialOperationReport(id: string) {
-  const response = await fetchApi<void>(`/safety/special-operation-reports/${id}`, { method: 'DELETE' })
+  const response = await fetchApi<void>(`/api/v1/safety/special-operation-reports/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/risk-reporting')
   return response
 }
 
 export async function submitSpecialOperationReport(id: string) {
-  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/submit`, { method: 'POST' })
+  const response = await fetchApi<SpecialOperationReport>(`/api/v1/safety/special-operation-reports/${id}/submit`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
   revalidatePath('/safety/special-ops/report')
   revalidatePath('/safety/special-ops')
@@ -1375,7 +1375,7 @@ export async function submitSpecialOperationReport(id: string) {
 }
 
 export async function approveSpecialOperationReport(id: string) {
-  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/approve`, { method: 'POST' })
+  const response = await fetchApi<SpecialOperationReport>(`/api/v1/safety/special-operation-reports/${id}/approve`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
   revalidatePath('/safety/special-ops/report')
   revalidatePath('/safety/special-ops')
@@ -1383,7 +1383,7 @@ export async function approveSpecialOperationReport(id: string) {
 }
 
 export async function rejectSpecialOperationReport(id: string, reason: string) {
-  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/reject?reason=${encodeURIComponent(reason)}`, { method: 'POST' })
+  const response = await fetchApi<SpecialOperationReport>(`/api/v1/safety/special-operation-reports/${id}/reject?reason=${encodeURIComponent(reason)}`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
   revalidatePath('/safety/special-ops/report')
   revalidatePath('/safety/special-ops')
@@ -1391,7 +1391,7 @@ export async function rejectSpecialOperationReport(id: string, reason: string) {
 }
 
 export async function setSpecialOperationReportCritical(id: string, is_critical: boolean, reason?: string) {
-  const response = await fetchApi<SpecialOperationReport>(`/safety/special-operation-reports/${id}/critical`, {
+  const response = await fetchApi<SpecialOperationReport>(`/api/v1/safety/special-operation-reports/${id}/critical`, {
     method: 'PUT',
     body: JSON.stringify({ is_critical, reason }),
   })
@@ -1417,12 +1417,12 @@ export async function getSpecialOperationLedger(params?: SpecialOperationLedgerQ
     if (params.is_critical !== undefined) query.set('is_critical', String(params.is_critical))
   }
   const qs = query.toString()
-  const response = await fetchApi<SpecialOperationReport[]>(`/safety/special-operation-ledger${qs ? `?${qs}` : ''}`)
+  const response = await fetchApi<SpecialOperationReport[]>(`/api/v1/safety/special-operation-ledger${qs ? `?${qs}` : ''}`)
   return response
 }
 
 export async function getSpecialOperationLedgerStats() {
-  const response = await fetchApi<SpecialOperationLedgerStats[]>('/safety/special-operation-ledger/stats')
+  const response = await fetchApi<SpecialOperationLedgerStats[]>('/api/v1/safety/special-operation-ledger/stats')
   return response
 }
 
@@ -1440,17 +1440,17 @@ export async function getDailyRiskReports(params?: DailyRiskReportQueryParams) {
     if (params.report_type) query.set('report_type', params.report_type)
   }
   const qs = query.toString()
-  const response = await fetchApi<DailyRiskReport[]>(`/safety/daily-risk-reports${qs ? `?${qs}` : ''}`)
+  const response = await fetchApi<DailyRiskReport[]>(`/api/v1/safety/daily-risk-reports${qs ? `?${qs}` : ''}`)
   return response
 }
 
 export async function getDailyRiskReport(id: string) {
-  const response = await fetchApi<DailyRiskReport>(`/safety/daily-risk-reports/${id}`)
+  const response = await fetchApi<DailyRiskReport>(`/api/v1/safety/daily-risk-reports/${id}`)
   return response
 }
 
 export async function createDailyRiskReport(data: DailyRiskReportFormData) {
-  const response = await fetchApi<DailyRiskReport>('/safety/daily-risk-reports', {
+  const response = await fetchApi<DailyRiskReport>('/api/v1/safety/daily-risk-reports', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1459,7 +1459,7 @@ export async function createDailyRiskReport(data: DailyRiskReportFormData) {
 }
 
 export async function updateDailyRiskReport(id: string, data: Partial<DailyRiskReportFormData>) {
-  const response = await fetchApi<DailyRiskReport>(`/safety/daily-risk-reports/${id}`, {
+  const response = await fetchApi<DailyRiskReport>(`/api/v1/safety/daily-risk-reports/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1468,25 +1468,25 @@ export async function updateDailyRiskReport(id: string, data: Partial<DailyRiskR
 }
 
 export async function deleteDailyRiskReport(id: string) {
-  const response = await fetchApi<void>(`/safety/daily-risk-reports/${id}`, { method: 'DELETE' })
+  const response = await fetchApi<void>(`/api/v1/safety/daily-risk-reports/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/risk-reporting')
   return response
 }
 
 export async function submitDailyRiskReport(id: string) {
-  const response = await fetchApi<DailyRiskReport>(`/safety/daily-risk-reports/${id}/submit`, { method: 'POST' })
+  const response = await fetchApi<DailyRiskReport>(`/api/v1/safety/daily-risk-reports/${id}/submit`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
   return response
 }
 
 export async function approveDailyRiskReport(id: string) {
-  const response = await fetchApi<DailyRiskReport>(`/safety/daily-risk-reports/${id}/approve`, { method: 'POST' })
+  const response = await fetchApi<DailyRiskReport>(`/api/v1/safety/daily-risk-reports/${id}/approve`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
   return response
 }
 
 export async function rejectDailyRiskReport(id: string, reason: string) {
-  const response = await fetchApi<DailyRiskReport>(`/safety/daily-risk-reports/${id}/reject?reason=${encodeURIComponent(reason)}`, { method: 'POST' })
+  const response = await fetchApi<DailyRiskReport>(`/api/v1/safety/daily-risk-reports/${id}/reject?reason=${encodeURIComponent(reason)}`, { method: 'POST' })
   revalidatePath('/safety/risk-reporting')
   return response
 }
@@ -1505,7 +1505,7 @@ export async function getHazardRiskOptions(params?: {
     if (params.keyword) query.set('keyword', params.keyword)
   }
   const qs = query.toString()
-  const response = await fetchApi<HazardRiskOption[]>(`/safety/hazard-identifications/risk-options${qs ? `?${qs}` : ''}`)
+  const response = await fetchApi<HazardRiskOption[]>(`/api/v1/safety/hazard-identifications/risk-options${qs ? `?${qs}` : ''}`)
   return response
 }
 
@@ -1536,15 +1536,15 @@ export async function getEhsChanges(params: EhsChangeQueryParams = {}) {
   if (params.department) searchParams.set('department', params.department)
   if (params.keyword) searchParams.set('keyword', params.keyword)
   const qs = searchParams.toString()
-  return fetchApi<EhsChange[]>(`/safety/ehs-changes${qs ? `?${qs}` : ''}`)
+  return fetchApi<EhsChange[]>(`/api/v1/safety/ehs-changes${qs ? `?${qs}` : ''}`)
 }
 
 export async function getEhsChange(id: string) {
-  return fetchApi<EhsChange>(`/safety/ehs-changes/${id}`)
+  return fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}`)
 }
 
 export async function createEhsChange(data: EhsChangeFormData) {
-  const response = await fetchApi<EhsChange>('/safety/ehs-changes', {
+  const response = await fetchApi<EhsChange>('/api/v1/safety/ehs-changes', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1553,7 +1553,7 @@ export async function createEhsChange(data: EhsChangeFormData) {
 }
 
 export async function updateEhsChange(id: string, data: Partial<EhsChangeFormData>) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}`, {
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1562,20 +1562,20 @@ export async function updateEhsChange(id: string, data: Partial<EhsChangeFormDat
 }
 
 export async function deleteEhsChange(id: string) {
-  const response = await fetchApi<void>(`/safety/ehs-changes/${id}`, { method: 'DELETE' })
+  const response = await fetchApi<void>(`/api/v1/safety/ehs-changes/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 // Workflow
 export async function submitEhsChange(id: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/submit`, { method: 'POST' })
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/submit`, { method: 'POST' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 export async function approveEhsChange(id: string, decision: string, comments?: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/approve`, {
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/approve`, {
     method: 'POST',
     body: JSON.stringify({ decision, comments }),
   })
@@ -1585,25 +1585,25 @@ export async function approveEhsChange(id: string, decision: string, comments?: 
 
 export async function rejectEhsChange(id: string, comments?: string) {
   const params = comments ? `?comments=${encodeURIComponent(comments)}` : ''
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/reject${params}`, { method: 'POST' })
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/reject${params}`, { method: 'POST' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 export async function startImplementationEhsChange(id: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/start-implementation`, { method: 'POST' })
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/start-implementation`, { method: 'POST' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 export async function commissionEhsChange(id: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/commission`, { method: 'POST' })
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/commission`, { method: 'POST' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 export async function closeEhsChange(id: string, closedBy?: string, tempExpiryDate?: string, restoredDate?: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/close`, {
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/close`, {
     method: 'POST',
     body: JSON.stringify({ closed_by: closedBy, temp_expiry_date: tempExpiryDate, restored_date: restoredDate }),
   })
@@ -1612,14 +1612,14 @@ export async function closeEhsChange(id: string, closedBy?: string, tempExpiryDa
 }
 
 export async function cancelEhsChange(id: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/cancel`, { method: 'POST' })
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/cancel`, { method: 'POST' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 // JSON sub-record operations
 export async function addRiskAssessment(id: string, data: Record<string, unknown>) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/risk-assessments`, {
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/risk-assessments`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1628,13 +1628,13 @@ export async function addRiskAssessment(id: string, data: Record<string, unknown
 }
 
 export async function updateActionItem(id: string, index: number, status: string) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/action-items/${index}?status=${encodeURIComponent(status)}`, { method: 'PUT' })
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/action-items/${index}?status=${encodeURIComponent(status)}`, { method: 'PUT' })
   revalidatePath('/safety/ehs-change')
   return response
 }
 
 export async function updatePSSRChecklist(id: string, data: Record<string, unknown>[] | object[]) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/pssr-checklist`, {
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/pssr-checklist`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1643,7 +1643,7 @@ export async function updatePSSRChecklist(id: string, data: Record<string, unkno
 }
 
 export async function submitVerification(id: string, data: Record<string, unknown>) {
-  const response = await fetchApi<EhsChange>(`/safety/ehs-changes/${id}/verification`, {
+  const response = await fetchApi<EhsChange>(`/api/v1/safety/ehs-changes/${id}/verification`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1664,16 +1664,16 @@ export async function getOhHazardMonitors(params: OhHazardMonitorQueryParams = {
   if (params.workplace) searchParams.set('workplace', params.workplace)
   if (params.keyword) searchParams.set('keyword', params.keyword)
   const qs = searchParams.toString()
-  const endpoint = `/safety/oh-hazard-monitors${qs ? '?' + qs : ''}`
+  const endpoint = `/api/v1/safety/oh-hazard-monitors${qs ? '?' + qs : ''}`
   return fetchApi<OhHazardMonitor[]>(endpoint)
 }
 
 export async function getOhHazardMonitor(id: string) {
-  return fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}`)
+  return fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}`)
 }
 
 export async function createOhHazardMonitor(data: OhHazardMonitorFormData) {
-  const res = await fetchApi<OhHazardMonitor>('/safety/oh-hazard-monitors', {
+  const res = await fetchApi<OhHazardMonitor>('/api/v1/safety/oh-hazard-monitors', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1682,7 +1682,7 @@ export async function createOhHazardMonitor(data: OhHazardMonitorFormData) {
 }
 
 export async function updateOhHazardMonitor(id: string, data: Partial<OhHazardMonitorFormData>) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}`, {
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1691,26 +1691,26 @@ export async function updateOhHazardMonitor(id: string, data: Partial<OhHazardMo
 }
 
 export async function deleteOhHazardMonitor(id: string) {
-  const res = await fetchApi<void>(`/safety/oh-hazard-monitors/${id}`, { method: 'DELETE' })
+  const res = await fetchApi<void>(`/api/v1/safety/oh-hazard-monitors/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 // Monitor Workflow
 export async function startMonitor(id: string) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/start`, { method: 'POST' })
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/start`, { method: 'POST' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 export async function completeMonitor(id: string) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/complete`, { method: 'POST' })
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/complete`, { method: 'POST' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 export async function verifyMonitor(id: string, data: { verified_by?: string; comments?: string }) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/verify`, {
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/verify`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1720,7 +1720,7 @@ export async function verifyMonitor(id: string, data: { verified_by?: string; co
 
 // Monitor Sub-records
 export async function addDetectionResult(id: string, data: Record<string, unknown>) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/detection-results`, {
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/detection-results`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1729,7 +1729,7 @@ export async function addDetectionResult(id: string, data: Record<string, unknow
 }
 
 export async function updateDetectionResult(id: string, index: number, data: Record<string, unknown>) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/detection-results/${index}`, {
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/detection-results/${index}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1738,13 +1738,13 @@ export async function updateDetectionResult(id: string, index: number, data: Rec
 }
 
 export async function deleteDetectionResult(id: string, index: number) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/detection-results/${index}`, { method: 'DELETE' })
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/detection-results/${index}`, { method: 'DELETE' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 export async function addMonitorAbnormality(id: string, data: Record<string, unknown>) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/abnormality-records`, {
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/abnormality-records`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1753,7 +1753,7 @@ export async function addMonitorAbnormality(id: string, data: Record<string, unk
 }
 
 export async function updateMonitorAbnormalityStatus(id: string, index: number, status: string) {
-  const res = await fetchApi<OhHazardMonitor>(`/safety/oh-hazard-monitors/${id}/abnormality-records/${index}?status=${encodeURIComponent(status)}`, { method: 'PUT' })
+  const res = await fetchApi<OhHazardMonitor>(`/api/v1/safety/oh-hazard-monitors/${id}/abnormality-records/${index}?status=${encodeURIComponent(status)}`, { method: 'PUT' })
   revalidatePath('/safety/occupational-health')
   return res
 }
@@ -1771,16 +1771,16 @@ export async function getOhHealthExams(params: OhHealthExamQueryParams = {}) {
   if (params.department) searchParams.set('department', params.department)
   if (params.keyword) searchParams.set('keyword', params.keyword)
   const qs = searchParams.toString()
-  const endpoint = `/safety/oh-health-exams${qs ? '?' + qs : ''}`
+  const endpoint = `/api/v1/safety/oh-health-exams${qs ? '?' + qs : ''}`
   return fetchApi<OhHealthExam[]>(endpoint)
 }
 
 export async function getOhHealthExam(id: string) {
-  return fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}`)
+  return fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}`)
 }
 
 export async function createOhHealthExam(data: OhHealthExamFormData) {
-  const res = await fetchApi<OhHealthExam>('/safety/oh-health-exams', {
+  const res = await fetchApi<OhHealthExam>('/api/v1/safety/oh-health-exams', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1789,7 +1789,7 @@ export async function createOhHealthExam(data: OhHealthExamFormData) {
 }
 
 export async function updateOhHealthExam(id: string, data: Partial<OhHealthExamFormData>) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}`, {
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1798,33 +1798,33 @@ export async function updateOhHealthExam(id: string, data: Partial<OhHealthExamF
 }
 
 export async function deleteOhHealthExam(id: string) {
-  const res = await fetchApi<void>(`/safety/oh-health-exams/${id}`, { method: 'DELETE' })
+  const res = await fetchApi<void>(`/api/v1/safety/oh-health-exams/${id}`, { method: 'DELETE' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 // Exam Workflow
 export async function startExam(id: string) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/start`, { method: 'POST' })
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/start`, { method: 'POST' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 export async function completeExam(id: string) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/complete`, { method: 'POST' })
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/complete`, { method: 'POST' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 export async function archiveExam(id: string) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/archive`, { method: 'POST' })
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/archive`, { method: 'POST' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 // Exam Sub-records
 export async function addExamItem(id: string, data: Record<string, unknown>) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/exam-items`, {
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/exam-items`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1833,7 +1833,7 @@ export async function addExamItem(id: string, data: Record<string, unknown>) {
 }
 
 export async function updateExamItem(id: string, index: number, data: Record<string, unknown>) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/exam-items/${index}`, {
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/exam-items/${index}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -1842,13 +1842,13 @@ export async function updateExamItem(id: string, index: number, data: Record<str
 }
 
 export async function deleteExamItem(id: string, index: number) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/exam-items/${index}`, { method: 'DELETE' })
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/exam-items/${index}`, { method: 'DELETE' })
   revalidatePath('/safety/occupational-health')
   return res
 }
 
 export async function setExamConclusion(id: string, conclusion: string, remarks?: string) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/conclusion`, {
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/conclusion`, {
     method: 'PUT',
     body: JSON.stringify({ conclusion, remarks }),
   })
@@ -1857,7 +1857,7 @@ export async function setExamConclusion(id: string, conclusion: string, remarks?
 }
 
 export async function addExamAbnormality(id: string, data: Record<string, unknown>) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/abnormality-records`, {
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/abnormality-records`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -1866,7 +1866,7 @@ export async function addExamAbnormality(id: string, data: Record<string, unknow
 }
 
 export async function updateExamAbnormalityStatus(id: string, index: number, status: string) {
-  const res = await fetchApi<OhHealthExam>(`/safety/oh-health-exams/${id}/abnormality-records/${index}?status=${encodeURIComponent(status)}`, { method: 'PUT' })
+  const res = await fetchApi<OhHealthExam>(`/api/v1/safety/oh-health-exams/${id}/abnormality-records/${index}?status=${encodeURIComponent(status)}`, { method: 'PUT' })
   revalidatePath('/safety/occupational-health')
   return res
 }

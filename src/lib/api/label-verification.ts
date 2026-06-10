@@ -7,7 +7,7 @@ import {
   LabelVerificationListParams,
 } from '@/types/label-verification'
 
-const API_BASE = 'http://localhost:8000'
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000'
 
 export async function fetchLabelVerifications(
   params?: LabelVerificationListParams

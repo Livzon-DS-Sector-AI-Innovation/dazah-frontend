@@ -111,7 +111,7 @@ export default function SpecialOpsLedger() {
   useEffect(() => { fetchData() }, [fetchData])
 
   // ── AI Export ──
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002/api/v1'
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
   const handleAIExport = async () => {
     if (!exportQuery.trim()) {
@@ -122,7 +122,7 @@ export default function SpecialOpsLedger() {
     setExportLoading(true)
     try {
       // AI parse natural language first
-      const parseRes = await fetch(`${API_BASE}/safety/special-operation-ledger/parse-query`, {
+      const parseRes = await fetch(`${API_BASE}/api/v1/safety/special-operation-ledger/parse-query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ natural_query: exportQuery }),
@@ -154,7 +154,7 @@ export default function SpecialOpsLedger() {
       // Clean empty values
       Object.keys(body).forEach(k => { if (body[k] === undefined || body[k] === null || body[k] === '') delete body[k] })
 
-      const res = await fetch(`${API_BASE}/safety/special-operation-ledger/export`, {
+      const res = await fetch(`${API_BASE}/api/v1/safety/special-operation-ledger/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

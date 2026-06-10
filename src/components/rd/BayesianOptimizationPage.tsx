@@ -548,7 +548,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
                 {new Date(currentProject.created_at).toLocaleString('zh-CN')}
               </Descriptions.Item>
               <Descriptions.Item label="更新时间">
-                {new Date(currentProject.updated_at).toLocaleString('zh-CN')}
+                {new Date(currentProject.updated_at || '').toLocaleString('zh-CN')}
               </Descriptions.Item>
             </Descriptions>
 

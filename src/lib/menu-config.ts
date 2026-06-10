@@ -26,6 +26,7 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "process", label: "工艺规程", path: "/production/process" },
       { key: "records", label: "生产记录", path: "/production/records" },
       { key: "balance", label: "物料平衡", path: "/production/balance" },
+      { key: "label-verification", label: "标签验证", path: "/production/label-verification" },
     ],
   },
   {
@@ -186,6 +187,7 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "projects", label: "研发项目", path: "/rd/projects" },
       { key: "experiments", label: "实验记录", path: "/rd/experiments" },
       { key: "reports", label: "研发报告", path: "/rd/reports" },
+      { key: "bayesian", label: "贝叶斯优化", path: "/rd/bayesian" },
     ],
   },
   {

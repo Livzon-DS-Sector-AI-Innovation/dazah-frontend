@@ -25,7 +25,7 @@ import type {
   ApiResponse,
 } from '@/types/production'
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000/api/v1'
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000'
 
 // ============ Helper Functions ============
 
@@ -53,16 +53,16 @@ export async function getBatches(params: BatchQueryParams = {}) {
   if (params.batch_no) searchParams.set('batch_no', params.batch_no)
 
   const queryString = searchParams.toString()
-  const endpoint = `/production/batches${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/production/batches${queryString ? `?${queryString}` : ''}`
   return fetchApi<Batch[]>(endpoint)
 }
 
 export async function getBatch(id: string) {
-  return fetchApi<Batch>(`/production/batches/${id}`)
+  return fetchApi<Batch>(`/api/v1/production/batches/${id}`)
 }
 
 export async function createBatch(data: BatchFormData) {
-  const response = await fetchApi<Batch>('/production/batches', {
+  const response = await fetchApi<Batch>('/api/v1/production/batches', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -71,7 +71,7 @@ export async function createBatch(data: BatchFormData) {
 }
 
 export async function updateBatch(id: string, data: Partial<BatchFormData>) {
-  const response = await fetchApi<Batch>(`/production/batches/${id}`, {
+  const response = await fetchApi<Batch>(`/api/v1/production/batches/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -80,7 +80,7 @@ export async function updateBatch(id: string, data: Partial<BatchFormData>) {
 }
 
 export async function updateBatchStatus(id: string, status: string) {
-  const response = await fetchApi<Batch>(`/production/batches/${id}/status`, {
+  const response = await fetchApi<Batch>(`/api/v1/production/batches/${id}/status`, {
     method: 'PUT',
     body: JSON.stringify({ status }),
   })
@@ -89,7 +89,7 @@ export async function updateBatchStatus(id: string, status: string) {
 }
 
 export async function deleteBatch(id: string) {
-  const response = await fetchApi<null>(`/production/batches/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/production/batches/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/production/batches')
@@ -99,11 +99,11 @@ export async function deleteBatch(id: string) {
 // ============ Batch Material Actions ============
 
 export async function getBatchMaterials(batchId: string) {
-  return fetchApi<BatchMaterial[]>(`/production/batches/${batchId}/materials`)
+  return fetchApi<BatchMaterial[]>(`/api/v1/production/batches/${batchId}/materials`)
 }
 
 export async function addBatchMaterial(batchId: string, data: BatchMaterialFormData) {
-  const response = await fetchApi<BatchMaterial>(`/production/batches/${batchId}/materials`, {
+  const response = await fetchApi<BatchMaterial>(`/api/v1/production/batches/${batchId}/materials`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -112,14 +112,14 @@ export async function addBatchMaterial(batchId: string, data: BatchMaterialFormD
 }
 
 export async function updateBatchMaterial(id: string, data: Partial<BatchMaterialFormData>) {
-  return fetchApi<BatchMaterial>(`/production/materials/${id}`, {
+  return fetchApi<BatchMaterial>(`/api/v1/production/materials/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
 export async function deleteBatchMaterial(id: string) {
-  return fetchApi<null>(`/production/materials/${id}`, {
+  return fetchApi<null>(`/api/v1/production/materials/${id}`, {
     method: 'DELETE',
   })
 }
@@ -134,16 +134,16 @@ export async function getPlans(params: PlanQueryParams = {}) {
   if (params.plan_month) searchParams.set('plan_month', params.plan_month)
 
   const queryString = searchParams.toString()
-  const endpoint = `/production/plans${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/production/plans${queryString ? `?${queryString}` : ''}`
   return fetchApi<ProductionPlan[]>(endpoint)
 }
 
 export async function getPlan(id: string) {
-  return fetchApi<ProductionPlan>(`/production/plans/${id}`)
+  return fetchApi<ProductionPlan>(`/api/v1/production/plans/${id}`)
 }
 
 export async function createPlan(data: ProductionPlanFormData) {
-  const response = await fetchApi<ProductionPlan>('/production/plans', {
+  const response = await fetchApi<ProductionPlan>('/api/v1/production/plans', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -152,7 +152,7 @@ export async function createPlan(data: ProductionPlanFormData) {
 }
 
 export async function updatePlan(id: string, data: Partial<ProductionPlanFormData>) {
-  const response = await fetchApi<ProductionPlan>(`/production/plans/${id}`, {
+  const response = await fetchApi<ProductionPlan>(`/api/v1/production/plans/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -161,7 +161,7 @@ export async function updatePlan(id: string, data: Partial<ProductionPlanFormDat
 }
 
 export async function deletePlan(id: string) {
-  const response = await fetchApi<null>(`/production/plans/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/production/plans/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/production/plan')
@@ -171,11 +171,11 @@ export async function deletePlan(id: string) {
 // ============ Plan Task Actions ============
 
 export async function getPlanTasks(planId: string) {
-  return fetchApi<PlanTask[]>(`/production/plans/${planId}/tasks`)
+  return fetchApi<PlanTask[]>(`/api/v1/production/plans/${planId}/tasks`)
 }
 
 export async function createPlanTask(data: PlanTaskFormData & { plan_id: string }) {
-  const response = await fetchApi<PlanTask>('/production/tasks', {
+  const response = await fetchApi<PlanTask>('/api/v1/production/tasks', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -184,14 +184,14 @@ export async function createPlanTask(data: PlanTaskFormData & { plan_id: string 
 }
 
 export async function updatePlanTask(id: string, data: Partial<PlanTaskFormData>) {
-  return fetchApi<PlanTask>(`/production/tasks/${id}`, {
+  return fetchApi<PlanTask>(`/api/v1/production/tasks/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
 export async function deletePlanTask(id: string) {
-  return fetchApi<null>(`/production/tasks/${id}`, {
+  return fetchApi<null>(`/api/v1/production/tasks/${id}`, {
     method: 'DELETE',
   })
 }
@@ -206,16 +206,16 @@ export async function getProcessSpecs(params: ProcessSpecQueryParams = {}) {
   if (params.product_code) searchParams.set('product_code', params.product_code)
 
   const queryString = searchParams.toString()
-  const endpoint = `/production/process-specs${queryString ? `?${queryString}` : ''}`
+  const endpoint = `/api/v1/production/process-specs${queryString ? `?${queryString}` : ''}`
   return fetchApi<ProcessSpec[]>(endpoint)
 }
 
 export async function getProcessSpec(id: string) {
-  return fetchApi<ProcessSpec>(`/production/process-specs/${id}`)
+  return fetchApi<ProcessSpec>(`/api/v1/production/process-specs/${id}`)
 }
 
 export async function createProcessSpec(data: ProcessSpecFormData) {
-  const response = await fetchApi<ProcessSpec>('/production/process-specs', {
+  const response = await fetchApi<ProcessSpec>('/api/v1/production/process-specs', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -224,7 +224,7 @@ export async function createProcessSpec(data: ProcessSpecFormData) {
 }
 
 export async function updateProcessSpec(id: string, data: Partial<ProcessSpecFormData>) {
-  const response = await fetchApi<ProcessSpec>(`/production/process-specs/${id}`, {
+  const response = await fetchApi<ProcessSpec>(`/api/v1/production/process-specs/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
@@ -233,7 +233,7 @@ export async function updateProcessSpec(id: string, data: Partial<ProcessSpecFor
 }
 
 export async function deleteProcessSpec(id: string) {
-  const response = await fetchApi<null>(`/production/process-specs/${id}`, {
+  const response = await fetchApi<null>(`/api/v1/production/process-specs/${id}`, {
     method: 'DELETE',
   })
   revalidatePath('/production/process')
@@ -243,11 +243,11 @@ export async function deleteProcessSpec(id: string) {
 // ============ Process Step Actions ============
 
 export async function getProcessSteps(specId: string) {
-  return fetchApi<ProcessStep[]>(`/production/process-specs/${specId}/steps`)
+  return fetchApi<ProcessStep[]>(`/api/v1/production/process-specs/${specId}/steps`)
 }
 
 export async function createProcessStep(data: ProcessStepFormData & { spec_id: string }) {
-  const response = await fetchApi<ProcessStep>('/production/steps', {
+  const response = await fetchApi<ProcessStep>('/api/v1/production/steps', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -256,14 +256,14 @@ export async function createProcessStep(data: ProcessStepFormData & { spec_id: s
 }
 
 export async function updateProcessStep(id: string, data: Partial<ProcessStepFormData>) {
-  return fetchApi<ProcessStep>(`/production/steps/${id}`, {
+  return fetchApi<ProcessStep>(`/api/v1/production/steps/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
 export async function deleteProcessStep(id: string) {
-  return fetchApi<null>(`/production/steps/${id}`, {
+  return fetchApi<null>(`/api/v1/production/steps/${id}`, {
     method: 'DELETE',
   })
 }
@@ -271,11 +271,11 @@ export async function deleteProcessStep(id: string) {
 // ============ Process Parameter Actions ============
 
 export async function getProcessParameters(stepId: string) {
-  return fetchApi<ProcessParameter[]>(`/production/steps/${stepId}/parameters`)
+  return fetchApi<ProcessParameter[]>(`/api/v1/production/steps/${stepId}/parameters`)
 }
 
 export async function createProcessParameter(data: ProcessParameterFormData & { step_id: string }) {
-  const response = await fetchApi<ProcessParameter>('/production/parameters', {
+  const response = await fetchApi<ProcessParameter>('/api/v1/production/parameters', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -284,7 +284,7 @@ export async function createProcessParameter(data: ProcessParameterFormData & { 
 }
 
 export async function deleteProcessParameter(id: string) {
-  return fetchApi<null>(`/production/parameters/${id}`, {
+  return fetchApi<null>(`/api/v1/production/parameters/${id}`, {
     method: 'DELETE',
   })
 }
@@ -293,12 +293,12 @@ export async function deleteProcessParameter(id: string) {
 
 export async function getProductionRecords(batchId: string, page = 1, pageSize = 100) {
   return fetchApi<ProductionRecord[]>(
-    `/production/batches/${batchId}/records?page=${page}&page_size=${pageSize}`
+    `/api/v1/production/batches/${batchId}/records?page=${page}&page_size=${pageSize}`
   )
 }
 
 export async function createProductionRecord(data: ProductionRecordFormData & { batch_id: string }) {
-  const response = await fetchApi<ProductionRecord>('/production/records', {
+  const response = await fetchApi<ProductionRecord>('/api/v1/production/records', {
     method: 'POST',
     body: JSON.stringify(data),
   })
@@ -307,14 +307,14 @@ export async function createProductionRecord(data: ProductionRecordFormData & { 
 }
 
 export async function updateProductionRecord(id: string, data: Partial<ProductionRecordFormData>) {
-  return fetchApi<ProductionRecord>(`/production/records/${id}`, {
+  return fetchApi<ProductionRecord>(`/api/v1/production/records/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
 }
 
 export async function deleteProductionRecord(id: string) {
-  return fetchApi<null>(`/production/records/${id}`, {
+  return fetchApi<null>(`/api/v1/production/records/${id}`, {
     method: 'DELETE',
   })
 }
@@ -322,12 +322,12 @@ export async function deleteProductionRecord(id: string) {
 // ============ Material Balance Actions ============
 
 export async function getMaterialBalance(batchId: string) {
-  return fetchApi<MaterialBalance>(`/production/batches/${batchId}/balance`)
+  return fetchApi<MaterialBalance>(`/api/v1/production/batches/${batchId}/balance`)
 }
 
 export async function calculateMaterialBalance(batchId: string, minBalanceRate = 95.0) {
   const response = await fetchApi<MaterialBalance>(
-    `/production/batches/${batchId}/balance/calculate?min_balance_rate=${minBalanceRate}`,
+    `/api/v1/production/batches/${batchId}/balance/calculate?min_balance_rate=${minBalanceRate}`,
     { method: 'POST' }
   )
   revalidatePath(`/production/balance`)

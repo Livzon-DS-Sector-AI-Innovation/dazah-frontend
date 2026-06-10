@@ -7,27 +7,29 @@ import {
   Form,
   Input,
   Button,
-  message,
   Typography,
   Row,
   Col,
   Space,
   Upload,
+  Steps,
 } from 'antd'
-import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, UploadOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import {
   createHazardIdentification,
   submitHazardIdentification,
   uploadHazardAttachment,
 } from '@/actions/safety'
+import { App } from 'antd'
 
-const { Title } = Typography
+const { Title, Text } = Typography
 
 export default function NewHazardIdentificationPage() {
   const router = useRouter()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [submitType, setSubmitType] = useState<'save' | 'submit'>('save')
+  const { message } = App.useApp()
 
   const handleSubmit = async (saveOnly: boolean) => {
     try {
@@ -35,7 +37,6 @@ export default function NewHazardIdentificationPage() {
       setLoading(true)
       setSubmitType(saveOnly ? 'save' : 'submit')
 
-      // 创建记录
       const createRes = await createHazardIdentification({
         hazard_id_no: values.hazard_id_no,
         department: values.department,
@@ -52,7 +53,6 @@ export default function NewHazardIdentificationPage() {
 
       const recordId = createRes.data.id
 
-      // 如果有附件，上传
       if (values.attachment?.length > 0) {
         const file = values.attachment[0].originFileObj
         if (file) {
@@ -61,7 +61,6 @@ export default function NewHazardIdentificationPage() {
       }
 
       if (!saveOnly) {
-        // 提交进入AI流程
         const submitRes = await submitHazardIdentification(recordId)
         if (submitRes.code !== 200) {
           message.error(submitRes.message || '提交失败')
@@ -82,22 +81,39 @@ export default function NewHazardIdentificationPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <Space className="mb-4">
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => router.push('/safety/hazard-identification')}
-        >
-          返回列表
-        </Button>
-      </Space>
+    <div style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
+      {/* 返回 */}
+      <Button
+        type="text"
+        icon={<ArrowLeftOutlined />}
+        onClick={() => router.push('/safety/hazard-identification')}
+        style={{ marginBottom: 24 }}
+      >
+        返回列表
+      </Button>
 
-      <Title level={4} className="mb-2">
-        新建危险源辨识
-      </Title>
+      {/* 步骤引导 */}
+      <Card
+        style={{ marginBottom: 24, borderRadius: 12, border: '1px solid #e5e3df', background: '#fafaf9' }}
+        styles={{ body: { padding: '16px 24px' } }}
+      >
+        <Steps
+          current={0}
+          size="small"
+          items={[
+            { title: '填写基础信息', icon: <FileTextOutlined /> },
+            { title: '上传岗位资料', icon: <UploadOutlined /> },
+            { title: '提交进入AI流程', icon: <ThunderboltOutlined /> },
+          ]}
+        />
+      </Card>
 
-      <Card>
+      {/* 表单 */}
+      <Card style={{ borderRadius: 12, border: '1px solid #e5e3df' }}>
+        <Title level={5} style={{ marginBottom: 20, color: '#1a1a1a' }}>
+          ① 基础信息
+        </Title>
+
         <Form
           form={form}
           layout="vertical"
@@ -146,35 +162,47 @@ export default function NewHazardIdentificationPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            name="attachment"
-            label="岗位资料附件"
-            extra="上传岗位操作规程、SOP等资料，AI将据此解析识别危险源"
-            valuePropName="fileList"
-            getValueFromEvent={(e: unknown) =>
-              Array.isArray(e) ? e : (e as { fileList?: unknown[] })?.fileList ?? []
-            }
-          >
-            <Upload
-              maxCount={1}
-              beforeUpload={() => false}
-              accept=".pdf,.docx,.xlsx,.xls,.txt,.md"
+          {/* 附件上传区 */}
+          <div style={{ marginBottom: 24 }}>
+            <Title level={5} style={{ marginBottom: 4, color: '#1a1a1a' }}>
+              ② 岗位资料附件
+            </Title>
+            <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 13 }}>
+              AI 将据此解析识别危险源（可选）
+            </Text>
+
+            <Form.Item
+              name="attachment"
+              valuePropName="fileList"
+              getValueFromEvent={(e: unknown) =>
+                Array.isArray(e) ? e : (e as { fileList?: unknown[] })?.fileList ?? []
+              }
+              noStyle
             >
-              <Button icon={<UploadOutlined />}>选择文件</Button>
-            </Upload>
-          </Form.Item>
+              <Upload.Dragger
+                maxCount={1}
+                beforeUpload={() => false}
+                accept=".pdf,.docx,.xlsx,.xls,.txt,.md"
+                style={{ borderRadius: 12 }}
+              >
+                <div style={{ padding: '20px 0' }}>
+                  <UploadOutlined style={{ fontSize: 32, color: '#5645d4' }} />
+                  <p style={{ marginTop: 8, color: '#37352f' }}>拖拽或点击上传 SOP/操作规程</p>
+                  <p style={{ color: '#787671', fontSize: 12 }}>
+                    支持 PDF、Word、Excel、文本文件
+                  </p>
+                </div>
+              </Upload.Dragger>
+            </Form.Item>
+          </div>
 
           <Form.Item name="notes" label="备注">
             <Input.TextArea rows={2} placeholder="可选备注信息" />
           </Form.Item>
 
-          <Space>
-            <Button
-              type="primary"
-              loading={loading && submitType === 'submit'}
-              onClick={() => handleSubmit(false)}
-            >
-              提交并进入AI流程
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', paddingTop: 16, borderTop: '1px solid #e5e3df' }}>
+            <Button onClick={() => router.push('/safety/hazard-identification')}>
+              取消
             </Button>
             <Button
               loading={loading && submitType === 'save'}
@@ -182,10 +210,14 @@ export default function NewHazardIdentificationPage() {
             >
               仅保存草稿
             </Button>
-            <Button onClick={() => router.push('/safety/hazard-identification')}>
-              取消
+            <Button
+              type="primary"
+              loading={loading && submitType === 'submit'}
+              onClick={() => handleSubmit(false)}
+            >
+              提交并进入AI流程
             </Button>
-          </Space>
+          </div>
         </Form>
       </Card>
     </div>

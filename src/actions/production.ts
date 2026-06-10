@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getAuthHeaders } from '@/lib/auth'
 import type {
   Batch,
   BatchMaterial,
@@ -33,11 +34,14 @@ async function fetchApi<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
+  const authHeaders = await getAuthHeaders()
+  const { headers: optHeaders, ...restOptions } = options || {}
   const response = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
-      'Content-Type': 'application/json',
+      ...authHeaders,
+      ...optHeaders,
     },
-    ...options,
+    ...restOptions,
   })
   return response.json()
 }

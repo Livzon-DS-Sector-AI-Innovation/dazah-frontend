@@ -32,7 +32,7 @@ import {
   activateAPICallConfig,
   deleteAPICallConfig,
 } from '@/actions/safety'
-import { AI_MODEL_OPTIONS } from '@/types/safety'
+import { AI_MODEL_OPTIONS, CONFIG_TYPE_OPTIONS } from '@/types/safety'
 import type { APICallConfig } from '@/types/safety'
 
 const { Title, Text } = Typography
@@ -68,6 +68,7 @@ export default function APICallConfigClient({ initialConfigs }: Props) {
     setEditingConfig(null)
     form.resetFields()
     form.setFieldsValue({
+      config_type: 'text',
       temperature: 0.1,
       timeout_seconds: 120,
       is_active: false,
@@ -79,6 +80,7 @@ export default function APICallConfigClient({ initialConfigs }: Props) {
     setEditingConfig(record)
     form.setFieldsValue({
       config_name: record.config_name,
+      config_type: record.config_type,
       api_base_url: record.api_base_url,
       api_key: record.api_key,
       model_name: record.model_name,
@@ -157,9 +159,20 @@ export default function APICallConfigClient({ initialConfigs }: Props) {
       render: (name: string, record: APICallConfig) => (
         <Space>
           {name}
+          {record.source === 'env' && <Tag color="blue">ENV</Tag>}
           {record.is_active && <Tag color="success">当前使用</Tag>}
         </Space>
       ),
+    },
+    {
+      title: '类型',
+      dataIndex: 'config_type',
+      key: 'config_type',
+      width: 110,
+      render: (type: string) => {
+        const opt = CONFIG_TYPE_OPTIONS.find((o) => o.value === type)
+        return <Tag color={opt?.color || 'default'}>{opt?.label || type}</Tag>
+      },
     },
     {
       title: 'API 地址',
@@ -220,41 +233,55 @@ export default function APICallConfigClient({ initialConfigs }: Props) {
       key: 'actions',
       width: 200,
       align: 'center' as const,
-      render: (_: unknown, record: APICallConfig) => (
-        <Space>
-          {!record.is_active && (
-            <Tooltip title="激活此配置">
+      render: (_: unknown, record: APICallConfig) => {
+        const isEnv = record.source === 'env'
+        return (
+          <Space>
+            {isEnv ? (
+              <Tooltip title="环境变量配置无法在此激活，请修改 .env 文件">
+                <Button type="link" size="small" icon={<PlayCircleOutlined />} disabled>
+                  激活
+                </Button>
+              </Tooltip>
+            ) : !record.is_active ? (
+              <Tooltip title="激活此配置">
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<PlayCircleOutlined />}
+                  loading={testingId === record.id}
+                  onClick={() => handleActivate(record.id)}
+                >
+                  激活
+                </Button>
+              </Tooltip>
+            ) : null}
+            <Tooltip title={isEnv ? '环境变量配置请在 .env 中修改' : '编辑'}>
               <Button
                 type="link"
                 size="small"
-                icon={<PlayCircleOutlined />}
-                loading={testingId === record.id}
-                onClick={() => handleActivate(record.id)}
-              >
-                激活
-              </Button>
+                icon={<EditOutlined />}
+                disabled={isEnv}
+                onClick={() => handleEdit(record)}
+              />
             </Tooltip>
-          )}
-          <Tooltip title="编辑">
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Popconfirm
-            title="确定删除此配置？"
-            onConfirm={() => handleDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
-          >
-            <Tooltip title="删除">
-              <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+            <Tooltip title={isEnv ? '环境变量配置无法删除' : '删除'}>
+              {isEnv ? (
+                <Button type="link" size="small" danger icon={<DeleteOutlined />} disabled />
+              ) : (
+                <Popconfirm
+                  title="确定删除此配置？"
+                  onConfirm={() => handleDelete(record.id)}
+                  okText="确定"
+                  cancelText="取消"
+                >
+                  <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              )}
             </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
+          </Space>
+        )
+      },
     },
   ]
 
@@ -288,9 +315,9 @@ export default function APICallConfigClient({ initialConfigs }: Props) {
       </div>
 
       <Card
-        bordered={false}
+        variant="borderless"
         style={{ borderRadius: 12, border: '1px solid #e5e3df' }}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <Table
           columns={columns}
@@ -323,6 +350,17 @@ export default function APICallConfigClient({ initialConfigs }: Props) {
             rules={[{ required: true, message: '请输入配置名称' }]}
           >
             <Input placeholder="例如：生产环境 GPT-4o" style={{ borderRadius: 8 }} />
+          </Form.Item>
+
+          <Form.Item
+            name="config_type"
+            label="配置类型"
+            rules={[{ required: true, message: '请选择配置类型' }]}
+          >
+            <Select
+              options={CONFIG_TYPE_OPTIONS}
+              placeholder="选择配置类型"
+            />
           </Form.Item>
 
           <Form.Item

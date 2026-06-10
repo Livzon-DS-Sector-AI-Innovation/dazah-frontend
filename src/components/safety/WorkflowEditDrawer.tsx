@@ -254,7 +254,7 @@ export default function WorkflowEditDrawer({ open, workflow, onClose, onSaved }:
                     <CaretRightOutlined rotate={isActive ? 90 : 0} />
                   )}
                   style={{ background: 'transparent' }}
-                  expandIconPosition="end"
+                  expandIconPlacement="end"
                   items={fields.map(({ key, name, ...restField }) => {
                     const scriptNum = name + 1
                     const formValues = form.getFieldValue('script_configs') || []

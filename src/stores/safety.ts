@@ -9,10 +9,6 @@ import type {
   EhsChangeQueryParams,
   HazardReport,
   HazardReportQueryParams,
-  HazardRevisionArchive,
-  HazardRevisionArchiveQueryParams,
-  HazardRevisionRecord,
-  HazardRevisionRecordQueryParams,
   OhHazardMonitor,
   OhHazardMonitorQueryParams,
   OhHealthExam,
@@ -83,20 +79,6 @@ interface SafetyState {
   revisionQueryParams: RegulationRevisionQueryParams
   revisionTotal: number
   revisionLoading: boolean
-
-  // Hazard revision record state
-  hazardRevisionRecords: HazardRevisionRecord[]
-  currentHazardRevisionRecord: HazardRevisionRecord | null
-  hazardRevisionRecordQueryParams: HazardRevisionRecordQueryParams
-  hazardRevisionRecordTotal: number
-  hazardRevisionRecordLoading: boolean
-
-  // Hazard revision archive state
-  hazardRevisionArchives: HazardRevisionArchive[]
-  currentHazardRevisionArchive: HazardRevisionArchive | null
-  hazardRevisionArchiveQueryParams: HazardRevisionArchiveQueryParams
-  hazardRevisionArchiveTotal: number
-  hazardRevisionArchiveLoading: boolean
 
   // AI workflow config state
   aiWorkflowConfigs: AIWorkflowConfig[]
@@ -228,26 +210,6 @@ interface SafetyState {
   updateRevision: (id: string, revision: Partial<RegulationRevision>) => void
   removeRevision: (id: string) => void
 
-  // Actions - Hazard Revision Record
-  setHazardRevisionRecords: (records: HazardRevisionRecord[]) => void
-  setCurrentHazardRevisionRecord: (record: HazardRevisionRecord | null) => void
-  setHazardRevisionRecordQueryParams: (params: Partial<HazardRevisionRecordQueryParams>) => void
-  setHazardRevisionRecordTotal: (total: number) => void
-  setHazardRevisionRecordLoading: (loading: boolean) => void
-  addHazardRevisionRecord: (record: HazardRevisionRecord) => void
-  updateHazardRevisionRecord: (id: string, record: Partial<HazardRevisionRecord>) => void
-  removeHazardRevisionRecord: (id: string) => void
-
-  // Actions - Hazard Revision Archive
-  setHazardRevisionArchives: (archives: HazardRevisionArchive[]) => void
-  setCurrentHazardRevisionArchive: (archive: HazardRevisionArchive | null) => void
-  setHazardRevisionArchiveQueryParams: (params: Partial<HazardRevisionArchiveQueryParams>) => void
-  setHazardRevisionArchiveTotal: (total: number) => void
-  setHazardRevisionArchiveLoading: (loading: boolean) => void
-  addHazardRevisionArchive: (archive: HazardRevisionArchive) => void
-  updateHazardRevisionArchive: (id: string, archive: Partial<HazardRevisionArchive>) => void
-  removeHazardRevisionArchive: (id: string) => void
-
   // Actions - AI Workflow Config
   setAIWorkflowConfigs: (configs: AIWorkflowConfig[]) => void
   setCurrentAIWorkflowConfig: (config: AIWorkflowConfig | null) => void
@@ -356,8 +318,6 @@ interface SafetyState {
   resetTrainingState: () => void
   resetRegulationState: () => void
   resetRevisionState: () => void
-  resetHazardRevisionRecordState: () => void
-  resetHazardRevisionArchiveState: () => void
   resetAIWorkflowConfigState: () => void
   resetAPICallConfigState: () => void
   resetPersonnelState: () => void
@@ -416,22 +376,6 @@ const initialRevisionState = {
   revisionQueryParams: { page: 1, page_size: 20 } as RegulationRevisionQueryParams,
   revisionTotal: 0,
   revisionLoading: false,
-}
-
-const initialHazardRevisionRecordState = {
-  hazardRevisionRecords: [] as HazardRevisionRecord[],
-  currentHazardRevisionRecord: null as HazardRevisionRecord | null,
-  hazardRevisionRecordQueryParams: { page: 1, page_size: 20 } as HazardRevisionRecordQueryParams,
-  hazardRevisionRecordTotal: 0,
-  hazardRevisionRecordLoading: false,
-}
-
-const initialHazardRevisionArchiveState = {
-  hazardRevisionArchives: [] as HazardRevisionArchive[],
-  currentHazardRevisionArchive: null as HazardRevisionArchive | null,
-  hazardRevisionArchiveQueryParams: { page: 1, page_size: 20 } as HazardRevisionArchiveQueryParams,
-  hazardRevisionArchiveTotal: 0,
-  hazardRevisionArchiveLoading: false,
 }
 
 const initialAIWorkflowConfigState = {
@@ -521,8 +465,6 @@ export const useSafetyStore = create<SafetyState>((set) => ({
   ...initialTrainingState,
   ...initialRegulationState,
   ...initialRevisionState,
-  ...initialHazardRevisionRecordState,
-  ...initialHazardRevisionArchiveState,
   ...initialAIWorkflowConfigState,
   ...initialAPICallConfigState,
   ...initialPersonnelState,
@@ -677,68 +619,6 @@ export const useSafetyStore = create<SafetyState>((set) => ({
     set((state) => ({
       revisions: state.revisions.filter((r) => r.id !== id),
       currentRevision: state.currentRevision?.id === id ? null : state.currentRevision,
-    })),
-
-  // ============ Hazard Revision Record Actions ============
-  setHazardRevisionRecords: (records) => set({ hazardRevisionRecords: records }),
-  setCurrentHazardRevisionRecord: (record) => set({ currentHazardRevisionRecord: record }),
-  setHazardRevisionRecordQueryParams: (params) =>
-    set((state) => ({
-      hazardRevisionRecordQueryParams: { ...state.hazardRevisionRecordQueryParams, ...params },
-    })),
-  setHazardRevisionRecordTotal: (total) => set({ hazardRevisionRecordTotal: total }),
-  setHazardRevisionRecordLoading: (loading) => set({ hazardRevisionRecordLoading: loading }),
-
-  addHazardRevisionRecord: (record) =>
-    set((state) => ({ hazardRevisionRecords: [record, ...state.hazardRevisionRecords] })),
-
-  updateHazardRevisionRecord: (id, updates) =>
-    set((state) => ({
-      hazardRevisionRecords: state.hazardRevisionRecords.map((r) =>
-        r.id === id ? { ...r, ...updates } : r
-      ),
-      currentHazardRevisionRecord:
-        state.currentHazardRevisionRecord?.id === id
-          ? { ...state.currentHazardRevisionRecord, ...updates }
-          : state.currentHazardRevisionRecord,
-    })),
-
-  removeHazardRevisionRecord: (id) =>
-    set((state) => ({
-      hazardRevisionRecords: state.hazardRevisionRecords.filter((r) => r.id !== id),
-      currentHazardRevisionRecord:
-        state.currentHazardRevisionRecord?.id === id ? null : state.currentHazardRevisionRecord,
-    })),
-
-  // ============ Hazard Revision Archive Actions ============
-  setHazardRevisionArchives: (archives) => set({ hazardRevisionArchives: archives }),
-  setCurrentHazardRevisionArchive: (archive) => set({ currentHazardRevisionArchive: archive }),
-  setHazardRevisionArchiveQueryParams: (params) =>
-    set((state) => ({
-      hazardRevisionArchiveQueryParams: { ...state.hazardRevisionArchiveQueryParams, ...params },
-    })),
-  setHazardRevisionArchiveTotal: (total) => set({ hazardRevisionArchiveTotal: total }),
-  setHazardRevisionArchiveLoading: (loading) => set({ hazardRevisionArchiveLoading: loading }),
-
-  addHazardRevisionArchive: (archive) =>
-    set((state) => ({ hazardRevisionArchives: [archive, ...state.hazardRevisionArchives] })),
-
-  updateHazardRevisionArchive: (id, updates) =>
-    set((state) => ({
-      hazardRevisionArchives: state.hazardRevisionArchives.map((a) =>
-        a.id === id ? { ...a, ...updates } : a
-      ),
-      currentHazardRevisionArchive:
-        state.currentHazardRevisionArchive?.id === id
-          ? { ...state.currentHazardRevisionArchive, ...updates }
-          : state.currentHazardRevisionArchive,
-    })),
-
-  removeHazardRevisionArchive: (id) =>
-    set((state) => ({
-      hazardRevisionArchives: state.hazardRevisionArchives.filter((a) => a.id !== id),
-      currentHazardRevisionArchive:
-        state.currentHazardRevisionArchive?.id === id ? null : state.currentHazardRevisionArchive,
     })),
 
   // ============ AI Workflow Config Actions ============
@@ -979,8 +859,6 @@ export const useSafetyStore = create<SafetyState>((set) => ({
   resetTrainingState: () => set(initialTrainingState),
   resetRegulationState: () => set(initialRegulationState),
   resetRevisionState: () => set(initialRevisionState),
-  resetHazardRevisionRecordState: () => set(initialHazardRevisionRecordState),
-  resetHazardRevisionArchiveState: () => set(initialHazardRevisionArchiveState),
   resetAIWorkflowConfigState: () => set(initialAIWorkflowConfigState),
   resetAPICallConfigState: () => set(initialAPICallConfigState),
   resetPersonnelState: () => set(initialPersonnelState),
@@ -1000,8 +878,6 @@ export const useSafetyStore = create<SafetyState>((set) => ({
       ...initialTrainingState,
       ...initialRegulationState,
       ...initialRevisionState,
-      ...initialHazardRevisionRecordState,
-      ...initialHazardRevisionArchiveState,
       ...initialAIWorkflowConfigState,
       ...initialAPICallConfigState,
       ...initialPersonnelState,

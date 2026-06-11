@@ -42,6 +42,7 @@ interface InspectionStore {
   executingEquipmentNo: string
   executingEquipmentIds: string[] | null
   executingEquipments: { id: string; name: string; no: string }[]
+  executingCompletedEquipmentIds: string[]
   setExecutingTask: (
     taskId: string,
     planType: string,
@@ -53,6 +54,7 @@ interface InspectionStore {
     equipmentNo?: string,
     equipmentIds?: string[] | null,
     equipments?: { id: string; name: string; no: string }[],
+    completedEquipmentIds?: string[],
   ) => void
   clearExecuting: () => void
 
@@ -149,7 +151,8 @@ export const useInspectionStore = create<InspectionStore>()((set) => ({
   executingEquipmentNo: '',
   executingEquipmentIds: null,
   executingEquipments: [],
-  setExecutingTask: (taskId, planType, routeDetail, templateItems, templateName, equipmentId, equipmentName, equipmentNo, equipmentIds, equipments) => set({
+  executingCompletedEquipmentIds: [],
+  setExecutingTask: (taskId, planType, routeDetail, templateItems, templateName, equipmentId, equipmentName, equipmentNo, equipmentIds, equipments, completedEquipmentIds) => set({
     executingTaskId: taskId,
     executingPlanType: planType,
     executingRouteDetail: routeDetail,
@@ -160,6 +163,7 @@ export const useInspectionStore = create<InspectionStore>()((set) => ({
     executingEquipmentNo: equipmentNo || '',
     executingEquipmentIds: equipmentIds || null,
     executingEquipments: equipments || [],
+    executingCompletedEquipmentIds: completedEquipmentIds || [],
   }),
   clearExecuting: () => set({
     executingTaskId: null,
@@ -172,6 +176,7 @@ export const useInspectionStore = create<InspectionStore>()((set) => ({
     executingEquipmentNo: '',
     executingEquipmentIds: null,
     executingEquipments: [],
+    executingCompletedEquipmentIds: [],
   }),
 
   // 路线

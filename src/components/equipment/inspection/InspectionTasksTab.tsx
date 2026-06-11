@@ -8,7 +8,7 @@ import { useInspectionStore } from '@/stores/inspection'
 import { startInspectionTask, closeInspectionTask } from '@/actions/inspection'
 import {
   fetchInspectionTasks, fetchInspectionRouteById,
-  fetchInspectionTemplateByIdClient,
+  fetchInspectionTemplateByIdClient, fetchInspectionTaskById,
 } from '@/lib/api/inspection'
 import { statusPill, pillSuccess, pillError, pillTab, actionLink, linkSuccess, linkWarning, linkMuted } from '@/components/equipment/shared-styles'
 import type { InspectionTask, InspectionTaskStatus } from '@/types/inspection'
@@ -69,10 +69,16 @@ export function InspectionTasksTab({ templates, equipments: allEquipments }: Pro
     const eqInfos = eqIds
       ? allEquipments.filter(e => eqIds.includes(e.id)).map(e => ({ id: e.id, name: e.name, no: e.equipment_no }))
       : undefined
+    // 获取任务详情以拿到已完成设备列表
+    let completedIds: string[] = []
+    try {
+      const taskDetail = await fetchInspectionTaskById(record.id)
+      completedIds = taskDetail.completed_equipment_ids || []
+    } catch { /* 获取失败不阻塞 */ }
     setExecutingTask(
       record.id, record.plan_type, routeDetail, items, template.name,
       record.equipment_id, record.equipment_name, record.equipment_no,
-      eqIds, eqInfos,
+      eqIds, eqInfos, completedIds,
     )
   }, [allEquipments, setExecutingTask])
 

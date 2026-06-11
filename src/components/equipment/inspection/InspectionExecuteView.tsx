@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import {
   App, Button, Card, Form, Input, Progress, Radio, Select, Steps, Typography,
 } from 'antd'
@@ -48,6 +48,12 @@ export function InspectionExecuteView({ onClose }: Props) {
   const rmPhoto = useCallback((i: number) => {
     setPhotos(prev => prev.filter((_, idx) => idx !== i))
   }, [])
+
+  // 管理 Blob URL 生命周期，避免内存泄漏
+  const photoUrls = useMemo(() => photos.map(f => URL.createObjectURL(f)), [photos])
+  useEffect(() => {
+    return () => { photoUrls.forEach(u => URL.revokeObjectURL(u)) }
+  }, [photoUrls])
 
   const pickFile = () => {
     const inp = document.createElement('input')
@@ -155,7 +161,7 @@ export function InspectionExecuteView({ onClose }: Props) {
                 border: '1px solid #e5e3df',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
               }}>
-                <img src={URL.createObjectURL(f)} alt={`现场照片-${i + 1}`}
+                <img src={photoUrls[i]} alt={`现场照片-${i + 1}`}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span role="button" onClick={() => rmPhoto(i)} style={{
                   position: 'absolute', top: 4, right: 4,
@@ -255,7 +261,7 @@ function DeviceInspectionView({ onClose }: Props) {
   const {
     executingTaskId, executingRouteDetail, executingTemplateItems, executingTemplateName,
     executingEquipmentId, executingEquipmentName, executingEquipmentNo,
-    executingEquipmentIds, executingEquipments,
+    executingEquipmentIds, executingEquipments, executingCompletedEquipmentIds,
     clearExecuting,
   } = useInspectionStore()
 
@@ -281,8 +287,13 @@ function DeviceInspectionView({ onClose }: Props) {
     return []
   }, [executingRouteDetail, executingEquipmentId, executingEquipmentName, executingEquipmentNo, executingEquipmentIds, executingEquipments])
 
-  const [step, setStep] = useState(0)
-  const [done, setDone] = useState<Set<string>>(new Set())
+  const initialDone = useMemo(() => new Set(executingCompletedEquipmentIds || []), [executingCompletedEquipmentIds])
+  const initialStep = useMemo(() => {
+    const idx = equipments.findIndex(eq => !initialDone.has(eq.equipment_id))
+    return idx >= 0 ? idx : 0
+  }, [equipments, initialDone])
+  const [step, setStep] = useState(initialStep)
+  const [done, setDone] = useState<Set<string>>(initialDone)
   const [submitting, setSubmitting] = useState(false)
   const [photos, setPhotos] = useState<Record<string, File[]>>({})
 
@@ -487,6 +498,12 @@ function EquipmentCheckCard({
   const [loading, setLoading] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
 
+  // 管理 Blob URL 生命周期，避免内存泄漏
+  const photoUrls = useMemo(() => photos.map((f: File) => URL.createObjectURL(f)), [photos])
+  useEffect(() => {
+    return () => { photoUrls.forEach((u: string) => URL.revokeObjectURL(u)) }
+  }, [photoUrls])
+
   const handleSubmit = async () => {
     try {
       const vals = await form.validateFields()
@@ -663,7 +680,7 @@ function EquipmentCheckCard({
                   border: '1px solid #e5e3df',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
                 }}>
-                  <img src={URL.createObjectURL(f)} alt={`${equipmentName}-${i + 1}`}
+                  <img src={photoUrls[i]} alt={`${equipmentName}-${i + 1}`}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   {!disabled && (
                     <span role="button" onClick={() => onRemovePhoto(i)} style={{

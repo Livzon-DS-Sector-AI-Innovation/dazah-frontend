@@ -101,6 +101,7 @@ export interface InspectionTask {
   assignee_name?: string
   equipment_count?: number
   completed_count?: number
+  completed_equipment_ids?: string[]
   photo_count?: number
 }
 

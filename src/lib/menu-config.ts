@@ -200,6 +200,7 @@ export const moduleMenus: ModuleMenu[] = [
     path: "/registration",
     children: [
       { key: "review", label: "申报进度", path: "/registration/review" },
+      { key: "authorization-letter", label: "授权书管理", path: "/registration/authorization-letter" },
       { key: "filing", label: "注册申报", path: "/registration/filing" },
       { key: "writing", label: "申报文件撰写", path: "/registration/writing" },
       { key: "dossier-writer", label: "申报资料撰写", path: "/registration/dossier-writer" },

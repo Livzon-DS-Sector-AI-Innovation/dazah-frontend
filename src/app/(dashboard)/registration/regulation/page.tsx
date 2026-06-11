@@ -186,7 +186,7 @@ export default function RegulatoryTrackerPage() {
               title="法规总数"
               value={summary?.totalCount || 0}
               prefix={<FileTextOutlined />}
-              valueStyle={{ color: '#1890ff' }}
+              styles={{ content: { color: '#1890ff' } }}
             />
           </Card>
         </Col>
@@ -196,7 +196,7 @@ export default function RegulatoryTrackerPage() {
               title="今日新增"
               value={summary?.todayNewCount || 0}
               prefix={<PlusOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -206,7 +206,7 @@ export default function RegulatoryTrackerPage() {
               title="未读法规"
               value={summary?.unreadNewCount || 0}
               prefix={<EyeOutlined />}
-              valueStyle={{ color: '#faad14' }}
+              styles={{ content: { color: '#faad14' } }}
             />
           </Card>
         </Col>
@@ -220,7 +220,7 @@ export default function RegulatoryTrackerPage() {
                   : '暂无'
               }
               prefix={<ReloadOutlined />}
-              valueStyle={{ color: '#722ed1', fontSize: '20px' }}
+              styles={{ content: { color: '#722ed1', fontSize: '20px' } }}
             />
           </Card>
         </Col>

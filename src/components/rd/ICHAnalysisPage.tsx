@@ -210,6 +210,13 @@ export function ICHAnalysisPage() {
   const saveLlmConfig = async () => {
     try {
       const values = await llmForm.validateFields()
+      
+      // 验证 API Key 格式
+      if (values.api_key && !values.api_key.startsWith('sk-')) {
+        message.error('API Key 格式错误，应以 sk- 开头')
+        return
+      }
+      
       const res = await fetch(`${API_BASE}/research/llm/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -218,13 +225,13 @@ export function ICHAnalysisPage() {
       const data = await res.json()
       if (data.code === 200) {
         setLlmConfig(data.data)
-        message.success('配置已保存')
+        message.success('✓ 配置已保存')
         setLlmConfigOpen(false)
       } else {
-        message.error(data.message || '保存失败')
+        message.error(data.message || '保存失败，请重试')
       }
-    } catch (e) {
-      message.error('保存失败')
+    } catch (e: any) {
+      message.error(`保存失败: ${e.message || '请检查网络连接'}`)
     }
   }
 
@@ -235,13 +242,17 @@ export function ICHAnalysisPage() {
     try {
       const res = await fetch(`${API_BASE}/research/llm/test`, { method: 'POST' })
       const data = await res.json()
-      if (data.code === 200) {
-        setLlmTestResult(data.data)
+      
+      // 无论成功失败都显示详细消息
+      if (data.code === 200 && data.data?.success) {
+        setLlmTestResult({ success: true, message: data.data.message })
       } else {
-        setLlmTestResult({ success: false, message: data.message || '连接失败' })
+        // 优先显示 data.data.message（后端详细错误），否则显示 data.message
+        const errorMsg = data.data?.message || data.message || '连接失败，请检查配置'
+        setLlmTestResult({ success: false, message: errorMsg })
       }
-    } catch (e) {
-      setLlmTestResult({ success: false, message: '连接失败' })
+    } catch (e: any) {
+      setLlmTestResult({ success: false, message: `网络错误: ${e.message || '无法连接到服务器'}` })
     } finally {
       setLlmTesting(false)
     }
@@ -727,11 +738,12 @@ export function ICHAnalysisPage() {
         
         {llmTestResult && (
           <Alert
-            message={llmTestResult.success ? '连接成功' : '连接失败'}
+            message={llmTestResult.success ? '✓ 连接成功' : '✗ 连接失败'}
             description={llmTestResult.message}
             type={llmTestResult.success ? 'success' : 'error'}
             showIcon
             icon={llmTestResult.success ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+            style={{ marginTop: 16 }}
           />
         )}
       </Modal>

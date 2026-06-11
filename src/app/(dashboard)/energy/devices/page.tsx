@@ -96,7 +96,7 @@ export default function DevicesPage() {
           variant="filled"
           style={{ width: 220, ...filledInputStyle }}
           value={deviceFilters.keyword}
-          onChange={(e) => setDeviceFilters({ keyword: e.target.value || undefined })}
+          onChange={(e) => setDeviceFilters({ keyword: e.target.value || undefined, page: 1 })}
           allowClear
         />
 
@@ -106,7 +106,7 @@ export default function DevicesPage() {
           variant="filled"
           style={{ width: 110, ...filledInputStyle }}
           value={deviceFilters.energy_type}
-          onChange={(value) => setDeviceFilters({ energy_type: value })}
+          onChange={(value) => setDeviceFilters({ energy_type: value, page: 1 })}
           options={[
             { label: '电力', value: 'electricity' },
             { label: '水', value: 'water' },
@@ -120,7 +120,7 @@ export default function DevicesPage() {
           variant="filled"
           style={{ width: 90, ...filledInputStyle }}
           value={deviceFilters.is_enabled}
-          onChange={(value) => setDeviceFilters({ is_enabled: value })}
+          onChange={(value) => setDeviceFilters({ is_enabled: value, page: 1 })}
           options={[
             { label: '启用', value: true },
             { label: '禁用', value: false },

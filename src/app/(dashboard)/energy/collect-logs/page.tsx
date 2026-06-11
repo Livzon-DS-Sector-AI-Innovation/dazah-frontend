@@ -136,7 +136,7 @@ export default function CollectLogsPage() {
           variant="filled"
           style={{ width: 120, ...filledInputStyle }}
           value={logFilters.status}
-          onChange={(value) => setLogFilters({ status: value })}
+          onChange={(value) => setLogFilters({ status: value, page: 1 })}
           options={[
             { label: '成功', value: 'success' },
             { label: '失败', value: 'failed' },

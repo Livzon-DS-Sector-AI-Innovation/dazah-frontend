@@ -23,7 +23,7 @@ const columns: ColumnsType<MaterialRecord> = [
     render: (unit: string | undefined) => unit || '-',
   },
   {
-    title: '领用时间', dataIndex: 'consumed_at', key: 'consumed_at', width: 160,
+    title: '领用时间', dataIndex: 'created_at', key: 'created_at', width: 160,
     render: (time: string) => time ? new Date(time).toLocaleString('zh-CN') : '-',
   },
   {

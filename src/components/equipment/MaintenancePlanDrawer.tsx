@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { App, Drawer, Form, Input, Select, InputNumber, DatePicker, Button, Space } from 'antd'
 import dayjs from 'dayjs'
 import { useEquipmentStore } from '@/stores/equipment'
 import { createMaintenancePlan, updateMaintenancePlan } from '@/actions/equipment'
-import { CreateMaintenancePlanInput, UpdateMaintenancePlanInput } from '@/types/equipment'
+import { CreateMaintenancePlanInput, UpdateMaintenancePlanInput, Maintainer } from '@/types/equipment'
+import { fetchAllUsersClient } from '@/lib/api/equipment-client'
 
 const { TextArea } = Input
 
@@ -13,6 +14,7 @@ interface Equipment {
   id: string
   name: string
   equipment_no: string
+  responsible_person_id?: string | null
 }
 
 interface MaintenancePlanDrawerProps {
@@ -24,9 +26,20 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const { maintenancePlanDrawerOpen, editingMaintenancePlan, closeMaintenancePlanDrawer } = useEquipmentStore()
+  const [allUsers, setAllUsers] = useState<Maintainer[]>([])
 
   useEffect(() => {
-    if (maintenancePlanDrawerOpen) {
+    if (!maintenancePlanDrawerOpen) return
+    fetchAllUsersClient().then((list) => {
+      setAllUsers(list)
+      // 加载完后重新设置责任人，让 Select 能匹配选项显示姓名
+      if (editingMaintenancePlan?.responsible_person_id) {
+        form.setFieldsValue({ responsible_person_id: editingMaintenancePlan.responsible_person_id })
+      }
+    }).catch(() => {})
+
+    // 延迟确保 Form 字段在 destroyOnHidden 后重新挂载完毕
+    const timer = setTimeout(() => {
       if (editingMaintenancePlan) {
         form.setFieldsValue({
           equipment_id: editingMaintenancePlan.equipment_id,
@@ -35,6 +48,7 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
           frequency: editingMaintenancePlan.frequency,
           frequency_unit: editingMaintenancePlan.frequency_unit,
           last_maintenance_date: editingMaintenancePlan.last_maintenance_date ? dayjs(editingMaintenancePlan.last_maintenance_date) : undefined,
+          responsible_person_id: editingMaintenancePlan.responsible_person_id,
           maintenance_content: editingMaintenancePlan.maintenance_content,
           remark: editingMaintenancePlan.remark,
           status: editingMaintenancePlan.status,
@@ -43,7 +57,8 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
         form.resetFields()
         form.setFieldsValue({ plan_type: '预防性维护', frequency_unit: '月' })
       }
-    }
+    }, 0)
+    return () => clearTimeout(timer)
   }, [maintenancePlanDrawerOpen, editingMaintenancePlan, form])
 
   const handleSubmit = async () => {
@@ -56,6 +71,7 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
           frequency: values.frequency,
           frequency_unit: values.frequency_unit,
           last_maintenance_date: values.last_maintenance_date ? values.last_maintenance_date.format('YYYY-MM-DD') : undefined,
+          responsible_person_id: values.responsible_person_id,
           maintenance_content: values.maintenance_content || undefined,
           remark: values.remark || undefined,
           status: values.status,
@@ -70,6 +86,7 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
           frequency: values.frequency,
           frequency_unit: values.frequency_unit,
           last_maintenance_date: values.last_maintenance_date ? values.last_maintenance_date.format('YYYY-MM-DD') : undefined,
+          responsible_person_id: values.responsible_person_id,
           maintenance_content: values.maintenance_content || undefined,
           remark: values.remark || undefined,
         }
@@ -101,7 +118,14 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
         {!editingMaintenancePlan && (
           <Form.Item name="equipment_id" label="关联设备" rules={[{ required: true, message: '请选择设备' }]}>
             <Select placeholder="选择设备" showSearch optionFilterProp="label"
-              options={equipments.map((eq) => ({ label: `${eq.equipment_no} - ${eq.name}`, value: eq.id }))} />
+              options={equipments.map((eq) => ({ label: `${eq.equipment_no} - ${eq.name}`, value: eq.id }))}
+              onChange={(eqId: string) => {
+                const eq = equipments.find(e => e.id === eqId)
+                form.setFieldsValue({
+                  responsible_person_id: eq?.responsible_person_id || undefined,
+                })
+              }}
+            />
           </Form.Item>
         )}
         <Form.Item name="plan_name" label="计划名称" rules={[{ required: true, message: '请输入计划名称' }]}>
@@ -125,6 +149,17 @@ export function MaintenancePlanDrawer({ equipments, onRefresh }: MaintenancePlan
         </div>
         <Form.Item name="last_maintenance_date" label="上次维护日期">
           <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" placeholder="选择日期" />
+        </Form.Item>
+        <Form.Item name="responsible_person_id" label="责任人" rules={[{ required: true, message: '请选择责任人' }]}>
+          <Select
+            placeholder="选择责任人"
+            showSearch
+            optionFilterProp="label"
+            options={allUsers.map((m) => ({
+              label: `${m.name} (${m.employee_no || '-'})`,
+              value: m.user_id,
+            }))}
+          />
         </Form.Item>
         {editingMaintenancePlan && (
           <Form.Item name="status" label="状态">

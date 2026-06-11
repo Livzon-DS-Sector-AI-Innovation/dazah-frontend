@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, Segmented } from 'antd'
+import { Card } from 'antd'
 import { Pie } from '@ant-design/charts'
 import { DistributionDataPoint } from '@/types/energy'
 
@@ -14,7 +13,6 @@ export function DistributionChart({
   data,
   loading = false,
 }: DistributionChartProps) {
-  const [viewType, setViewType] = useState<'workshop' | 'production_line'>('workshop')
 
   const total = data.reduce((sum, d) => sum + d.value, 0)
 
@@ -68,21 +66,6 @@ export function DistributionChart({
         </span>
       }
       loading={loading}
-      extra={
-        <Segmented
-          value={viewType}
-          onChange={(value) => setViewType(value as 'workshop' | 'production_line')}
-          options={[
-            { label: '按车间', value: 'workshop' },
-            { label: '按产线', value: 'production_line' },
-          ]}
-          style={{
-            background: '#f6f5f4',
-            borderRadius: 8,
-            padding: 2,
-          }}
-        />
-      }
       styles={{
         header: { borderBottom: '1px solid #ede9e4', padding: '16px 20px' },
         body: { padding: '16px 20px 20px' },

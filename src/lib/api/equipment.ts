@@ -29,7 +29,7 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 // 处理带分页的响应
-async function apiFetchPaginated(url: string, options?: RequestInit): Promise<EquipmentListResponse> {
+async function apiFetchPaginated<T>(url: string, options?: RequestInit): Promise<{ items: T[]; total: number; page: number; page_size: number }> {
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -75,6 +75,7 @@ export async function fetchEquipments(filters: EquipmentFilters = {}): Promise<E
   const params = new URLSearchParams()
   if (filters.category_id) params.append('category_id', filters.category_id)
   if (filters.location_id) params.append('location_id', filters.location_id)
+  if (filters.department_id) params.append('department_id', filters.department_id)
   if (filters.status) params.append('status', filters.status)
   if (filters.keyword) params.append('keyword', filters.keyword)
   if (filters.page) params.append('page', filters.page.toString())
@@ -112,17 +113,7 @@ export async function fetchWorkOrders(filters: WorkOrderFilters = {}): Promise<W
     ? `${API_BASE_URL}/api/v1/equipment/maintenance/work-orders/?${queryString}`
     : `${API_BASE_URL}/api/v1/equipment/maintenance/work-orders/`
 
-  const response = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
-  const result = await response.json()
-  return {
-    items: result.data || [],
-    total: result.meta?.total || 0,
-    page: result.meta?.page || 1,
-    page_size: result.meta?.page_size || 20,
-  }
+  return apiFetchPaginated(url)
 }
 
 export async function fetchWorkOrderStatistics(): Promise<WorkOrderStatistics> {
@@ -146,17 +137,7 @@ export async function fetchCalibrationPlans(filters: CalibrationPlanFilters = {}
     ? `${API_BASE_URL}/api/v1/equipment/maintenance/calibration/plans?${queryString}`
     : `${API_BASE_URL}/api/v1/equipment/maintenance/calibration/plans`
 
-  const response = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
-  const result = await response.json()
-  return {
-    items: result.data || [],
-    total: result.meta?.total || 0,
-    page: result.meta?.page || 1,
-    page_size: result.meta?.page_size || 20,
-  }
+  return apiFetchPaginated(url)
 }
 
 export async function fetchCalibrationPlanById(id: string): Promise<CalibrationPlan> {
@@ -176,17 +157,7 @@ export async function fetchCalibrationRecords(filters: CalibrationRecordFilters 
     ? `${API_BASE_URL}/api/v1/equipment/maintenance/calibration/records?${queryString}`
     : `${API_BASE_URL}/api/v1/equipment/maintenance/calibration/records`
 
-  const response = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
-  const result = await response.json()
-  return {
-    items: result.data || [],
-    total: result.meta?.total || 0,
-    page: result.meta?.page || 1,
-    page_size: result.meta?.page_size || 20,
-  }
+  return apiFetchPaginated(url)
 }
 
 // ==================== 备件管理 ====================
@@ -203,15 +174,7 @@ export async function fetchSpareParts(filters: SparePartFilters = {}): Promise<S
     ? `${API_BASE_URL}/api/v1/equipment/spare-parts/?${queryString}`
     : `${API_BASE_URL}/api/v1/equipment/spare-parts/`
 
-  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
-  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
-  const result = await response.json()
-  return {
-    items: result.data || [],
-    total: result.meta?.total || 0,
-    page: result.meta?.page || 1,
-    page_size: result.meta?.page_size || 20,
-  }
+  return apiFetchPaginated(url)
 }
 
 export async function fetchSparePartById(id: string): Promise<SparePart> {
@@ -240,15 +203,7 @@ export async function fetchMaintenancePlans(filters: MaintenancePlanFilters = {}
     ? `${API_BASE_URL}/api/v1/equipment/maintenance/plans/?${queryString}`
     : `${API_BASE_URL}/api/v1/equipment/maintenance/plans/`
 
-  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
-  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
-  const result = await response.json()
-  return {
-    items: result.data || [],
-    total: result.meta?.total || 0,
-    page: result.meta?.page || 1,
-    page_size: result.meta?.page_size || 20,
-  }
+  return apiFetchPaginated(url)
 }
 
 export async function fetchMaintenancePlanById(id: string): Promise<MaintenancePlan> {
@@ -274,15 +229,7 @@ export async function fetchInspectionTemplates(filters: InspectionTemplateFilter
     ? `${API_BASE_URL}/api/v1/equipment/maintenance/inspection-templates/?${queryString}`
     : `${API_BASE_URL}/api/v1/equipment/maintenance/inspection-templates/`
 
-  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
-  if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText}`)
-  const result = await response.json()
-  return {
-    items: result.data || [],
-    total: result.meta?.total || 0,
-    page: result.meta?.page || 1,
-    page_size: result.meta?.page_size || 20,
-  }
+  return apiFetchPaginated(url)
 }
 
 export async function fetchInspectionTemplateById(id: string): Promise<InspectionTemplate> {
@@ -300,6 +247,7 @@ export interface DepartmentOption {
   name: string
   leader_name: string | null
   leader_user_id: string | null
+  leader_id: string | null
 }
 
 export async function fetchDepartments(): Promise<DepartmentOption[]> {

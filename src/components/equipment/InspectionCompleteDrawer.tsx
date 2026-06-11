@@ -48,6 +48,7 @@ export function InspectionCompleteDrawer({ onRefresh }: InspectionCompleteDrawer
       const records: InspectionRecordItem[] = values.records.map((row) => ({
         item_id: row.id,
         result: row.result,
+        actual_value: row.actual_value || undefined,
         remark: row.remark || undefined,
       }))
       await completeInspection(completingWorkOrderId!, { records })

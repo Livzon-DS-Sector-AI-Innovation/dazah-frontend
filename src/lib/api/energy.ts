@@ -14,8 +14,10 @@ import {
   AlertRule,
   CreateRuleInput,
   UpdateRuleInput,
+  RuleQueryParams,
   AlertRecord,
   ProcessRecordInput,
+  RecordQueryParams,
 } from '@/types/energy'
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000'
@@ -262,7 +264,7 @@ export async function fetchEnergyOverviewClient(
 
 // 预警规则 API
 export async function fetchAlertRules(
-  params: Record<string, unknown> = {}
+  params: RuleQueryParams = {}
 ): Promise<PaginatedResponse<AlertRule>> {
   const searchParams = new URLSearchParams()
   if (params.energy_type) searchParams.set('energy_type', String(params.energy_type))
@@ -311,7 +313,7 @@ export async function deleteAlertRule(id: string): Promise<void> {
 
 // 预警记录 API
 export async function fetchAlertRecords(
-  params: Record<string, unknown> = {}
+  params: RecordQueryParams = {}
 ): Promise<PaginatedResponse<AlertRecord>> {
   const searchParams = new URLSearchParams()
   if (params.energy_type) searchParams.set('energy_type', String(params.energy_type))
@@ -354,7 +356,17 @@ export async function fetchCollectLogDetail(
   return unwrapData(res)
 }
 
-async function fetchCollectLogsClient(
+export async function fetchCollectLogDetailClient(
+  id: string
+): Promise<CollectLogDetail> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/energy/collect/logs/${id}/detail`
+  )
+  if (!res.ok) throw new Error('获取采集日志详情失败')
+  return unwrapData(res)
+}
+
+export async function fetchCollectLogsClient(
   params: LogQueryParams = {}
 ): Promise<PaginatedResponse<CollectLog>> {
   const searchParams = new URLSearchParams()

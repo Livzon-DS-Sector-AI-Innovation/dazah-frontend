@@ -50,7 +50,7 @@ export function StockWarningTable({ onRefresh }: StockWarningTableProps) {
         />
       )}
       <Table
-        columns={columns} dataSource={stockWarnings} rowKey="id" size="small" loading={stockWarningsLoading}
+        columns={columns} dataSource={stockWarnings} rowKey="spare_part_id" size="small" loading={stockWarningsLoading}
         scroll={{ x: 'max-content' }}
         pagination={false}
       />

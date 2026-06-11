@@ -6,7 +6,7 @@ import { ToolOutlined, SearchOutlined, CalendarOutlined } from '@ant-design/icon
 import type { ColumnsType } from 'antd/es/table'
 import type { Equipment, MaintenancePlan, WorkOrder } from '@/types/equipment'
 import type { InspectionTask } from '@/types/inspection'
-import { fetchMaintenancePlans, fetchWorkOrders } from '@/lib/api/equipment'
+import { fetchMaintenancePlansClient, fetchWorkOrdersClient } from '@/lib/api/equipment-client'
 import { fetchInspectionHistory } from '@/lib/api/inspection'
 import { monoFont, pillNeutral, pillSuccess, pillWarning, pillError, pillInfo, pillPurple, statusPill } from '@/components/equipment/shared-styles'
 import type { EquipmentStatus, EquipmentImportance } from '@/types/equipment'
@@ -78,7 +78,7 @@ export function EquipmentDetailDrawer({ open, equipment, categoryName, locationN
     if (!equipment) return
     setPlansLoading(true)
     try {
-      const result = await fetchMaintenancePlans({ equipment_id: equipment.id, page: 1, page_size: 50 })
+      const result = await fetchMaintenancePlansClient({ equipment_id: equipment.id, page: 1, page_size: 50 })
       setPlans(result.items)
     } catch {
       message.error('加载维护保养计划失败')
@@ -104,7 +104,7 @@ export function EquipmentDetailDrawer({ open, equipment, categoryName, locationN
     if (!equipment) return
     setOrdersLoading(true)
     try {
-      const result = await fetchWorkOrders({ equipment_id: equipment.id, page: 1, page_size: 50 })
+      const result = await fetchWorkOrdersClient({ equipment_id: equipment.id, page: 1, page_size: 50 })
       setOrders(result.items)
     } catch {
       message.error('加载维修工单失败')

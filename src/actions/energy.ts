@@ -12,6 +12,7 @@ import {
   triggerCollect as apiTriggerCollect,
   fetchCollectLogs,
   fetchAlertRules,
+  fetchAlertRuleById,
   createAlertRule as apiCreateAlertRule,
   updateAlertRule as apiUpdateAlertRule,
   deleteAlertRule as apiDeleteAlertRule,
@@ -28,6 +29,8 @@ import {
   CreateRuleInput,
   UpdateRuleInput,
   ProcessRecordInput,
+  RuleQueryParams,
+  RecordQueryParams,
 } from '@/types/energy'
 
 // 数据源配置 Server Actions
@@ -77,8 +80,12 @@ export async function getCollectLogs(params: LogQueryParams = {}) {
 }
 
 // 预警规则 Server Actions
-export async function getAlertRules(params: Record<string, unknown> = {}) {
+export async function getAlertRules(params: RuleQueryParams = {}) {
   return fetchAlertRules(params)
+}
+
+export async function getAlertRuleById(id: string) {
+  return fetchAlertRuleById(id)
 }
 
 export async function createAlertRule(data: CreateRuleInput) {
@@ -99,7 +106,7 @@ export async function deleteAlertRule(id: string) {
 }
 
 // 预警记录 Server Actions
-export async function getAlertRecords(params: Record<string, unknown> = {}) {
+export async function getAlertRecords(params: RecordQueryParams = {}) {
   return fetchAlertRecords(params)
 }
 

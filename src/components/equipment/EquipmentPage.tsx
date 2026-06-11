@@ -3,11 +3,11 @@
 import { useEffect, useCallback, useState } from 'react'
 import { App, ConfigProvider, Tabs, Button } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
+import { MenuFoldOutlined, MenuUnfoldOutlined, ReloadOutlined } from '@ant-design/icons'
 import { EquipmentCategory, Location, Equipment, EquipmentStatistics } from '@/types/equipment'
 import { useEquipmentStore } from '@/stores/equipment'
 import { antdTheme } from '@/lib/antd-theme'
-import { fetchEquipmentsClient, fetchEquipmentStatisticsClient } from '@/lib/api/equipment-client'
+import { fetchEquipmentsClient, fetchEquipmentStatisticsClient, fetchCategoriesClient, fetchLocationsClient } from '@/lib/api/equipment-client'
 import { StatsCards } from './StatsCards'
 import { EquipmentTable } from './EquipmentTable'
 import { CategoryTree } from './CategoryTree'
@@ -40,6 +40,8 @@ export function EquipmentPage({
     categories,
     locations,
     statistics,
+    equipments,
+    failureCodes,
     selectedCategory,
     selectedLocation,
     statusFilter,
@@ -47,6 +49,8 @@ export function EquipmentPage({
     departments,
     keyword,
     loading,
+    setSelectedCategory,
+    setSelectedLocation,
     setCategories,
     setLocations,
     setEquipments,
@@ -59,10 +63,12 @@ export function EquipmentPage({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [resetKey, setResetKey] = useState(0)
 
-  // 初始化分类和位置
+  // 初始化 store 数据（包含 SSR 数据）
   useEffect(() => {
     setCategories(initialCategories)
     setLocations(initialLocations)
+    setEquipments(initialEquipments)
+    setTotal(initialTotal)
     setStatistics(initialStatistics)
   }, [])
 
@@ -71,42 +77,52 @@ export function EquipmentPage({
     setDepartments(initialDepartments)
   }, [])
 
-  // 获取数据
+  // 获取列表数据
   const fetchData = useCallback(async (p: number, ps: number) => {
     setLoading(true)
     try {
-      const [equipmentsResponse, stats] = await Promise.all([
-        fetchEquipmentsClient({
-          category_id: selectedCategory,
-          location_id: selectedLocation,
-          department_id: departmentFilter,
-          status: statusFilter || undefined,
-          keyword: keyword || undefined,
-          page: p,
-          page_size: ps,
-        }),
-        fetchEquipmentStatisticsClient(),
-      ])
+      const equipmentsResponse = await fetchEquipmentsClient({
+        category_id: selectedCategory,
+        location_id: selectedLocation,
+        department_id: departmentFilter,
+        status: statusFilter || undefined,
+        keyword: keyword || undefined,
+        page: p,
+        page_size: ps,
+      })
       setEquipments(equipmentsResponse.items)
       setTotal(equipmentsResponse.total)
-      setStatistics(stats)
     } catch (error) {
       console.error('获取设备数据失败:', error)
     } finally {
       setLoading(false)
     }
-  }, [selectedCategory, selectedLocation, departmentFilter, statusFilter, keyword, setEquipments, setTotal, setStatistics, setLoading])
+  }, [selectedCategory, selectedLocation, departmentFilter, statusFilter, keyword, setEquipments, setTotal, setLoading])
 
-  // 首次加载
-  useEffect(() => {
-    fetchData(1, 20)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // 单独刷新统计（仅 mount 或需要时使用）
+  const refreshStatistics = useCallback(async () => {
+    try {
+      const stats = await fetchEquipmentStatisticsClient()
+      setStatistics(stats)
+    } catch { /* 静默 */ }
+  }, [setStatistics])
 
-  // 筛选变化时重置到第一页
+  // 刷新分类和位置树
+  const refreshCategoriesAndLocations = useCallback(async () => {
+    try {
+      const [cats, locs] = await Promise.all([fetchCategoriesClient(), fetchLocationsClient()])
+      setCategories(cats)
+      setLocations(locs)
+    } catch (error) {
+      console.error('刷新分类/位置失败:', error)
+    }
+  }, [setCategories, setLocations])
+
+  // 筛选变化时重置到第一页（含首次加载）
   useEffect(() => {
     fetchData(1, 20)
     setResetKey(k => k + 1)
-  }, [selectedCategory, selectedLocation, departmentFilter])
+  }, [selectedCategory, selectedLocation, departmentFilter, statusFilter, keyword])
 
   const tabItems = [
     {
@@ -120,6 +136,21 @@ export function EquipmentPage({
       children: <LocationTree locations={locations} />,
     },
   ]
+
+  const tabBarExtra = (selectedCategory || selectedLocation) ? (
+    <Button
+      type="text"
+      size="small"
+      icon={<ReloadOutlined />}
+      onClick={() => {
+        setSelectedCategory(null)
+        setSelectedLocation(null)
+      }}
+      style={{ color: '#787671', marginRight: 4 }}
+    >
+      重置
+    </Button>
+  ) : null
 
   const currentStats = statistics ?? initialStatistics
 
@@ -156,8 +187,8 @@ export function EquipmentPage({
                 overflow: 'hidden',
               }}
             >
-              <div style={{ flex: 1, overflow: 'auto' }}>
-                <Tabs items={tabItems} />
+              <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+                <Tabs items={tabItems} tabBarExtraContent={tabBarExtra} />
               </div>
             </div>
           )}
@@ -194,12 +225,13 @@ export function EquipmentPage({
 
         {/* 抽屉组件 */}
         <EquipmentDrawer onRefresh={() => { fetchData(1, 20); setResetKey(k => k + 1) }} />
-        <CategoryDrawer />
-        <LocationDrawer />
+        <CategoryDrawer onRefresh={refreshCategoriesAndLocations} />
+        <LocationDrawer onRefresh={refreshCategoriesAndLocations} />
         <RepairDrawer
-          equipments={initialEquipments.map(e => ({
+          equipments={equipments.map(e => ({
             id: e.id, equipment_no: e.equipment_no, name: e.name, importance: e.importance,
           }))}
+          symptoms={failureCodes.symptoms}
           onRefresh={() => fetchData(1, 20)}
         />
       </App>

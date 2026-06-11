@@ -7,7 +7,7 @@ import { createLocation, updateLocation } from '@/actions/equipment'
 
 const { TextArea } = Input
 
-export function LocationDrawer() {
+export function LocationDrawer({ onRefresh }: { onRefresh?: () => void }) {
   const [form] = Form.useForm()
   const { message } = App.useApp()
   const [submitting, setSubmitting] = useState(false)
@@ -19,7 +19,8 @@ export function LocationDrawer() {
   } = useEquipmentStore()
 
   useEffect(() => {
-    if (locationDrawerOpen) {
+    if (!locationDrawerOpen) return
+    const timer = setTimeout(() => {
       if (editingLocation) {
         form.setFieldsValue({
           name: editingLocation.name,
@@ -30,7 +31,8 @@ export function LocationDrawer() {
       } else {
         form.resetFields()
       }
-    }
+    }, 0)
+    return () => clearTimeout(timer)
   }, [locationDrawerOpen, editingLocation, form])
 
   const handleSubmit = async () => {
@@ -46,6 +48,7 @@ export function LocationDrawer() {
         message.success('创建位置成功')
       }
       closeLocationDrawer()
+      onRefresh?.()
     } catch (err: any) {
       // Ant Design validation errors have an errorFields property
       if (err?.errorFields) return

@@ -15,9 +15,9 @@ import {
   fetchFailureCodesClient, fetchCalibrationPlansClient, fetchCalibrationRecordsClient,
   fetchMaintenancePlansClient,
   fetchEquipmentsClient,
+  fetchCategoriesClient,
   fetchClaimTimeoutConfigClient,
 } from '@/lib/api/equipment-client'
-import { fetchCategories } from '@/lib/api/equipment'
 import { updateClaimTimeoutConfig } from '@/actions/equipment'
 import { EquipmentCategory } from '@/types/equipment'
 import { WorkOrderStatsCards } from './WorkOrderStatsCards'
@@ -104,7 +104,7 @@ export function MaintenancePage({
         setEquipmentsState(res.items)
       }).catch(() => {})
     }
-    fetchCategories().then(setCategoriesState).catch(() => {})
+    fetchCategoriesClient().then(setCategoriesState).catch(() => {})
   }, [initialEquipments.length])
 
   // 初始化
@@ -333,7 +333,7 @@ export function MaintenancePage({
             维护保养
           </h2>
           <p style={{ fontSize: 14, color: '#787671', margin: 0, lineHeight: 1.5 }}>
-            工单管理 · 故障代码 · 校准计划 · 维护计划 · 巡检模板
+            工单管理 · 故障代码 · 校准计划 · 维护计划
           </p>
         </div>
         <div style={{ background: '#ffffff', padding: 20, borderRadius: 12, border: '1px solid #e5e3df' }}>

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, Radio, Segmented } from 'antd'
+import { Card } from 'antd'
 import { Line } from '@ant-design/charts'
 import { TrendDataPoint } from '@/types/energy'
 
@@ -11,7 +10,6 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ data, loading = false }: TrendChartProps) {
-  const [timeRange, setTimeRange] = useState<'week' | 'month'>('week')
 
   const config = {
     data,
@@ -71,21 +69,6 @@ export function TrendChart({ data, loading = false }: TrendChartProps) {
         </span>
       }
       loading={loading}
-      extra={
-        <Segmented
-          value={timeRange}
-          onChange={(value) => setTimeRange(value as 'week' | 'month')}
-          options={[
-            { label: '近7天', value: 'week' },
-            { label: '近30天', value: 'month' },
-          ]}
-          style={{
-            background: '#f6f5f4',
-            borderRadius: 8,
-            padding: 2,
-          }}
-        />
-      }
       styles={{
         header: { borderBottom: '1px solid #ede9e4', padding: '16px 20px' },
         body: { padding: '16px 20px 20px' },

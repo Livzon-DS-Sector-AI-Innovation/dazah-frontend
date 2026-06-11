@@ -41,7 +41,10 @@ export function MaintenancePlanTable({ onRefresh, equipments }: Props) {
 
   const columns: ColumnsType<MaintenancePlan> = [
     { title: '计划名称', dataIndex: 'plan_name', key: 'plan_name', width: 160 },
-    { title: '关联设备', dataIndex: 'equipment_name', key: 'equipment_name', width: 150, render: (n: string | undefined, r) => n || r.equipment_id },
+    {
+      title: '关联设备', dataIndex: 'equipment_name', key: 'equipment_name', width: 150,
+      render: (n: string | undefined, r) => n || equipments.find(eq => eq.id === r.equipment_id)?.name || r.equipment_id,
+    },
     {
       title: '维护类型', dataIndex: 'plan_type', key: 'plan_type', width: 110,
       render: (t: string) => <span style={t === '预防性维护' ? pillPurple : pillWarning}>{t}</span>,
@@ -79,7 +82,7 @@ export function MaintenancePlanTable({ onRefresh, equipments }: Props) {
             value={maintenancePlanStatusFilter || undefined} onChange={v => setMaintenancePlanStatusFilter(v || '')}
             options={[{ label: '启用', value: '启用' }, { label: '停用', value: '停用' }, { label: '已完成', value: '已完成' }]} />
           <Input.Search placeholder="搜索计划名称" allowClear style={{ width: 200 }}
-            value={maintenancePlanKeyword || undefined} onChange={e => setMaintenancePlanKeyword(e.target.value)} onSearch={v => setMaintenancePlanKeyword(v)} />
+            value={maintenancePlanKeyword || undefined} onSearch={v => setMaintenancePlanKeyword(v)} />
         </Space>
       </div>
       <Table columns={columns} dataSource={maintenancePlans} rowKey="id" size="small" loading={maintenancePlanLoading}
@@ -87,7 +90,7 @@ export function MaintenancePlanTable({ onRefresh, equipments }: Props) {
         pagination={{
           current: maintenancePlanPage, pageSize: maintenancePlanPageSize, total: maintenancePlanTotal,
           showSizeChanger: true, showQuickJumper: true, showTotal: t => `共 ${t} 条`,
-          onChange: (p, s) => { setMaintenancePlanPage(p); setMaintenancePlanPageSize(s) },
+          onChange: (p, s) => { if (s !== maintenancePlanPageSize) { setMaintenancePlanPageSize(s) } else { setMaintenancePlanPage(p) } },
         }} />
     </div>
   )

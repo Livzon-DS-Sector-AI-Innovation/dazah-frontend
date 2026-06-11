@@ -102,6 +102,7 @@ interface EquipmentStore {
   workOrderDetailOpen: boolean
   editingWorkOrder: WorkOrder | null
   viewingWorkOrder: WorkOrder | null
+  setViewingWorkOrder: (order: WorkOrder | null) => void
   openWorkOrderDrawer: (order?: WorkOrder) => void
   closeWorkOrderDrawer: () => void
   openWorkOrderDetail: (order: WorkOrder) => void
@@ -287,6 +288,7 @@ export const useEquipmentStore = create<EquipmentStore>()(
       resetFilters: () => set({
         selectedCategory: null,
         selectedLocation: null,
+        departmentFilter: null,
         statusFilter: '',
         keyword: '',
         page: 1,
@@ -350,6 +352,7 @@ export const useEquipmentStore = create<EquipmentStore>()(
       workOrderDetailOpen: false,
       editingWorkOrder: null,
       viewingWorkOrder: null,
+      setViewingWorkOrder: (order) => set({ viewingWorkOrder: order }, false, 'equipment/setViewingWorkOrder'),
       openWorkOrderDrawer: (order) => set({ workOrderDrawerOpen: true, editingWorkOrder: order || null }, false, 'equipment/openWorkOrderDrawer'),
       closeWorkOrderDrawer: () => set({ workOrderDrawerOpen: false, editingWorkOrder: null }, false, 'equipment/closeWorkOrderDrawer'),
       openWorkOrderDetail: (order) => set({ workOrderDetailOpen: true, viewingWorkOrder: order }, false, 'equipment/openWorkOrderDetail'),

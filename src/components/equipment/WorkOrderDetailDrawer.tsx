@@ -10,7 +10,7 @@ import {
 import { useEquipmentStore } from '@/stores/equipment'
 import { assignWorkOrder, startWorkOrder, completeWorkOrder, verifyWorkOrder, closeWorkOrder, claimWorkOrder } from '@/actions/equipment'
 import { WorkOrderStatus, WorkOrderPriority, Maintainer } from '@/types/equipment'
-import { fetchMaintainersClient } from '@/lib/api/equipment-client'
+import { fetchMaintainersClient, fetchWorkOrderByIdClient } from '@/lib/api/equipment-client'
 
 const { TextArea } = Input
 
@@ -48,10 +48,17 @@ interface WorkOrderDetailDrawerProps {
 
 export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps) {
   const { message, modal } = App.useApp()
-  const { workOrderDetailOpen, viewingWorkOrder, closeWorkOrderDetail } = useEquipmentStore()
+  const { workOrderDetailOpen, viewingWorkOrder, closeWorkOrderDetail, setViewingWorkOrder } = useEquipmentStore()
 
   const [maintainers, setMaintainersState] = useState<Maintainer[]>([])
 
+  const refreshDetail = async (id: string) => {
+    try {
+      const updated = await fetchWorkOrderByIdClient(id)
+      setViewingWorkOrder(updated)
+    } catch { /* 静默失败，列表刷新已覆盖 */ }
+    onRefresh?.()
+  }
   useEffect(() => {
     if (workOrderDetailOpen) {
       fetchMaintainersClient().then(setMaintainersState).catch(() => {})
@@ -86,11 +93,11 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
       okText: '确认指派',
       cancelText: '取消',
       onOk: async () => {
-        if (!assigneeId) { message.warning('请选择维修人员'); return }
+        if (!assigneeId) { message.warning('请选择维修人员'); throw new Error('请选择维修人员') }
         try {
           await assignWorkOrder(wo.id, { assignee_id: assigneeId })
           message.success('指派成功')
-          onRefresh?.()
+          await refreshDetail(wo.id)
         } catch (error: any) {
           message.error(error?.message || '指派失败')
           throw error
@@ -103,7 +110,7 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
     try {
       await startWorkOrder(wo.id)
       message.success('已开始维修')
-      onRefresh?.()
+      await refreshDetail(wo.id)
     } catch (error: any) {
       message.error(error?.message || '操作失败')
     }
@@ -132,7 +139,7 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
         try {
           await completeWorkOrder(wo.id, { repair_detail: repairDetail })
           message.success('已提交验收')
-          onRefresh?.()
+          await refreshDetail(wo.id)
         } catch (error: any) {
           message.error(error?.message || '操作失败')
           throw error
@@ -163,7 +170,7 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
         try {
           await verifyWorkOrder(wo.id, { result, remark: remark || undefined })
           message.success(result === '合格' ? '验收通过' : '已打回重修')
-          onRefresh?.()
+          await refreshDetail(wo.id)
         } catch (error: any) {
           message.error(error?.message || '操作失败')
           throw error
@@ -176,7 +183,7 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
     try {
       await closeWorkOrder(wo.id)
       message.success('工单已关闭')
-      onRefresh?.()
+      await refreshDetail(wo.id)
     } catch (error: any) {
       message.error(error?.message || '操作失败')
     }
@@ -186,7 +193,7 @@ export function WorkOrderDetailDrawer({ onRefresh }: WorkOrderDetailDrawerProps)
     try {
       await claimWorkOrder(wo.id)
       message.success('抢单成功')
-      onRefresh?.()
+      await refreshDetail(wo.id)
     } catch (error: any) {
       message.error(error?.message || '抢单失败')
     }

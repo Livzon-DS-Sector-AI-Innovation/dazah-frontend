@@ -13,7 +13,7 @@ import {
   CollectLogDeviceDetail,
   CollectStatus,
 } from '@/types/energy'
-import { fetchCollectLogDetail } from '@/lib/api/energy'
+import { fetchCollectLogDetailClient } from '@/lib/api/energy'
 
 // ── 轻奢 Pill ──
 
@@ -171,7 +171,7 @@ export function CollectLogDetailDrawer({
 
     setLoading(true)
     setDetail(null)
-    fetchCollectLogDetail(logId)
+    fetchCollectLogDetailClient(logId)
       .then(setDetail)
       .catch((err) => {
         console.error('获取采集日志详情失败:', err)
@@ -279,7 +279,7 @@ export function CollectLogDetailDrawer({
       size={640}
       open={open}
       onClose={onClose}
-      destroyOnClose
+      destroyOnHidden
       styles={{
         header: {
           borderBottom: '1px solid #e5e3df',

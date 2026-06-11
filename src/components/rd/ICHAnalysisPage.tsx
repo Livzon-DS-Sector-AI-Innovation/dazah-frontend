@@ -15,7 +15,8 @@ import {
   Typography,
   Divider,
   Select,
-  Radio
+  Radio,
+  Checkbox
 } from 'antd'
 import { 
   UploadOutlined, 
@@ -75,6 +76,8 @@ interface Q3DResult {
     other: number
   }
   report: string
+  llm_used?: boolean
+  llm_elements_count?: number
 }
 
 interface Q3CResult {
@@ -90,6 +93,8 @@ interface Q3CResult {
     unknown: number
   }
   report: string
+  llm_used?: boolean
+  llm_solvents_count?: number
 }
 
 export function ICHAnalysisPage() {
@@ -99,6 +104,7 @@ export function ICHAnalysisPage() {
   const [loading, setLoading] = useState(false)
   const [route, setRoute] = useState<string>('oral')
   const [showReport, setShowReport] = useState(false)
+  const [useLLM, setUseLLM] = useState(false)
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
@@ -109,7 +115,7 @@ export function ICHAnalysisPage() {
       const formData = new FormData()
       formData.append('file', file)
       
-      const res = await fetch(`${API_BASE}/research/ich/q3d/analyze?route=${route}`, {
+      const res = await fetch(`${API_BASE}/research/ich/q3d/analyze?route=${route}&use_llm=${useLLM}`, {
         method: 'POST',
         body: formData,
       })
@@ -138,7 +144,7 @@ export function ICHAnalysisPage() {
       const formData = new FormData()
       formData.append('file', file)
       
-      const res = await fetch(`${API_BASE}/research/ich/q3c/analyze`, {
+      const res = await fetch(`${API_BASE}/research/ich/q3c/analyze?use_llm=${useLLM}`, {
         method: 'POST',
         body: formData,
       })
@@ -342,6 +348,14 @@ export function ICHAnalysisPage() {
                         ))}
                       </Radio.Group>
                     </div>
+                    <div style={{ marginBottom: 12 }}>
+                      <Checkbox 
+                        checked={useLLM} 
+                        onChange={(e) => setUseLLM(e.target.checked)}
+                      >
+                        使用 AI 增强识别（需要配置 OPENAI_API_KEY）
+                      </Checkbox>
+                    </div>
                     <Upload
                       accept=".docx"
                       maxCount={1}
@@ -374,6 +388,11 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="需要评估的元素">
                           <Tag color="red">{q3dResult.needs_assessment} 个</Tag>
                         </Descriptions.Item>
+                        {q3dResult.llm_used && (
+                          <Descriptions.Item label="AI 识别元素">
+                            <Tag color="purple">{q3dResult.llm_elements_count} 个</Tag>
+                          </Descriptions.Item>
+                        )}
                         <Descriptions.Item label="Class 1 元素">
                           <Tag color="red">{q3dResult.summary.class_1} 个</Tag>
                         </Descriptions.Item>
@@ -463,6 +482,14 @@ export function ICHAnalysisPage() {
             children: (
               <div>
                 <Card title="上传工艺文件" style={{ marginBottom: 16 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <Checkbox 
+                      checked={useLLM} 
+                      onChange={(e) => setUseLLM(e.target.checked)}
+                    >
+                      使用 AI 增强识别（需要配置 OPENAI_API_KEY）
+                    </Checkbox>
+                  </div>
                   <Upload
                     accept=".docx"
                     maxCount={1}
@@ -495,6 +522,11 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="识别溶剂总数">
                           {q3cResult.total_solvents} 个
                         </Descriptions.Item>
+                        {q3cResult.llm_used && (
+                          <Descriptions.Item label="AI 识别溶剂">
+                            <Tag color="purple">{q3cResult.llm_solvents_count} 个</Tag>
+                          </Descriptions.Item>
+                        )}
                         <Descriptions.Item label="Class 1 溶剂（避免使用）">
                           <Tag color="red">{q3cResult.summary.class_1} 个</Tag>
                         </Descriptions.Item>

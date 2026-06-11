@@ -201,6 +201,7 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "review", label: "申报进度", path: "/registration/review" },
       { key: "filing", label: "注册申报", path: "/registration/filing" },
       { key: "writing", label: "申报文件撰写", path: "/registration/writing" },
+      { key: "dossier-writer", label: "申报资料撰写", path: "/registration/dossier-writer" },
       { key: "regulation", label: "法规跟踪", path: "/registration/regulation" },
       { key: "documents", label: "文件管理", path: "/registration/documents" },
     ],

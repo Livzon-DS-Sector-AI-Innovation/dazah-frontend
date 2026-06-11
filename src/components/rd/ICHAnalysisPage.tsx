@@ -17,7 +17,8 @@ import {
   Modal,
   Form,
   Input,
-  Popconfirm
+  Popconfirm,
+  Collapse
 } from 'antd'
 import { 
   UploadOutlined, 
@@ -27,8 +28,13 @@ import {
   CloseCircleOutlined,
   HistoryOutlined,
   DeleteOutlined,
-  EyeOutlined
+  EyeOutlined,
+  ExperimentOutlined
 } from '@ant-design/icons'
+import { ComplianceAlert } from './ComplianceAlert'
+import { StepGroupCard } from './StepGroupCard'
+import { ControlStrategy } from './ControlStrategy'
+import { TestingRecommendations } from './TestingRecommendations'
 
 const { Text } = Typography
 const { Option } = Select
@@ -63,6 +69,25 @@ interface SolventResult {
   limit_ppm?: number
   pde_mg_day?: number
   found_in_text: boolean
+  steps_used?: (string | number)[]
+}
+
+interface StepSolvent {
+  solvent: string
+  original_name?: string
+  class: string
+  limit?: number | string
+  pde?: number | null
+  purpose?: string
+  amount?: string
+  matched_as?: string
+}
+
+interface StepData {
+  step_number: string | number
+  step_title: string
+  solvents: StepSolvent[]
+  solvent_count: number
 }
 
 interface Q3DResult {
@@ -99,6 +124,7 @@ interface Q3CResult {
   report: string
   llm_used?: boolean
   llm_solvents_count?: number
+  step_analysis?: StepData[]
 }
 
 interface CombinedResult {
@@ -243,7 +269,7 @@ export function ICHAnalysisPage() {
       if (data.code === 200) {
         setLlmConfig(data.data)
         llmForm.setFieldsValue({
-          api_key: '',  // Don't pre-fill masked key
+          api_key: '',
           base_url: data.data.base_url,
           model: data.data.model,
         })
@@ -286,6 +312,78 @@ export function ICHAnalysisPage() {
     }
   }
 
+  // Q3D element detail card
+  const ElementDetailCard = ({ element }: { element: ElementResult }) => {
+    const classColor = {
+      'Class 1': 'red',
+      'Class 2A': 'orange',
+      'Class 2B': 'gold',
+      'Class 3': 'green',
+      'Other': 'default'
+    }[element.q3d_class] || 'default'
+
+    const assessmentItems = [
+      { route: '口服', assess: element.oral_assess, pde: element.oral_pde },
+      { route: '注射', assess: element.parenteral_assess, pde: element.parenteral_pde },
+      { route: '吸入', assess: element.inhalation_assess, pde: element.inhalation_pde },
+      { route: '皮肤', assess: element.cutaneous_assess, pde: element.cutaneous_pde, ctcl: element.ctcl },
+    ]
+
+    return (
+      <Card
+        size="small"
+        title={
+          <Space>
+            <span style={{ fontSize: 16, fontWeight: 600 }}>{element.symbol}</span>
+            <Tag color={classColor}>{element.q3d_class}</Tag>
+            {element.intentionally_added && <Tag color="blue">有意添加</Tag>}
+          </Space>
+        }
+        style={{ marginBottom: 8, borderLeft: `3px solid ${element.q3d_class === 'Class 1' ? '#e03131' : element.q3d_class === 'Class 2A' ? '#dd5b00' : '#d9d9d9'}` }}
+      >
+        <Descriptions size="small" column={2} style={{ marginBottom: 12 }}>
+          <Descriptions.Item label="来源" span={2}>{element.source}</Descriptions.Item>
+          {element.notes && <Descriptions.Item label="备注" span={2}>{element.notes}</Descriptions.Item>}
+        </Descriptions>
+        
+        <Table
+          size="small"
+          pagination={false}
+          dataSource={assessmentItems}
+          rowKey="route"
+          columns={[
+            { title: '给药途径', dataIndex: 'route', key: 'route', width: 80 },
+            {
+              title: '是否需要评估',
+              dataIndex: 'assess',
+              key: 'assess',
+              width: 100,
+              render: (val: boolean) => val ? <Tag color="warning">需要</Tag> : <Tag color="success">无需</Tag>
+            },
+            {
+              title: 'PDE (μg/天)',
+              dataIndex: 'pde',
+              key: 'pde',
+              width: 100,
+              render: (val: number | undefined) => val != null ? val.toFixed(1) : '-'
+            },
+            {
+              title: '备注',
+              key: 'note',
+              width: 150,
+              render: (_: any, record: any) => {
+                if (record.ctcl) {
+                  return <Text type="secondary" style={{ fontSize: 12 }}>CTCL: {record.ctcl} μg/g</Text>
+                }
+                return null
+              }
+            }
+          ]}
+        />
+      </Card>
+    )
+  }
+
   // Table columns
   const q3dColumns = [
     { title: '元素', dataIndex: 'symbol', key: 'symbol', width: 80, fixed: 'left' as const },
@@ -301,25 +399,6 @@ export function ICHAnalysisPage() {
     { title: '文中发现', dataIndex: 'found_in_text', key: 'found_in_text', width: 100, render: (val: boolean) => val ? <Tag color="success">✓</Tag> : <Tag>-</Tag> },
     { title: '需评估', dataIndex: 'needs_assessment', key: 'needs_assessment', width: 100, render: (val: boolean) => val ? <Tag color="warning">需要</Tag> : <Tag color="success">无需</Tag> },
     { title: '备注', dataIndex: 'notes', key: 'notes', width: 200 },
-  ]
-
-  const q3cColumns = [
-    {
-      title: '溶剂名称', key: 'name', width: 200,
-      render: (_: any, record: SolventResult) => (
-        <div><div>{record.name_cn}</div><div style={{ fontSize: 12, color: '#999' }}>{record.name_en}</div></div>
-      ),
-    },
-    {
-      title: '分类', dataIndex: 'class', key: 'class', width: 100,
-      render: (cls: string) => {
-        const colors: Record<string, string> = { 'Class 1': 'red', 'Class 2': 'orange', 'Class 3': 'green' }
-        return <Tag color={colors[cls] || 'default'}>{cls}</Tag>
-      },
-    },
-    { title: 'PDE (mg/天)', dataIndex: 'pde_mg_day', key: 'pde_mg_day', width: 120, render: (val: any) => { if (typeof val === 'number') return val.toFixed(2); if (val != null && !isNaN(Number(val))) return Number(val).toFixed(2); return '-'; } },
-    { title: '限度 (ppm)', dataIndex: 'limit_ppm', key: 'limit_ppm', width: 120, render: (val: any) => { if (typeof val === 'number') return val.toFixed(0); if (val != null && !isNaN(Number(val))) return Number(val).toFixed(0); return '-'; } },
-    { title: '文中发现', dataIndex: 'found_in_text', key: 'found_in_text', width: 100, render: (val: boolean) => val ? <Tag color="success">✓</Tag> : <Tag>-</Tag> },
   ]
 
   const historyColumns = [
@@ -341,52 +420,96 @@ export function ICHAnalysisPage() {
     },
   ]
 
+  // Count Q3D alerts - only elements actually found in text
+  const q3dClass1Found = result?.q3d.elements_found.filter(
+    e => e.q3d_class === 'Class 1' && e.found_in_text
+  ).map(e => e.symbol) || []
+
+  // Count Class 2B intentionally added for compliance alerts
+  const q3dClass2BIntentionalCount = result?.q3d.elements_found.filter(
+    e => e.q3d_class === 'Class 2B' && e.intentionally_added
+  ).length || 0
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, margin: 0 }}>ICH Q3C/Q3D 杂质识别</h1>
         <Space>
-          <Button icon={<SettingOutlined />} onClick={() => { setLlmConfigOpen(true); loadLlmConfig() }}>AI 配置</Button>
+          <Button icon={<SettingOutlined />} onClick={() => { setLlmConfigOpen(true); loadLlmConfig() }}>
+            AI 配置
+          </Button>
+          <Upload
+            accept=".docx,.doc"
+            showUploadList={false}
+            beforeUpload={handleUpload}
+            disabled={loading}
+          >
+            <Button type="primary" icon={<UploadOutlined />} loading={loading}>
+              上传工艺文件
+            </Button>
+          </Upload>
         </Space>
       </div>
 
-      {/* Upload section */}
-      <Card style={{ marginBottom: 16 }}>
-        <Upload accept=".docx" beforeUpload={handleUpload} showUploadList={false} disabled={loading}>
-          <Button icon={<UploadOutlined />} size="large" loading={loading} style={{ width: '100%', height: 40 }}>
-            {loading ? '分析中...' : '上传 DOCX 文件进行分析'}
-          </Button>
-        </Upload>
-        <Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 13 }}>
-          支持 .docx 格式，将同时进行 Q3C（溶剂残留）和 Q3D（元素杂质）分析，结果自动保存
-        </Text>
-      </Card>
-
-      {/* Analysis results */}
       {result && (
-        <Card title={result.id ? `分析结果（来自历史记录）` : '分析结果'} style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 16 }}>
+          <ComplianceAlert
+            q3cClass1Count={result.q3c.summary.class_1}
+            q3cUnknownCount={result.q3c.summary.unknown}
+            q3dClass1Found={q3dClass1Found}
+            q3dClass2BIntentionalCount={q3dClass2BIntentionalCount}
+          />
+          
           <Tabs
-            defaultActiveKey="q3d"
             items={[
               {
                 key: 'q3d',
                 label: `Q3D 元素杂质 (${result.q3d.total_elements} 个)`,
                 children: (
                   <div>
-                    <Alert
-                      title="评估说明"
-                      description={`共发现 ${result.q3d.total_elements} 个元素，其中 ${result.q3d.needs_assessment} 个需要进一步评估。评估所有给药途径（口服、注射、吸入、皮肤）。`}
-                      type="info" showIcon style={{ marginBottom: 16 }}
-                    />
                     <Descriptions bordered size="small" column={4} style={{ marginBottom: 16 }}>
                       <Descriptions.Item label="Class 1 元素（高毒）"><Tag color="red">{result.q3d.summary.class_1} 个</Tag></Descriptions.Item>
                       <Descriptions.Item label="Class 2A 元素"><Tag color="orange">{result.q3d.summary.class_2a} 个</Tag></Descriptions.Item>
                       <Descriptions.Item label="Class 2B 元素"><Tag color="gold">{result.q3d.summary.class_2b} 个</Tag></Descriptions.Item>
                       <Descriptions.Item label="Class 3 元素"><Tag color="green">{result.q3d.summary.class_3} 个</Tag></Descriptions.Item>
                     </Descriptions>
-                    <Table columns={q3dColumns} dataSource={result.q3d.elements_found} rowKey="symbol" pagination={false} scroll={{ x: 1000 }} size="small" />
+                    
+                    <Collapse
+                      style={{ marginBottom: 16 }}
+                      defaultActiveKey={['summary']}
+                      items={[
+                        {
+                          key: 'summary',
+                          label: <span><ExperimentOutlined style={{ marginRight: 8 }} />元素汇总表</span>,
+                          children: (
+                            <Table 
+                              columns={q3dColumns} 
+                              dataSource={result.q3d.elements_found} 
+                              rowKey="symbol" 
+                              pagination={false} 
+                              scroll={{ x: 1000 }} 
+                              size="small" 
+                            />
+                          )
+                        },
+                        {
+                          key: 'details',
+                          label: <span>元素详细信息（PDE 与评估）</span>,
+                          children: (
+                            <div>
+                              {result.q3d.elements_found.map(elem => (
+                                <ElementDetailCard key={elem.symbol} element={elem} />
+                              ))}
+                            </div>
+                          )
+                        }
+                      ]}
+                    />
+                    
                     <div style={{ marginTop: 16, textAlign: 'center' }}>
-                      <Button icon={<DownloadOutlined />} onClick={() => downloadReport(result.q3d.report, 'ICH_Q3D_Report.md')}>下载 Q3D 报告</Button>
+                      <Button icon={<DownloadOutlined />} onClick={() => downloadReport(result.q3d.report, 'ICH_Q3D_Report.md')}>
+                        下载 Q3D 报告
+                      </Button>
                     </div>
                   </div>
                 ),
@@ -396,19 +519,25 @@ export function ICHAnalysisPage() {
                 label: `Q3C 溶剂残留 (${result.q3c.total_solvents} 个)`,
                 children: (
                   <div>
-                    <Alert
-                      title="评估说明"
-                      description={`共发现 ${result.q3c.total_solvents} 种溶剂。`}
-                      type="info" showIcon style={{ marginBottom: 16 }}
-                    />
                     <Descriptions bordered size="small" column={4} style={{ marginBottom: 16 }}>
                       <Descriptions.Item label="Class 1 溶剂（应避免）"><Tag color="red">{result.q3c.summary.class_1} 个</Tag></Descriptions.Item>
                       <Descriptions.Item label="Class 2 溶剂（限制使用）"><Tag color="orange">{result.q3c.summary.class_2} 个</Tag></Descriptions.Item>
                       <Descriptions.Item label="Class 3 溶剂（低毒）"><Tag color="green">{result.q3c.summary.class_3} 个</Tag></Descriptions.Item>
+                      <Descriptions.Item label="未列出"><Tag>{result.q3c.summary.unknown} 个</Tag></Descriptions.Item>
                     </Descriptions>
-                    <Table columns={q3cColumns} dataSource={result.q3c.solvents_found} rowKey="name_en" pagination={false} scroll={{ x: 800 }} size="small" />
+
+                    {result.q3c.step_analysis && result.q3c.step_analysis.length > 0 && (
+                      <StepGroupCard steps={result.q3c.step_analysis} />
+                    )}
+
+                    <ControlStrategy solvents={result.q3c.solvents_found} />
+                    
+                    <TestingRecommendations solvents={result.q3c.solvents_found} />
+
                     <div style={{ marginTop: 16, textAlign: 'center' }}>
-                      <Button icon={<DownloadOutlined />} onClick={() => downloadReport(result.q3c.report, 'ICH_Q3C_Report.md')}>下载 Q3C 报告</Button>
+                      <Button icon={<DownloadOutlined />} onClick={() => downloadReport(result.q3c.report, 'ICH_Q3C_Report.md')}>
+                        下载 Q3C 报告
+                      </Button>
                     </div>
                   </div>
                 ),
@@ -461,14 +590,14 @@ export function ICHAnalysisPage() {
         </Form>
         {llmConfig.is_configured && (
           <Alert
-            title="当前已配置"
+            message="当前已配置"
             description={`API Key: ${llmConfig.api_key} | 模型: ${llmConfig.model}`}
             type="success" showIcon style={{ marginBottom: 12 }}
           />
         )}
         {llmTestResult && (
           <Alert
-            title={llmTestResult.success ? '✓ 连接成功' : '✗ 连接失败'}
+            message={llmTestResult.success ? '✓ 连接成功' : '✗ 连接失败'}
             description={llmTestResult.message}
             type={llmTestResult.success ? 'success' : 'error'} showIcon
             icon={llmTestResult.success ? <CheckCircleOutlined /> : <CloseCircleOutlined />}

@@ -31,11 +31,12 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 
 // 项目管理
 export async function fetchProjects(): Promise<BayesianProject[]> {
-  return fetchAPI('/research/projects?project_type=bayesian')
+  const data = await fetchAPI('/research/projects?project_type=bayesian')
+  return Array.isArray(data) ? data : []
 }
 
 export async function fetchProject(projectId: string): Promise<BayesianProject> {
-  return fetchAPI(`/research/projects/${projectId}`)
+  return fetchAPI(`/research/projects/${projectId}?project_type=bayesian`)
 }
 
 export async function createProject(data: CreateProjectRequest): Promise<BayesianProject> {
@@ -46,13 +47,13 @@ export async function createProject(data: CreateProjectRequest): Promise<Bayesia
 }
 
 export async function deleteProject(projectId: string): Promise<void> {
-  return fetchAPI(`/research/projects/${projectId}`, {
+  return fetchAPI(`/research/projects/${projectId}?project_type=bayesian`, {
     method: 'DELETE',
   })
 }
 
 export async function updateProject(projectId: string, data: { name?: string; description?: string; status?: string }): Promise<BayesianProject> {
-  return fetchAPI(`/research/projects/${projectId}`, {
+  return fetchAPI(`/research/projects/${projectId}?project_type=bayesian`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })

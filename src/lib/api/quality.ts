@@ -274,3 +274,219 @@ export async function fetchCapaStatistics(): Promise<{
 }> {
   return apiFetch(`${API_BASE_URL}/api/v1/quality/statistics/capas`)
 }
+
+// ============ Deviation Workflow - NEW ============
+
+/**
+ * 提交偏差启动审核流程
+ */
+export async function submitDeviation(deviationId: string): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/deviations/${deviationId}/submit`, {
+    method: 'POST',
+  })
+}
+
+/**
+ * 完成AI分析
+ */
+export async function completeAiAnalysis(
+  deviationId: string,
+  aiAnalysis?: Record<string, any>
+): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/deviations/${deviationId}/complete-ai-analysis`, {
+    method: 'POST',
+    body: JSON.stringify({ ai_analysis: aiAnalysis }),
+  })
+}
+
+/**
+ * 批量更新偏差状态
+ */
+export async function batchUpdateDeviationStatus(
+  deviationIds: string[],
+  targetStatus: string
+): Promise<{ updated_count: number; failed_count: number; failures: Array<{ id: string; reason: string }> }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/deviations/batch`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      deviation_ids: deviationIds,
+      target_status: targetStatus,
+    }),
+  })
+}
+
+/**
+ * 获取部门周确认列表
+ */
+export async function getDepartmentConfirmations(params?: {
+  week_key?: string
+  page?: number
+  page_size?: number
+}): Promise<{ items: any[]; total: number; page: number; page_size: number }> {
+  const searchParams = new URLSearchParams()
+  if (params?.week_key) searchParams.set('week_key', params.week_key)
+  if (params?.page) searchParams.set('page', params.page.toString())
+  if (params?.page_size) searchParams.set('page_size', params.page_size.toString())
+  
+  const queryString = searchParams.toString()
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/deviations/department-confirmations${queryString ? `?${queryString}` : ''}`)
+}
+
+/**
+ * 确认部门生产状态
+ */
+export async function confirmDepartmentStatus(data: {
+  department: string
+  week_key: string
+  production_status: string
+  deviation_status?: string
+}): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/deviations/department-confirmations`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * 获取停产部门列表
+ */
+export async function getStoppedDepartments(weekKey: string): Promise<string[]> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/deviations/stopped-departments?week_key=${encodeURIComponent(weekKey)}`)
+}
+
+// ============ CAPA Workflow - NEW ============
+
+/**
+ * 获取所有部门列表
+ */
+export async function getCapaDepartments(): Promise<string[]> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/departments`)
+}
+
+/**
+ * 从偏差自动填充CAPA表单
+ */
+export async function autoFillCapaFromDeviation(deviationId: string): Promise<{
+  title?: string
+  non_conformity_description?: string
+  root_cause_analysis?: string
+  capa_content?: string
+  expected_completion_date?: string
+}> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/auto-fill/${deviationId}`)
+}
+
+/**
+ * 关联偏差到CAPA
+ */
+export async function linkDeviation(capaId: string, deviationId: string): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/link-deviation`, {
+    method: 'POST',
+    body: JSON.stringify({ deviation_id: deviationId }),
+  })
+}
+
+/**
+ * 完成CAPA部分
+ */
+export async function completeCapaPart(capaId: string, part: 'a' | 'b'): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/complete-part`, {
+    method: 'POST',
+    body: JSON.stringify({ part }),
+  })
+}
+
+/**
+ * 提交CAPA审核
+ */
+export async function submitCapa(capaId: string): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/submit`, {
+    method: 'POST',
+  })
+}
+
+/**
+ * 部门主管确认CAPA
+ */
+export async function confirmDeptHead(capaId: string, data: {
+  department: string
+  dept_head_user_id: string
+  result: 'approved' | 'rejected'
+  opinion: string
+}): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/confirm-dept-head`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * QA审批CAPA
+ */
+export async function approveCapa(capaId: string, data: {
+  step: 'qa_review' | 'q_head_approval'
+  result: 'approved' | 'rejected'
+  opinion: string
+}): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/approve`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * 重新提交CAPA
+ */
+export async function resubmitCapa(capaId: string): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/resubmit`, {
+    method: 'POST',
+  })
+}
+
+/**
+ * 添加CAPA执行记录
+ */
+export async function addExecutionTrack(capaId: string, data: {
+  execution_status: string
+  qa_confirmer: string
+  qa_confirm_date: string
+}): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/add-execution-track`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * 删除CAPA执行记录
+ */
+export async function deleteExecutionTrack(capaId: string, index: number): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/delete-execution-track?index=${index}`, {
+    method: 'POST',
+  })
+}
+
+/**
+ * 确认CAPA执行完成
+ */
+export async function confirmExecution(capaId: string): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/confirm-execution`, {
+    method: 'POST',
+  })
+}
+
+/**
+ * 提交CAPA效果评价
+ */
+export async function submitEvaluation(capaId: string, data: {
+  evaluation_target: string
+  evaluation_result: string
+  evaluation_confirmer: string
+  evaluation_confirm_date: string
+  closure_date: string
+}): Promise<{ success: boolean }> {
+  return apiFetch(`${API_BASE_URL}/api/v1/quality/capas/${capaId}/submit-evaluation`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, Button, Table, Modal, Form, Input, InputNumber, Select, Space, Tag, Tabs, Descriptions, Popconfirm, Empty, Spin, Divider, App } from 'antd'
 import { 
   PlusOutlined, 
@@ -69,20 +69,24 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
   const [recordResultForm] = Form.useForm()
 
   // 加载项目列表
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     setLoading(true)
     try {
       const data = await fetchProjects()
-      setProjects(data)
+      console.log('Loaded projects:', data)
+      const projectsArray = Array.isArray(data) ? data : []
+      console.log('Setting projects to:', projectsArray)
+      setProjects(projectsArray)
     } catch (error) {
+      console.error('Failed to load projects:', error)
       message.error('加载项目列表失败')
     } finally {
       setLoading(false)
     }
-  }
+  }, [message])
 
   // 加载项目详情
-  const loadProjectDetail = async (projectId: string) => {
+  const loadProjectDetail = useCallback(async (projectId: string) => {
     setLoading(true)
     try {
       const project = await fetchProject(projectId)
@@ -92,7 +96,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     } finally {
       setLoading(false)
     }
-  }
+  }, [message])
 
   // 创建项目
   const handleCreateProject = async (values: any) => {
@@ -103,12 +107,17 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
         components: values.components || [],
         objectives: values.objectives || [],
       }
-      await createProject(data)
+      console.log('Creating project with data:', data)
+      const result = await createProject(data)
+      console.log('Project created:', result)
       message.success('项目创建成功')
       setCreateModalVisible(false)
       form.resetFields()
+      console.log('About to load projects...')
       await loadProjects()
+      console.log('Projects loaded')
     } catch (error: any) {
+      console.error('Create project error:', error)
       message.error(error.message || '创建失败')
     }
   }
@@ -131,7 +140,25 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
   const handleAddComponent = async (values: any) => {
     if (!currentProject) return
     try {
-      await addComponent(currentProject.id, values)
+      // Transform form values to API shape
+      const componentData: any = {
+        name: values.name,
+        component_type: values.component_type,
+      }
+      
+      if (values.component_type === 'numerical') {
+        componentData.lower_bound = values.lower_bound
+        componentData.upper_bound = values.upper_bound
+        componentData.data_points = values.data_points
+      } else {
+        // Parse comma-separated string into array
+        componentData.categorical_values = values.categorical_values
+          .split(',')
+          .map((v: string) => v.trim())
+          .filter((v: string) => v.length > 0)
+      }
+      
+      await addComponent(currentProject.id, componentData)
       message.success('参数添加成功')
       setComponentModalVisible(false)
       componentForm.resetFields()
@@ -359,26 +386,24 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       key: 'name',
     },
     {
-      title: '下限',
-      dataIndex: 'lower_bound',
-      key: 'lower_bound',
+      title: '类型',
+      dataIndex: 'component_type',
+      key: 'component_type',
+      render: (type: string) => (
+        <Tag color={type === 'numerical' ? 'blue' : 'purple'}>
+          {type === 'numerical' ? '数值型' : '类别型'}
+        </Tag>
+      ),
     },
     {
-      title: '上限',
-      dataIndex: 'upper_bound',
-      key: 'upper_bound',
-    },
-    {
-      title: '间隔',
-      dataIndex: 'interval',
-      key: 'interval',
-      render: (val: number) => val || '-',
-    },
-    {
-      title: '单位',
-      dataIndex: 'unit',
-      key: 'unit',
-      render: (val: string) => val || '-',
+      title: '取值',
+      key: 'values',
+      render: (_: any, record: BayesianComponent) => {
+        if (record.component_type === 'numerical') {
+          return `${record.lower_bound} - ${record.upper_bound} (${record.data_points}个值)`
+        }
+        return record.categorical_values?.join(', ') || '-'
+      },
     },
   ]
 
@@ -745,27 +770,56 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
             label="参数名称"
             rules={[{ required: true, message: '请输入参数名称' }]}
           >
-            <Input placeholder="例如：温度、压力、催化剂用量" />
+            <Input placeholder="例如：温度、溶剂、催化剂用量" />
           </Form.Item>
           <Form.Item
-            name="lower_bound"
-            label="下限"
-            rules={[{ required: true, message: '请输入下限' }]}
+            name="component_type"
+            label="参数类型"
+            initialValue="numerical"
+            rules={[{ required: true, message: '请选择参数类型' }]}
           >
-            <InputNumber style={{ width: '100%' }} />
+            <Select>
+              <Option value="numerical">数值型</Option>
+              <Option value="categorical">类别型</Option>
+            </Select>
           </Form.Item>
-          <Form.Item
-            name="upper_bound"
-            label="上限"
-            rules={[{ required: true, message: '请输入上限' }]}
-          >
-            <InputNumber style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="interval" label="间隔">
-            <InputNumber style={{ width: '100%' }} placeholder="可选" />
-          </Form.Item>
-          <Form.Item name="unit" label="单位">
-            <Input placeholder="例如：°C, MPa, mol%" />
+          <Form.Item noStyle shouldUpdate={(prev, cur) => prev.component_type !== cur.component_type}>
+            {({ getFieldValue }) => {
+              const type = getFieldValue('component_type')
+              return type === 'numerical' ? (
+                <>
+                  <Form.Item
+                    name="lower_bound"
+                    label="下限"
+                    rules={[{ required: true, message: '请输入下限' }]}
+                  >
+                    <InputNumber style={{ width: '100%' }} placeholder="例如：30" />
+                  </Form.Item>
+                  <Form.Item
+                    name="upper_bound"
+                    label="上限"
+                    rules={[{ required: true, message: '请输入上限' }]}
+                  >
+                    <InputNumber style={{ width: '100%' }} placeholder="例如：50" />
+                  </Form.Item>
+                  <Form.Item
+                    name="data_points"
+                    label="取值数量"
+                    rules={[{ required: true, message: '请输入取值数量' }]}
+                  >
+                    <InputNumber style={{ width: '100%' }} min={2} placeholder="例如：5（生成 30, 35, 40, 45, 50）" />
+                  </Form.Item>
+                </>
+              ) : (
+                <Form.Item
+                  name="categorical_values"
+                  label="类别值"
+                  rules={[{ required: true, message: '请输入类别值' }]}
+                >
+                  <Input placeholder="用逗号分隔，例如：THF, DMSO, DMF" />
+                </Form.Item>
+              )
+            }}
           </Form.Item>
         </Form>
       </Modal>

@@ -77,9 +77,13 @@ export interface BayesianComponent {
   id: string
   project_id: string
   name: string
-  component_type: string
-  min_concentration?: number
-  max_concentration?: number
+  component_type: 'numerical' | 'categorical'
+  // Numerical fields
+  lower_bound?: number
+  upper_bound?: number
+  data_points?: number  // EDBO uses this: generates N evenly-spaced values
+  // Categorical fields
+  categorical_values?: string[]  // ["THF", "DMSO", "DMF"]
   created_at: string
 }
 
@@ -97,10 +101,11 @@ export interface BayesianObjective {
 export interface BayesianExperiment {
   id: string
   project_id: string
-  iteration: number
-  status: string
-  components: Record<string, number>
+  batch_number: number
+  parameters: Record<string, number | string>
   results?: Record<string, number>
+  is_suggested: boolean
+  status: string
   created_at: string
 }
 

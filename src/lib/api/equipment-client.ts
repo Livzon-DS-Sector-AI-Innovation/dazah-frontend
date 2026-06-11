@@ -1,6 +1,8 @@
 'use client'
 
 import {
+  EquipmentCategory,
+  Location,
   EquipmentListResponse, EquipmentStatistics,
   FailureCode, WorkOrderFilters, WorkOrderListResponse, WorkOrderStatistics, WorkOrder,
   CalibrationPlanFilters, CalibrationPlanListResponse,
@@ -65,6 +67,24 @@ export async function fetchEquipmentStatisticsClient(): Promise<EquipmentStatist
 }
 
 // ==================== 故障代码 ====================
+export async function fetchCategoriesClient(): Promise<EquipmentCategory[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/equipment/categories`)
+  if (!response.ok) {
+    throw new Error(`请求失败: ${response.status} ${response.statusText}`)
+  }
+  const result = await response.json()
+  return result.data || []
+}
+
+export async function fetchLocationsClient(): Promise<Location[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/equipment/locations`)
+  if (!response.ok) {
+    throw new Error(`请求失败: ${response.status} ${response.statusText}`)
+  }
+  const result = await response.json()
+  return result.data || []
+}
+
 export async function fetchFailureCodesClient(type: 'symptoms' | 'causes' | 'actions'): Promise<FailureCode[]> {
   const response = await fetch(`${API_BASE_URL}/api/v1/equipment/maintenance/failure-codes/${type}`)
   if (!response.ok) {
@@ -290,6 +310,13 @@ export async function fetchWorkOrderMaterialsClient(workOrderId: string): Promis
 // ==================== 维修人员 ====================
 export async function fetchMaintainersClient(): Promise<Maintainer[]> {
   const response = await fetch(`${API_BASE_URL}/api/v1/equipment/maintenance/staff/maintainers`)
+  if (!response.ok) throw new Error(`请求失败: ${response.status}`)
+  const result = await response.json()
+  return result.data || []
+}
+
+export async function fetchAllUsersClient(): Promise<Maintainer[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/equipment/maintenance/staff/all-users`)
   if (!response.ok) throw new Error(`请求失败: ${response.status}`)
   const result = await response.json()
   return result.data || []

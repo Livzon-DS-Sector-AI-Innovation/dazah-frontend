@@ -7,12 +7,12 @@ import type { UploadFile } from 'antd/es/upload'
 import { useEquipmentStore } from '@/stores/equipment'
 import { createWorkOrder, uploadWorkOrderImages } from '@/actions/equipment'
 import { CreateWorkOrderInput, FailureCode, Maintainer } from '@/types/equipment'
-import { fetchMaintainersClient } from '@/lib/api/equipment-client'
+import { fetchAllUsersClient } from '@/lib/api/equipment-client'
 
 const { TextArea } = Input
 
 interface RepairDrawerProps {
-  equipments: { id: string; equipment_no: string; name: string; importance?: string }[]
+  equipments: { id: string; equipment_no: string; name: string; importance?: string; responsible_person_id?: string | null }[]
   symptoms?: FailureCode[]
   onRefresh?: () => void
 }
@@ -37,7 +37,11 @@ export function RepairDrawer({ equipments, symptoms, onRefresh }: RepairDrawerPr
         priority: defaultPriority,
       })
       setFileList([])
-      fetchMaintainersClient().then(setMaintainers).catch(() => {})
+      fetchAllUsersClient().then(setMaintainers).catch(() => {})
+      // 默认填入设备责任人
+      if (selectedEquipment?.responsible_person_id) {
+        form.setFieldsValue({ responsible_person_id: selectedEquipment.responsible_person_id })
+      }
     }
   }, [repairDrawerOpen, repairEquipmentId, form, selectedEquipment?.importance])
 

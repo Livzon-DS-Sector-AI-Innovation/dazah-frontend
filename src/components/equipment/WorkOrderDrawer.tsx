@@ -6,7 +6,7 @@ import { useEquipmentStore } from '@/stores/equipment'
 import { createWorkOrder, updateWorkOrder } from '@/actions/equipment'
 import { CreateWorkOrderInput, UpdateWorkOrderInput, FailureCode, WorkOrderStatus, Maintainer } from '@/types/equipment'
 import { Equipment } from '@/types/equipment'
-import { fetchMaintainersClient } from '@/lib/api/equipment-client'
+import { fetchAllUsersClient } from '@/lib/api/equipment-client'
 
 const { TextArea } = Input
 
@@ -34,9 +34,9 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
 
   useEffect(() => {
     if (workOrderDrawerOpen) {
-      fetchMaintainersClient().then((list) => {
+      fetchAllUsersClient().then((list) => {
         setMaintainers(list)
-        // maintainers 加载完后重新设置责任人，让 Select 能匹配选项显示姓名
+        // 加载完后重新设置责任人，让 Select 能匹配选项显示姓名
         if (editingWorkOrder?.responsible_person_id) {
           form.setFieldsValue({ responsible_person_id: editingWorkOrder.responsible_person_id })
         }
@@ -123,6 +123,15 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
             showSearch
             optionFilterProp="label"
             options={equipments.map((eq) => ({ label: `${eq.equipment_no} - ${eq.name}`, value: eq.id }))}
+            onChange={(eqId: string) => {
+              // 新建模式：自动填入设备责任人
+              if (!isEditing) {
+                const eq = equipments.find(e => e.id === eqId)
+                form.setFieldsValue({
+                  responsible_person_id: eq?.responsible_person_id || undefined,
+                })
+              }
+            }}
           />
         </Form.Item>
         <Form.Item name="order_type" label="工单类型" rules={[{ required: true, message: '请选择工单类型' }]}>

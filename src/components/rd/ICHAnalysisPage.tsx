@@ -16,13 +16,19 @@ import {
   Divider,
   Select,
   Radio,
-  Checkbox
+  Checkbox,
+  Modal,
+  Form,
+  Input
 } from 'antd'
 import { 
   UploadOutlined, 
   FileTextOutlined,
   ExperimentOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  SettingOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from '@ant-design/icons'
 
 const { Title, Text, Paragraph } = Typography
@@ -105,6 +111,11 @@ export function ICHAnalysisPage() {
   const [route, setRoute] = useState<string>('oral')
   const [showReport, setShowReport] = useState(false)
   const [useLLM, setUseLLM] = useState(false)
+  const [llmConfigOpen, setLlmConfigOpen] = useState(false)
+  const [llmConfig, setLlmConfig] = useState({ api_key: '', base_url: '', model: '', is_configured: false })
+  const [llmTestResult, setLlmTestResult] = useState<{success: boolean, message: string} | null>(null)
+  const [llmTesting, setLlmTesting] = useState(false)
+  const [llmForm] = Form.useForm()
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
@@ -175,6 +186,65 @@ export function ICHAnalysisPage() {
     a.download = filename
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  // 加载 LLM 配置
+  const loadLlmConfig = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/research/llm/config`)
+      const data = await res.json()
+      if (data.code === 200) {
+        setLlmConfig(data.data)
+        llmForm.setFieldsValue({
+          api_key: data.data.api_key,
+          base_url: data.data.base_url,
+          model: data.data.model,
+        })
+      }
+    } catch (e) {
+      console.error('加载 LLM 配置失败:', e)
+    }
+  }
+
+  // 保存 LLM 配置
+  const saveLlmConfig = async () => {
+    try {
+      const values = await llmForm.validateFields()
+      const res = await fetch(`${API_BASE}/research/llm/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const data = await res.json()
+      if (data.code === 200) {
+        setLlmConfig(data.data)
+        message.success('配置已保存')
+        setLlmConfigOpen(false)
+      } else {
+        message.error(data.message || '保存失败')
+      }
+    } catch (e) {
+      message.error('保存失败')
+    }
+  }
+
+  // 测试 LLM 连接
+  const testLlmConnection = async () => {
+    setLlmTesting(true)
+    setLlmTestResult(null)
+    try {
+      const res = await fetch(`${API_BASE}/research/llm/test`, { method: 'POST' })
+      const data = await res.json()
+      if (data.code === 200) {
+        setLlmTestResult(data.data)
+      } else {
+        setLlmTestResult({ success: false, message: data.message || '连接失败' })
+      }
+    } catch (e) {
+      setLlmTestResult({ success: false, message: '连接失败' })
+    } finally {
+      setLlmTesting(false)
+    }
   }
 
   // 元素杂质表格列
@@ -308,9 +378,17 @@ export function ICHAnalysisPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2}>
-        <ExperimentOutlined /> ICH Q3C、Q3D 杂质识别
-      </Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Title level={2} style={{ margin: 0 }}>
+          <ExperimentOutlined /> ICH Q3C、Q3D 杂质识别
+        </Title>
+        <Button 
+          icon={<SettingOutlined />}
+          onClick={() => { loadLlmConfig(); setLlmConfigOpen(true) }}
+        >
+          AI 配置
+        </Button>
+      </div>
       
       <Alert
         message="ICH 杂质识别工具"
@@ -601,6 +679,62 @@ export function ICHAnalysisPage() {
           },
         ]}
       />
+      {/* LLM 配置弹窗 */}
+      <Modal
+        title="AI 增强识别配置"
+        open={llmConfigOpen}
+        onCancel={() => { setLlmConfigOpen(false); setLlmTestResult(null) }}
+        footer={[
+          <Button key="cancel" onClick={() => setLlmConfigOpen(false)}>取消</Button>,
+          <Button key="test" onClick={testLlmConnection} loading={llmTesting}>测试连接</Button>,
+          <Button key="save" type="primary" onClick={saveLlmConfig}>保存</Button>,
+        ]}
+        width={500}
+      >
+        <Form form={llmForm} layout="vertical">
+          <Form.Item 
+            name="api_key" 
+            label="API Key" 
+            rules={[{ required: true, message: '请输入 API Key' }]}
+          >
+            <Input.Password placeholder="sk-..." />
+          </Form.Item>
+          <Form.Item 
+            name="base_url" 
+            label="API Base URL"
+            rules={[{ required: true, message: '请输入 Base URL' }]}
+          >
+            <Input placeholder="https://api.deepseek.com/v1" />
+          </Form.Item>
+          <Form.Item 
+            name="model" 
+            label="模型名称"
+            rules={[{ required: true, message: '请输入模型名称' }]}
+          >
+            <Input placeholder="deepseek-v4-flash" />
+          </Form.Item>
+        </Form>
+        
+        {llmConfig.is_configured && (
+          <Alert
+            message="当前已配置"
+            description={`API Key: ${llmConfig.api_key} | 模型: ${llmConfig.model}`}
+            type="success"
+            showIcon
+            style={{ marginBottom: 12 }}
+          />
+        )}
+        
+        {llmTestResult && (
+          <Alert
+            message={llmTestResult.success ? '连接成功' : '连接失败'}
+            description={llmTestResult.message}
+            type={llmTestResult.success ? 'success' : 'error'}
+            showIcon
+            icon={llmTestResult.success ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+          />
+        )}
+      </Modal>
     </div>
   )
 }

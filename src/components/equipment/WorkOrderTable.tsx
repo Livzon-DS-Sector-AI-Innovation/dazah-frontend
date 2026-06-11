@@ -110,7 +110,7 @@ export function WorkOrderTable({ onRefresh }: Props) {
         pagination={{
           current: workOrderPage, pageSize: workOrderPageSize, total: workOrderTotal,
           showSizeChanger: true, showQuickJumper: true, showTotal: t => `共 ${t} 条`,
-          onChange: (p, s) => { setWorkOrderPage(p); setWorkOrderPageSize(s) },
+          onChange: (p, s) => { if (s !== workOrderPageSize) { setWorkOrderPageSize(s) } else { setWorkOrderPage(p) } },
         }} />
     </div>
   )

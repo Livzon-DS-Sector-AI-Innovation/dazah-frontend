@@ -98,7 +98,16 @@ export const moduleMenus: ModuleMenu[] = [
             path: "",
             children: [
               { key: "hazard-identification", label: "危险源辨识工作流", path: "/safety/hazard-identification" },
-              { key: "hazard-archive", label: "危险源辨识台账", path: "/safety/hazard-identification" },
+              { key: "hazard-ledger", label: "危险源辨识台账", path: "/safety/hazard-identification/ledger" },
+            ],
+          },
+                    {
+            key: "hazard-inspection",
+            label: "隐患排查治理",
+            path: "",
+            children: [
+              { key: "hazard-check", label: "隐患排查", path: "/safety/hazard" },
+              { key: "hazard-inspection-ledger", label: "隐患台账", path: "/safety/hazard-ledger" },
             ],
           },
           {
@@ -118,15 +127,7 @@ export const moduleMenus: ModuleMenu[] = [
               { key: "ehs-change-accept", label: "EHS变更验收", path: "/safety/ehs-change" },
             ],
           },
-          {
-            key: "hazard-inspection",
-            label: "隐患排查治理",
-            path: "",
-            children: [
-              { key: "hazard-check", label: "隐患排查", path: "/safety/hazard" },
-              { key: "hazard-ledger", label: "隐患台账", path: "/safety/hazard" },
-            ],
-          },
+
         ],
       },
 

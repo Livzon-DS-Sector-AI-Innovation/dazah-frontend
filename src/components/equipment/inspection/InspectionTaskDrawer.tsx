@@ -179,11 +179,10 @@ export function InspectionTaskDrawer({ templates, equipments }: InspectionTaskDr
           <DatePicker style={{ width: '100%', borderRadius: 8 }} />
         </Form.Item>
 
-        <Form.Item name="assigned_to" label="巡检人员（可选）">
+        <Form.Item name="assigned_to" label="巡检人员" rules={[{ required: true, message: '请选择巡检人员' }]}>
           <Select
             showSearch
-            allowClear
-            placeholder="选择巡检人员"
+            placeholder="请选择巡检人员"
             optionFilterProp="label"
             options={personnel.map(p => ({
               label: `${p.name}${p.department ? ` · ${p.department}` : ''}`,

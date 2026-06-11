@@ -6,7 +6,7 @@ import { useEquipmentStore } from '@/stores/equipment'
 import { createWorkOrder, updateWorkOrder } from '@/actions/equipment'
 import { CreateWorkOrderInput, UpdateWorkOrderInput, FailureCode, WorkOrderStatus, Maintainer } from '@/types/equipment'
 import { Equipment } from '@/types/equipment'
-import { fetchMaintainersClient } from '@/lib/api/equipment-client'
+import { fetchAllUsersClient } from '@/lib/api/equipment-client'
 
 const { TextArea } = Input
 
@@ -34,7 +34,13 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
 
   useEffect(() => {
     if (workOrderDrawerOpen) {
-      fetchMaintainersClient().then(setMaintainers).catch(() => {})
+      fetchAllUsersClient().then((list) => {
+        setMaintainers(list)
+        // 加载完后重新设置责任人，让 Select 能匹配选项显示姓名
+        if (editingWorkOrder?.responsible_person_id) {
+          form.setFieldsValue({ responsible_person_id: editingWorkOrder.responsible_person_id })
+        }
+      }).catch(() => {})
     }
   }, [workOrderDrawerOpen])
 
@@ -59,7 +65,7 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
     if (workOrderDrawerOpen) {
       form.setFieldsValue(initialValues)
     }
-  }, [workOrderDrawerOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [workOrderDrawerOpen, initialValues])
 
   const handleSubmit = async () => {
     try {
@@ -91,6 +97,7 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
       closeWorkOrderDrawer()
       onRefresh?.()
     } catch (error: any) {
+      if (error?.errorFields) return
       if (error?.message) message.error(error.message)
     }
   }
@@ -116,6 +123,15 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
             showSearch
             optionFilterProp="label"
             options={equipments.map((eq) => ({ label: `${eq.equipment_no} - ${eq.name}`, value: eq.id }))}
+            onChange={(eqId: string) => {
+              // 新建模式：自动填入设备责任人
+              if (!isEditing) {
+                const eq = equipments.find(e => e.id === eqId)
+                form.setFieldsValue({
+                  responsible_person_id: eq?.responsible_person_id || undefined,
+                })
+              }
+            }}
           />
         </Form.Item>
         <Form.Item name="order_type" label="工单类型" rules={[{ required: true, message: '请选择工单类型' }]}>
@@ -131,10 +147,9 @@ export function WorkOrderDrawer({ equipments, symptoms, onRefresh }: WorkOrderDr
         <Form.Item name="priority" label="优先级" rules={[{ required: true, message: '请选择优先级' }]}>
           <Select options={[{ label: '紧急', value: '紧急' }, { label: '高', value: '高' }, { label: '中', value: '中' }, { label: '低', value: '低' }]} />
         </Form.Item>
-        <Form.Item name="responsible_person_id" label="责任人">
+        <Form.Item name="responsible_person_id" label="责任人" rules={[{ required: true, message: '请选择责任人' }]}>
           <Select
-            placeholder="选择责任人（可选）"
-            allowClear
+            placeholder="选择责任人"
             showSearch
             optionFilterProp="label"
             options={maintainers.map((m) => ({

@@ -38,10 +38,12 @@ export function PersonnelTable({ roles, onAddClick, onRoleClick, onCategoryClick
   const { message } = App.useApp()
   const queryClient = useQueryClient()
   const [keyword, setKeyword] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['equipment-personnel', { keyword }],
-    queryFn: () => fetchPersonnelList({ keyword: keyword || undefined }),
+    queryKey: ['equipment-personnel', { keyword, page, pageSize }],
+    queryFn: () => fetchPersonnelList({ keyword: keyword || undefined, page, page_size: pageSize }),
   })
 
   const handleDelete = async (id: string) => {
@@ -182,14 +184,18 @@ export function PersonnelTable({ roles, onAddClick, onRoleClick, onCategoryClick
         loading={isLoading}
         scroll={{ x: 960 }}
         pagination={{
-          current: data?.page ?? 1,
-          pageSize: data?.page_size ?? 20,
+          current: data?.page ?? page,
+          pageSize: data?.page_size ?? pageSize,
           total: data?.total ?? 0,
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (t: number) => (
             <Text style={{ color: '#a4a097', fontSize: 13 }}>共 {t} 条</Text>
           ),
+          onChange: (p, ps) => {
+            setPage(p)
+            setPageSize(ps)
+          },
         }}
         style={{ borderRadius: 0 }}
       />

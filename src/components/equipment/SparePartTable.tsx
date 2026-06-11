@@ -66,7 +66,7 @@ export function SparePartTable({ onRefresh }: Props) {
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Space>
           <Input.Search placeholder="搜索备件名称/编码" allowClear style={{ width: 240 }}
-            value={sparePartKeyword || undefined} onChange={e => setSparePartKeyword(e.target.value)} onSearch={v => setSparePartKeyword(v)} />
+            value={sparePartKeyword || undefined} onSearch={v => setSparePartKeyword(v)} />
           {stockWarnings.length > 0 && (
             <Badge count={stockWarnings.length} offset={[-4, 0]}>
               <Button icon={<WarningOutlined />} style={{ color: '#dd5b00', borderColor: '#dd5b00' }}>库存预警</Button>
@@ -80,7 +80,7 @@ export function SparePartTable({ onRefresh }: Props) {
         pagination={{
           current: sparePartPage, pageSize: sparePartPageSize, total: sparePartTotal,
           showSizeChanger: true, showQuickJumper: true, showTotal: t => `共 ${t} 条`,
-          onChange: (p, s) => { setSparePartPage(p); setSparePartPageSize(s) },
+          onChange: (p, s) => { if (s !== sparePartPageSize) { setSparePartPageSize(s) } else { setSparePartPage(p) } },
         }} />
     </div>
   )

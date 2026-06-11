@@ -81,6 +81,10 @@ export async function fetchInspectionTasks(filters: InspectionTaskFilters = {}):
   return { items: result.data || [], total: result.meta?.total || 0, page: result.meta?.page || 1, page_size: result.meta?.page_size || 20 }
 }
 
+export async function fetchInspectionTaskById(taskId: string): Promise<InspectionTask> {
+  return apiFetch<InspectionTask>(`${INSPECTION_BASE}/tasks/${taskId}`)
+}
+
 // ==================== 巡检历史 ====================
 export async function fetchInspectionHistory(filters: InspectionHistoryFilters = {}): Promise<InspectionHistoryListResponse> {
   const params = new URLSearchParams()

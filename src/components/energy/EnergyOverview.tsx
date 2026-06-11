@@ -55,9 +55,9 @@ export function EnergyOverview() {
       setStatistics(overview.summary)
       setTrendData(overview.trend)
       setDistributionData(
-        overview.distribution.map((d: any) => ({
-          name: d.name || d.group_key,
-          value: d.value || d.total_value,
+        overview.distribution.map((d: { name?: string; group_key?: string; value?: number; total_value?: number }) => ({
+          name: d.name || d.group_key || '',
+          value: d.value ?? d.total_value ?? 0,
         })),
       )
     } catch (error) {

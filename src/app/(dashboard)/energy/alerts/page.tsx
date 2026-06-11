@@ -5,8 +5,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button, Space, App } from 'antd'
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
-import { AlertRuleTable } from '@/components/energy'
-import { AlertRule, PaginatedResponse } from '@/types/energy'
+import { AlertRuleTable, AlertConfigDrawer } from '@/components/energy'
+import { AlertRule } from '@/types/energy'
 import { getAlertRules, deleteAlertRule } from '@/actions/energy'
 import { useEnergyStore } from '@/stores/energy'
 
@@ -15,14 +15,17 @@ export default function AlertsPage() {
 
 
   const { alertConfigDrawerOpen, openAlertConfigDrawer } = useEnergyStore()
+  const { openAlertConfigDrawer } = useEnergyStore()
   const [data, setData] = useState<AlertRule[]>([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (p = page, ps = pageSize) => {
     setLoading(true)
     try {
-      const result = await getAlertRules()
+      const result = await getAlertRules({ page: p, page_size: ps })
       setData(result.items)
       setTotal(result.total)
     } catch (error) {
@@ -30,11 +33,16 @@ export default function AlertsPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [page, pageSize])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  const handlePageChange = (p: number, ps: number) => {
+    setPage(p)
+    setPageSize(ps)
+  }
 
   const handleEdit = (record: AlertRule) => {
     openAlertConfigDrawer('edit', record.id)
@@ -51,16 +59,15 @@ export default function AlertsPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div style={{ padding: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h1
-          className="font-semibold"
-          style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
+          style={{ fontSize: 22, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3, margin: 0 }}
         >
           预警管理
         </h1>
         <Space>
-          <Button icon={<ReloadOutlined />} onClick={fetchData}>
+          <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>
             刷新
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openAlertConfigDrawer('create')}>
@@ -73,10 +80,14 @@ export default function AlertsPage() {
         data={data}
         loading={loading}
         total={total}
-        onRefresh={fetchData}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onRefresh={() => fetchData()}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
+      <AlertConfigDrawer onRefresh={() => fetchData()} />
     </div>
   )
 }

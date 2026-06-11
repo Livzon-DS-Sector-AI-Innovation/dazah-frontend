@@ -1,6 +1,6 @@
 'use client'
 
-import { App, Table, Tag, Space, Button, Popconfirm } from 'antd'
+import { Table, Tag, Space, Button, Popconfirm } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableColumnsType } from 'antd'
 import { AlertRule, AlertLevel, EnergyType } from '@/types/energy'
@@ -10,6 +10,9 @@ interface AlertRuleTableProps {
   data: AlertRule[]
   loading?: boolean
   total?: number
+  page: number
+  pageSize: number
+  onPageChange: (page: number, pageSize: number) => void
   onRefresh: () => void
   onEdit: (record: AlertRule) => void
   onDelete: (id: string) => void
@@ -26,20 +29,15 @@ export function AlertRuleTable({
   data,
   loading = false,
   total = 0,
+  page,
+  pageSize,
+  onPageChange,
   onRefresh,
   onEdit,
   onDelete,
 }: AlertRuleTableProps) {
-  const { message } = App.useApp()
-
   const handleDelete = async (id: string) => {
-    try {
-      await onDelete(id)
-      message.success('删除成功')
-      onRefresh()
-    } catch (error) {
-      message.error('删除失败')
-    }
+    await onDelete(id)
   }
 
   const columns: TableColumnsType<AlertRule> = [
@@ -132,10 +130,19 @@ export function AlertRuleTable({
       loading={loading}
       rowKey="id"
       pagination={{
+        current: page,
+        pageSize,
         total,
         showSizeChanger: true,
         showQuickJumper: true,
         showTotal: (total) => `共 ${total} 条`,
+        onChange: (p, s) => {
+          if (s !== pageSize) {
+            onPageChange(1, s)
+          } else {
+            onPageChange(p, s)
+          }
+        },
       }}
     />
   )

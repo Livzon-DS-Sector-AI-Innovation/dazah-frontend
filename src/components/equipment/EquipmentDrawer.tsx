@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { App, Drawer, Form, Input, Select, DatePicker, Button, Space } from 'antd'
 import dayjs from 'dayjs'
 import { useEquipmentStore } from '@/stores/equipment'
@@ -48,6 +48,13 @@ function flattenLocations(locations: Location[], prefix = ''): { label: string; 
   return result
 }
 
+interface StaffOption {
+  id: string
+  name: string
+  employee_no: string | null
+  department: string | null
+}
+
 interface EquipmentDrawerProps {
   onRefresh?: () => void
 }
@@ -56,6 +63,10 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
   const [form] = Form.useForm()
   const { message } = App.useApp()
   const [submitting, setSubmitting] = useState(false)
+  const [staffKeyword, setStaffKeyword] = useState('')
+  const [staffOptions, setStaffOptions] = useState<{ label: string; value: string }[]>([])
+  const [staffLoading, setStaffLoading] = useState(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const {
     equipmentDrawerOpen,
     editingEquipment,
@@ -68,9 +79,48 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
   const categoryOptions = flattenCategories(categories)
   const locationOptions = flattenLocations(locations)
 
+  // 搜索员工：输入关键字后延迟 300ms 从 identity/personnel 查询
+  const handleStaffSearch = (value: string) => {
+    setStaffKeyword(value)
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    if (!value.trim()) {
+      setStaffOptions([])
+      return
+    }
+    searchTimer.current = setTimeout(async () => {
+      setStaffLoading(true)
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+        const params = new URLSearchParams({ limit: '50', keyword: value.trim() })
+        const resp = await fetch(`${API_BASE}/api/v1/identity/personnel?${params}`)
+        if (!resp.ok) { setStaffOptions([]); return }
+        const json = await resp.json()
+        const items = (json.data?.items ?? []) as Record<string, unknown>[]
+        setStaffOptions(items.map(u => ({
+          label: `${String(u.name ?? '')}${u.department ? ` - ${String(u.department)}` : ''}${u.employee_no ? ` (${String(u.employee_no)})` : ''}`,
+          value: String(u.id),
+        })))
+      } catch {
+        setStaffOptions([])
+      } finally {
+        setStaffLoading(false)
+      }
+    }, 300)
+  }
+
   useEffect(() => {
     if (equipmentDrawerOpen) {
       if (editingEquipment) {
+        // 编辑模式：用后端返回的 responsible_person_name 直接构造初始选项
+        const initialOptions: { label: string; value: string }[] = []
+        if (editingEquipment.responsible_person_id && editingEquipment.responsible_person_name) {
+          initialOptions.push({
+            label: editingEquipment.responsible_person_name,
+            value: editingEquipment.responsible_person_id,
+          })
+        }
+        setStaffOptions(initialOptions)
+
         form.setFieldsValue({
           name: editingEquipment.name,
           equipment_no: editingEquipment.equipment_no,
@@ -85,34 +135,43 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
           commissioning_date: editingEquipment.commissioning_date ? dayjs(editingEquipment.commissioning_date) : undefined,
           description: editingEquipment.description ?? undefined,
           department_id: editingEquipment.department_id ?? undefined,
-          responsible_person_name: editingEquipment.responsible_person_name ?? undefined,
+          responsible_person_id: editingEquipment.responsible_person_id ?? undefined,
           importance: editingEquipment.importance ?? '低',
         })
       } else {
         form.resetFields()
+        setStaffOptions([])
       }
     }
   }, [equipmentDrawerOpen, editingEquipment, form])
 
-  // 选择部门后自动填入负责人
+  // 选择部门后自动填入负责人（默认为部门负责人，但可手动修改）
   const handleDepartmentChange = (deptId: string | undefined) => {
     if (!deptId) {
-      form.setFieldsValue({ responsible_person_name: undefined })
+      form.setFieldsValue({ responsible_person_id: undefined })
       return
     }
     const dept = departments.find(d => d.id === deptId)
-    form.setFieldsValue({
-      responsible_person_name: dept?.leader_name || undefined,
-    })
+    if (dept?.leader_id) {
+      form.setFieldsValue({ responsible_person_id: dept.leader_id })
+      // 同时确保 leader_id 在 staffOptions 中可见
+      if (!staffOptions.some(o => o.value === dept.leader_id)) {
+        setStaffOptions(prev => [...prev, {
+          label: `${dept.leader_name ?? ''}${dept.name ? ` - ${dept.name}` : ''}`,
+          value: dept.leader_id!,
+        }])
+      }
+    } else {
+      form.setFieldsValue({ responsible_person_id: undefined })
+    }
   }
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
-      const { responsible_person_name, ...restValues } = values
       const submitData = {
-        ...restValues,
+        ...values,
         production_date: values.production_date
           ? values.production_date.format('YYYY-MM-DD')
           : undefined,
@@ -214,8 +273,17 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
             onChange={handleDepartmentChange}
           />
         </Form.Item>
-        <Form.Item name="responsible_person_name" label="负责人">
-          <Input placeholder="选择部门后自动填入" disabled />
+        <Form.Item name="responsible_person_id" label="负责人">
+          <Select
+            placeholder="选择部门后默认填入部门负责人，也可搜索修改"
+            allowClear
+            showSearch
+            filterOption={false}
+            onSearch={handleStaffSearch}
+            loading={staffLoading}
+            notFoundContent={staffLoading ? '搜索中...' : staffKeyword ? '无匹配人员' : '输入姓名搜索员工'}
+            options={staffOptions}
+          />
         </Form.Item>
         <Form.Item
           name="status"

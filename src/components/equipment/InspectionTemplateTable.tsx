@@ -56,14 +56,14 @@ export function InspectionTemplateTable({ onRefresh, categories }: Props) {
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
         <Input.Search placeholder="搜索模板名称" allowClear style={{ width: 240 }}
-          value={inspectionTemplateKeyword} onChange={e => setInspectionTemplateKeyword(e.target.value)} onSearch={v => setInspectionTemplateKeyword(v)} />
+          value={inspectionTemplateKeyword} onSearch={v => setInspectionTemplateKeyword(v)} />
       </div>
       <Table columns={columns} dataSource={inspectionTemplates} rowKey="id" size="small" loading={inspectionTemplateLoading}
         scroll={{ x: 'max-content' }}
         pagination={{
           current: inspectionTemplatePage, pageSize: inspectionTemplatePageSize, total: inspectionTemplateTotal,
           showSizeChanger: true, showQuickJumper: true, showTotal: t => `共 ${t} 条`,
-          onChange: (p, s) => { setInspectionTemplatePage(p); setInspectionTemplatePageSize(s) },
+          onChange: (p, s) => { if (s !== inspectionTemplatePageSize) { setInspectionTemplatePageSize(s) } else { setInspectionTemplatePage(p) } },
         }} />
     </div>
   )

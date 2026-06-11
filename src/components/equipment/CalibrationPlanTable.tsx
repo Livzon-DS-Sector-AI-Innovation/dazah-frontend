@@ -83,7 +83,7 @@ export function CalibrationPlanTable({ onRefresh, onRecordRefresh }: Props) {
         pagination={{
           current: calibrationPlanPage, pageSize: calibrationPlanPageSize, total: calibrationPlanTotal,
           showSizeChanger: true, showQuickJumper: true, showTotal: t => `共 ${t} 条`,
-          onChange: (p, s) => { setCalibrationPlanPage(p); setCalibrationPlanPageSize(s) },
+          onChange: (p, s) => { if (s !== calibrationPlanPageSize) { setCalibrationPlanPageSize(s) } else { setCalibrationPlanPage(p) } },
         }} />
     </div>
   )

@@ -125,6 +125,7 @@ export function DeviceDrawer({ onRefresh }: DeviceDrawerProps) {
 
   const loadDeviceData = async (id: string) => {
     try {
+      form.resetFields()
       const device = await getEnergyDeviceById(id)
       form.setFieldsValue(device)
     } catch {

@@ -1,11 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getAuthHeaders } from '@/lib/auth'
 import type {
   Accident,
   AccidentFormData,
   AccidentQueryParams,
-  AssignRectificationRequest,
   CompleteRectificationRequest,
   ConfirmCheckRequest,
   Contractor,
@@ -17,12 +17,6 @@ import type {
   HazardReport,
   HazardReportFormData,
   HazardReportQueryParams,
-  HazardRevisionArchive,
-  HazardRevisionArchiveFormData,
-  HazardRevisionArchiveQueryParams,
-  HazardRevisionRecord,
-  HazardRevisionRecordFormData,
-  HazardRevisionRecordQueryParams,
   OperationRegulation,
   OperationRegulationFormData,
   OperationRegulationQueryParams,
@@ -53,6 +47,10 @@ import type {
   DailyRiskReportFormData,
   DailyRiskReportQueryParams,
   HazardRiskOption,
+=======
+  RectificationReplyRequest,
+  VerifyLevelRequest,
+>>>>>>> origin/feature/safety-module
   TrainingRecord,
   TrainingRecordFormData,
   ApiResponse,
@@ -68,11 +66,14 @@ async function fetchApi<T>(
 ): Promise<ApiResponse<T>> {
   let response: Response
   try {
+    const authHeaders = await getAuthHeaders()
+    const { headers: optHeaders, ...restOptions } = options || {}
     response = await fetch(`${API_BASE}${endpoint}`, {
       headers: {
-        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...optHeaders,
       },
-      ...options,
+      ...restOptions,
     })
   } catch {
     return {
@@ -181,6 +182,7 @@ export async function getHazards(params: HazardReportQueryParams = {}) {
   if (params.page) searchParams.set('page', String(params.page))
   if (params.page_size) searchParams.set('page_size', String(params.page_size))
   if (params.status) searchParams.set('status', params.status)
+  if (params.overall_status) searchParams.set('overall_status', params.overall_status)
   if (params.hazard_type) searchParams.set('hazard_type', params.hazard_type)
   if (params.hazard_level) searchParams.set('hazard_level', params.hazard_level)
   if (params.hazard_category) searchParams.set('hazard_category', params.hazard_category)
@@ -232,6 +234,7 @@ export async function completeRectification(id: string, data?: CompleteRectifica
   return response
 }
 
+<<<<<<< HEAD
 export async function assignRectification(id: string, data: AssignRectificationRequest) {
   const response = await fetchApi<HazardReport>(
     `/api/v1/safety/hazards/${id}/assign`,
@@ -241,6 +244,7 @@ export async function assignRectification(id: string, data: AssignRectificationR
   return response
 }
 
+>>>>>>> origin/feature/safety-module
 export async function extendDeadline(id: string, data: ExtendDeadlineRequest) {
   const response = await fetchApi<HazardReport>(
     `/api/v1/safety/hazards/${id}/extend`,
@@ -259,10 +263,32 @@ export async function confirmCheck(id: string, data: ConfirmCheckRequest) {
   return response
 }
 
-export async function verifyRectification(id: string, passed: boolean) {
+export async function replyRectification(id: string, data: RectificationReplyRequest) {
   const response = await fetchApi<HazardReport>(
+<<<<<<< HEAD
     `/api/v1/safety/hazards/${id}/rectification/verify?passed=${passed}`,
     { method: 'POST' }
+=======
+    `/safety/hazards/${id}/rectification/reply`,
+    { method: 'POST', body: JSON.stringify(data) }
+  )
+  revalidatePath('/safety/hazard')
+  return response
+}
+
+export async function verifyLevel(id: string, data: VerifyLevelRequest) {
+  const response = await fetchApi<HazardReport>(
+    `/safety/hazards/${id}/rectification/verify-level`,
+    { method: 'POST', body: JSON.stringify(data) }
+  )
+  revalidatePath('/safety/hazard')
+  return response
+}
+
+export async function reworkRectification(id: string, data: RectificationReplyRequest) {
+  const response = await fetchApi<HazardReport>(
+    `/safety/hazards/${id}/rectification/rework`,
+    { method: 'POST', body: JSON.stringify(data) }
   )
   revalidatePath('/safety/hazard')
   return response
@@ -272,6 +298,62 @@ export async function deleteHazard(id: string) {
   const response = await fetchApi<null>(`/api/v1/safety/hazards/${id}`, {
     method: 'DELETE',
   })
+  revalidatePath('/safety/hazard')
+  return response
+}
+
+export async function deleteHazards(ids: string[]) {
+  const results = await Promise.allSettled(
+    ids.map((id) =>
+      fetchApi<null>(`/safety/hazards/${id}`, { method: 'DELETE' })
+    )
+  )
+  revalidatePath('/safety/hazard')
+  const succeeded = results.filter((r) => r.status === 'fulfilled').length
+  const failed = results.filter((r) => r.status === 'rejected').length
+  return { succeeded, failed, total: ids.length }
+}
+
+export async function uploadHazardPhoto(id: string, file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/safety/hazards/${id}/upload-photo`,
+    { method: 'POST', body: formData }
+  )
+  revalidatePath('/safety/hazard')
+  return response.json()
+}
+
+export async function uploadRectificationPhoto(id: string, file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/safety/hazards/${id}/upload-rectification-photo`,
+    { method: 'POST', body: formData }
+  )
+  revalidatePath('/safety/hazard')
+  return response.json()
+}
+
+export async function runHazardAI(hazardId: string, scriptNumber: number) {
+  const response = await fetchApi<HazardReport>(
+    `/safety/hazards/${hazardId}/ai/run/${scriptNumber}`,
+    { method: 'POST' }
+  )
+  revalidatePath('/safety/hazard')
+  return response
+}
+
+export async function reviewHazardAI(
+  hazardId: string,
+  scriptNumber: number,
+  action: 'approved' | 'rejected'
+) {
+  const response = await fetchApi<HazardReport>(
+    `/safety/hazards/${hazardId}/ai/review/${scriptNumber}?action=${action}`,
+    { method: 'POST' }
+  )
   revalidatePath('/safety/hazard')
   return response
 }
@@ -728,6 +810,44 @@ export async function deleteHazardIdentification(id: string) {
   return response
 }
 
+// ============ Hazard Identification AI Export ============
+
+export async function parseHazardExportQuery(naturalQuery: string) {
+  return fetchApi<import('@/types/safety').HazardLedgerExportParsedFilters>(
+    '/safety/hazard-identifications/parse-query',
+    {
+      method: 'POST',
+      body: JSON.stringify({ natural_query: naturalQuery }),
+    }
+  )
+}
+
+export async function exportHazardLedgerPdf(
+  params: import('@/types/safety').HazardLedgerExportRequest
+) {
+  const response = await fetch(`${API_BASE}/safety/hazard-identifications/export-pdf`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`导出失败: ${response.status} ${errorText}`)
+  }
+
+  // 触发浏览器下载 PDF
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `危险源辨识台账_${new Date().toISOString().slice(0, 10)}.pdf`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
 export async function getSafetyEnums() {
   return fetchApi<Record<string, Array<{ value: string; label: string }>>>('/api/v1/safety/enums')
 }
@@ -1006,6 +1126,7 @@ export async function deleteHazardRevisionArchive(id: string) {
   return response
 }
 
+>>>>>>> origin/feature/safety-module
 // ============ AI Workflow Config Actions ============
 
 export async function getAIWorkflowConfigs(
@@ -1505,7 +1626,10 @@ export async function getHazardRiskOptions(params?: {
     if (params.keyword) query.set('keyword', params.keyword)
   }
   const qs = query.toString()
+<<<<<<< HEAD
   const response = await fetchApi<HazardRiskOption[]>(`/api/v1/safety/hazard-identifications/risk-options${qs ? `?${qs}` : ''}`)
+=======
+  const response = await fetchApi<HazardRiskOption[]>(`/safety/hazard-identifications/risk-options${qs ? `?${qs}` : ''}`)
   return response
 }
 

@@ -403,6 +403,31 @@ export const CERTIFICATE_STATUS_OPTIONS = [
   { value: CertificateStatus.EXPIRED, label: '已过期', color: 'error' },
 ]
 
+export const HAZARD_LOCATION_OPTIONS = [
+  { value: '合成车间', label: '合成车间' },
+  { value: '精制车间', label: '精制车间' },
+  { value: '干燥车间', label: '干燥车间' },
+  { value: '包装车间', label: '包装车间' },
+  { value: '原料仓库', label: '原料仓库' },
+  { value: '成品仓库', label: '成品仓库' },
+  { value: '危化品仓库', label: '危化品仓库' },
+  { value: '溶剂罐区', label: '溶剂罐区' },
+  { value: '酸碱罐区', label: '酸碱罐区' },
+  { value: '污水处理站', label: '污水处理站' },
+  { value: '废气处理区', label: '废气处理区' },
+  { value: '锅炉房', label: '锅炉房' },
+  { value: '配电室', label: '配电室' },
+  { value: '空压站', label: '空压站' },
+  { value: '制冷站', label: '制冷站' },
+  { value: '实验室', label: '实验室' },
+  { value: '中控室', label: '中控室' },
+  { value: '办公楼', label: '办公楼' },
+  { value: '食堂', label: '食堂' },
+  { value: '门卫', label: '门卫' },
+  { value: '厂区道路', label: '厂区道路' },
+  { value: '其他', label: '其他' },
+]
+
 export const CHECK_RESULT_OPTIONS = [
   { value: 'qualified', label: '合格', color: 'success' },
   { value: 'unqualified', label: '不合格', color: 'error' },
@@ -412,13 +437,51 @@ export const CHECK_RESULT_OPTIONS = [
 export const RECTIFICATION_STATUS_OPTIONS = [
   { value: 'pending', label: '待整改', color: 'default' },
   { value: 'in_progress', label: '整改中', color: 'processing' },
-  { value: 'completed', label: '已完成', color: 'success' },
-  { value: 'verified', label: '已验证', color: 'blue' },
+  { value: 'replied', label: '待复核', color: 'warning' },
+  { value: 'level1_approved', label: '一级已通过', color: 'cyan' },
+  { value: 'level2_approved', label: '二级已通过', color: 'geekblue' },
+  { value: 'level3_approved', label: '三级已通过', color: 'blue' },
+  { value: 'rejected', label: '已驳回', color: 'error' },
+  { value: 'closed', label: '已关闭', color: 'success' },
+  { value: 'completed', label: '已完成(旧)', color: 'default' },
+  { value: 'verified', label: '已验证(旧)', color: 'default' },
+]
+
+export const VERIFY_LEVEL_OPTIONS = [
+  { value: 1, label: '一级复核（部门负责人）' },
+  { value: 2, label: '二级复核（分管领导）' },
+  { value: 3, label: '三级复核（隐患发现人）' },
+]
+
+export const VERIFY_LEVEL_STATUS_OPTIONS = [
+  { value: 'pending', label: '待复核', color: 'default' },
+  { value: 'approved', label: '已通过', color: 'success' },
+  { value: 'rejected', label: '已驳回', color: 'error' },
 ]
 
 export const HAZARD_STATUS_OPTIONS = [
   { value: 'open', label: '待处理', color: 'default' },
   { value: 'closed', label: '已关闭', color: 'success' },
+]
+
+export const AI_NODE_PROGRESS_OPTIONS_HAZARD = [
+  { value: 'pending_input', label: '待输入', color: 'default' },
+  { value: 'pending_script1', label: '待AI识别', color: 'processing' },
+  { value: 'pending_script2', label: '待AI整改建议', color: 'processing' },
+  { value: 'completed', label: 'AI完成', color: 'success' },
+]
+
+export const OVERALL_STATUS_OPTIONS_HAZARD = [
+  { value: 'draft', label: '草稿', color: 'default' },
+  { value: 'ai_processing', label: 'AI处理中', color: 'processing' },
+  { value: 'completed', label: 'AI完成(待审核)', color: 'warning' },
+  { value: 'reviewed', label: '已审核', color: 'success' },
+  { value: 'cancelled', label: '已取消', color: 'default' },
+]
+
+export const HAZARD_SOURCE_OPTIONS = [
+  { value: 'ai', label: 'AI识别', color: 'purple' },
+  { value: 'manual', label: '人工录入', color: 'default' },
 ]
 
 export const CHECK_STATUS_OPTIONS = [
@@ -487,6 +550,7 @@ export interface SafetyCheckQueryParams {
 export interface HazardReport {
   id: string
   hazard_no: string
+  inspection_category?: string
   hazard_type: HazardType
   hazard_level: HazardLevel
   hazard_category?: HazardCategory
@@ -508,26 +572,56 @@ export interface HazardReport {
   extended_deadline?: string
   rectification_photos?: string
   rectification_status: string
+  // 整改回复
+  rectification_reply?: string
+  rectification_replied_at?: string
+  rectification_replied_by?: string
+  rectification_replied_by_name?: string
+  // 三级复核
+  verify_level_1_status: string
+  verify_level_1_by?: string
+  verify_level_1_by_name?: string
+  verify_level_1_at?: string
+  verify_level_1_opinion?: string
+  verify_level_2_status: string
+  verify_level_2_by?: string
+  verify_level_2_by_name?: string
+  verify_level_2_at?: string
+  verify_level_2_opinion?: string
+  verify_level_3_status: string
+  verify_level_3_by?: string
+  verify_level_3_by_name?: string
+  verify_level_3_at?: string
+  verify_level_3_opinion?: string
+  // 旧字段（保留兼容）
   verified_by?: string
   verified_by_name?: string
   verified_at?: string
   status: string
   check_id?: string
   notes?: string
+  // ── AI 流程字段 ──
+  ai_node_progress: string
+  overall_status: string
+  ai_error_message?: string
+  ai_generated: boolean
+  script1_review_status: string
+  script2_review_status: string
   created_at: string
   updated_at: string
 }
 
 export interface HazardReportFormData {
   hazard_no: string
-  hazard_type: HazardType
-  hazard_level: HazardLevel
+  inspection_category?: string
+  hazard_type?: HazardType
+  hazard_level?: HazardLevel
   hazard_category?: HazardCategory
-  description: string
+  description?: string
   location?: string
   discovered_by?: string
   discovered_by_name?: string
-  discovered_at: string
+  discovered_at?: string
   department?: string
   major_hazard_basis?: string
   key_defect?: string
@@ -542,24 +636,19 @@ export interface HazardReportFormData {
   rectification_photos?: string
   check_id?: string
   notes?: string
+  overall_status?: string
 }
 
 export interface HazardReportQueryParams {
   page?: number
   page_size?: number
   status?: string
+  overall_status?: string
   hazard_type?: string
   hazard_level?: string
   hazard_category?: string
   department?: string
   keyword?: string
-}
-
-export interface AssignRectificationRequest {
-  responsible_person_name: string
-  responsible_department: string
-  planned_completion_date: string
-  corrective_preventive_measures?: string
 }
 
 export interface CompleteRectificationRequest {
@@ -570,6 +659,17 @@ export interface CompleteRectificationRequest {
 
 export interface ExtendDeadlineRequest {
   extended_deadline: string
+}
+
+export interface RectificationReplyRequest {
+  reply_content: string
+  rectification_photos?: string
+}
+
+export interface VerifyLevelRequest {
+  level: number
+  action: 'approved' | 'rejected'
+  opinion?: string
 }
 
 export interface ConfirmCheckRequest {
@@ -930,15 +1030,37 @@ export interface HazardIdentificationQueryParams {
 
 export const AI_NODE_PROGRESS_OPTIONS = [
   { value: 'pending_input', label: '待填写基础信息', color: 'default' },
-  { value: 'pending_script1', label: '待AI解析附件', color: 'processing' },
-  { value: 'pending_script2', label: '待AI危险源辨识', color: 'processing' },
-  { value: 'pending_script3', label: '待AI固有风险评价', color: 'processing' },
-  { value: 'pending_script4', label: '待AI输入现有控制措施', color: 'processing' },
-  { value: 'pending_script5', label: '待AI评价残余风险', color: 'processing' },
-  { value: 'pending_script6', label: '待AI提出建议措施', color: 'processing' },
-  { value: 'pending_script7', label: '待AI评价建议措施后风险', color: 'processing' },
-  { value: 'completed', label: 'AI流程结束', color: 'success' },
+  { value: 'pending_script1', label: '待解析附件', color: 'processing' },
+  { value: 'pending_script2', label: '待危险源辨识', color: 'processing' },
+  { value: 'pending_script3', label: '待固有风险评价', color: 'processing' },
+  { value: 'pending_script4', label: '待控制措施', color: 'processing' },
+  { value: 'pending_script5', label: '待残余风险评价', color: 'processing' },
+  { value: 'pending_script6', label: '待建议措施', color: 'processing' },
+  { value: 'pending_script7', label: '待措施后评价', color: 'processing' },
+  { value: 'completed', label: '已完成', color: 'success' },
 ]
+
+// ============ Hazard Identification Export Types ============
+
+export interface HazardLedgerExportRequest {
+  natural_query?: string
+  department?: string
+  position?: string
+  risk_level?: string
+  date_from?: string
+  date_to?: string
+  keyword?: string
+}
+
+export interface HazardLedgerExportParsedFilters {
+  department?: string
+  position?: string
+  risk_level?: string
+  date_from?: string
+  date_to?: string
+  keyword?: string
+  explanation: string
+}
 
 export const OVERALL_STATUS_OPTIONS_HI = [
   { value: 'draft', label: '草稿', color: 'default' },
@@ -1000,33 +1122,6 @@ export const REVIEW_OPINION_OPTIONS = [
   { value: ReviewOpinion.APPROVED, label: '已审核', color: 'success' },
 ]
 
-export enum IdentificationType {
-  AUTO_TRIGGER = 'auto_trigger',
-  MANUAL_START = 'manual_start',
-}
-
-export const IDENTIFICATION_TYPE_OPTIONS = [
-  { value: IdentificationType.AUTO_TRIGGER, label: '自动触发', color: 'blue' },
-  { value: IdentificationType.MANUAL_START, label: '手动启动', color: 'default' },
-]
-
-export enum ArchiveStatus {
-  ACTIVE = 'active',
-  ARCHIVED = 'archived',
-}
-
-export const ARCHIVE_STATUS_OPTIONS = [
-  { value: ArchiveStatus.ACTIVE, label: '有效', color: 'success' },
-  { value: ArchiveStatus.ARCHIVED, label: '已归档', color: 'default' },
-]
-
-export const IDENTIFICATION_SCOPE_OPTIONS = [
-  { value: '人', label: '人' },
-  { value: '机', label: '机' },
-  { value: '料', label: '料' },
-  { value: '法', label: '法' },
-  { value: '环', label: '环' },
-]
 
 // ============ OperationRegulation Types ============
 
@@ -1094,76 +1189,6 @@ export interface RegulationRevisionQueryParams {
   revision_type?: string
   review_opinion?: string
   revision_scope?: string
-}
-
-// ============ HazardRevisionRecord Types ============
-
-export interface HazardRevisionRecord {
-  id: string
-  hazard_revision_no: string
-  regulation_revision_id?: string
-  regulation_name: string
-  identifier_id?: string
-  identifier_name?: string
-  identification_time: string
-  identification_type: IdentificationType
-  process_change_content?: string
-  identification_scope?: string
-  review_opinion: ReviewOpinion
-  hazard_document_path?: string
-  hazard_document_original_name?: string
-  linked_hazard_archive_id?: string
-  notes?: string
-  created_at: string
-  updated_at: string
-}
-
-export interface HazardRevisionRecordFormData {
-  hazard_revision_no: string
-  regulation_revision_id?: string
-  regulation_name: string
-  identifier_id?: string
-  identifier_name?: string
-  identification_type: IdentificationType
-  process_change_content?: string
-  notes?: string
-}
-
-export interface HazardRevisionRecordQueryParams {
-  page?: number
-  page_size?: number
-  regulation_revision_id?: string
-  review_opinion?: string
-  identification_type?: string
-  keyword?: string
-}
-
-// ============ HazardRevisionArchive Types ============
-
-export interface HazardRevisionArchive {
-  id: string
-  regulation_name: string
-  hazard_document_path?: string
-  hazard_document_original_name?: string
-  identification_date: string
-  status: ArchiveStatus
-  notes?: string
-  created_at: string
-  updated_at: string
-}
-
-export interface HazardRevisionArchiveFormData {
-  regulation_name: string
-  hazard_document_path?: string
-  hazard_document_original_name?: string
-  notes?: string
-}
-
-export interface HazardRevisionArchiveQueryParams {
-  page?: number
-  page_size?: number
-  status?: string
-  keyword?: string
 }
 
 // ============ AI Workflow Config Types ============
@@ -1262,12 +1287,18 @@ export const WORKFLOW_MENU_MAP: Record<string, MenuMapEntry> = {
     subgroup: '特殊作业台账',
     path: '/safety/special-ops',
   },
+  'hazard-identification-export': {
+    group: '风险与隐患',
+    subgroup: '风险分级管控',
+    path: '/safety/hazard-identification',
+  },
 }
 
 export const WORKFLOW_ICONS: Record<string, string> = {
   'hazard-identification': '🤖',
   'special-ops-critical': '🏗️',
   'special-ops-export': '📊',
+  'hazard-identification-export': '📋',
 }
 
 // ============ API Call Config Types ============
@@ -1275,6 +1306,8 @@ export const WORKFLOW_ICONS: Record<string, string> = {
 export interface APICallConfig {
   id: string
   config_name: string
+  config_type: string
+  source: 'db' | 'env'
   api_base_url: string
   api_key: string
   model_name: string
@@ -1290,6 +1323,7 @@ export interface APICallConfig {
 
 export interface APICallConfigFormData {
   config_name: string
+  config_type?: string
   api_base_url: string
   api_key: string
   model_name: string
@@ -1311,6 +1345,13 @@ export const AI_MODEL_OPTIONS = [
   { value: 'deepseek-v3', label: 'DeepSeek V3' },
   { value: 'qwen-plus', label: '通义千问 Plus' },
   { value: 'qwen-max', label: '通义千问 Max' },
+  { value: 'qwen-vl-max', label: '通义千问 VL Max (视觉)' },
+  { value: 'qwen-vl-plus', label: '通义千问 VL Plus (视觉)' },
+]
+
+export const CONFIG_TYPE_OPTIONS = [
+  { value: 'text', label: '文本模型', color: 'blue' },
+  { value: 'vision', label: '视觉模型', color: 'purple' },
 ]
 
 // ============ SpecialOperationPersonnel Types ============

@@ -7,6 +7,7 @@ export { DeviceDrawer } from './DeviceDrawer'
 export { CollectLogTable } from './CollectLogTable'
 export { CollectLogDetailDrawer } from './CollectLogDetailDrawer'
 export { AlertRuleTable } from './AlertRuleTable'
+export { AlertConfigDrawer } from './AlertConfigDrawer'
 export {
   statusPill,
   pillSuccess,

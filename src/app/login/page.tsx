@@ -2,11 +2,17 @@
 
 'use client'
 
-import { Button } from 'antd'
+import { useSearchParams } from 'next/navigation'
+import { Button, Alert } from 'antd'
+import { Suspense } from 'react'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
+  const detail = searchParams.get('detail')
+
   const handleLogin = () => {
     window.location.href = `${API_BASE_URL}/api/v1/identity/auth/login`
   }
@@ -28,6 +34,23 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <Alert
+              type="error"
+              message="登录失败"
+              description={
+                <div>
+                  <p><strong>错误类型：</strong>{error}</p>
+                  {detail && <p style={{ marginTop: 4, wordBreak: 'break-all' }}><strong>详情：</strong>{decodeURIComponent(detail)}</p>}
+                </div>
+              }
+              showIcon
+              closable
+              style={{ marginBottom: 16 }}
+            />
+          )}
+
           {/* Login Button */}
           <Button
             type="primary"
@@ -41,5 +64,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }

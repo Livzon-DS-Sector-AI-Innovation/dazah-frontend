@@ -43,7 +43,7 @@ export function CalibrationRecordTable({ onRefresh }: Props) {
         pagination={{
           current: calibrationRecordPage, pageSize: calibrationRecordPageSize, total: calibrationRecordTotal,
           showSizeChanger: true, showQuickJumper: true, showTotal: t => `共 ${t} 条`,
-          onChange: (p, s) => { setCalibrationRecordPage(p); setCalibrationRecordPageSize(s) },
+          onChange: (p, s) => { if (s !== calibrationRecordPageSize) { setCalibrationRecordPageSize(s) } else { setCalibrationRecordPage(p) } },
         }} />
     </div>
   )

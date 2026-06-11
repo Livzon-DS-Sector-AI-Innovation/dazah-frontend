@@ -32,6 +32,17 @@ import {
 } from '@/lib/api/rd'
 import { BayesianExperiment, ReactionScope } from '@/types/rd'
 
+
+function ClientDate({ date }: { date: string }) {
+  const [formatted, setFormatted] = useState('')
+  
+  useEffect(() => {
+    setFormatted(new Date(date).toLocaleString('zh-CN'))
+  }, [date])
+  
+  return <>{formatted || '...'}</>
+}
+
 const { TextArea } = Input
 const { Option } = Select
 
@@ -315,7 +326,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: string) => new Date(date).toLocaleString('zh-CN'),
+      render: (date: string) => <ClientDate date={date} />,
     },
     {
       title: '操作',
@@ -529,10 +540,10 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
                 {currentProject.description || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="创建时间">
-                {new Date(currentProject.created_at).toLocaleString('zh-CN')}
+                <ClientDate date={currentProject.created_at} />
               </Descriptions.Item>
               <Descriptions.Item label="更新时间">
-                {new Date(currentProject.updated_at || '').toLocaleString('zh-CN')}
+                <ClientDate date={currentProject.updated_at || ''} />
               </Descriptions.Item>
             </Descriptions>
 
@@ -611,7 +622,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
                           title: '创建时间', 
                           dataIndex: 'created_at', 
                           key: 'created_at',
-                          render: (v) => new Date(v).toLocaleString('zh-CN')
+                          render: (v) => <ClientDate date={v} />
                         },
                       ]}
                       dataSource={currentProject.reaction_scopes || []}

@@ -1,12 +1,18 @@
-"use client"
+import { ResearchPage } from '@/components/rd'
+import { fetchResearchProjects } from '@/lib/api/research'
+import { ResearchProject } from '@/types/rd'
 
-export default function RdProjectsPage() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">研发项目</h1>
-      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-500">
-        功能开发中...
-      </div>
-    </div>
-  )
+export default async function RdProjectsPage() {
+  let initialProjects: ResearchProject[] = []
+  let initialTotal = 0
+
+  try {
+    const result = await fetchResearchProjects({ page: 1, page_size: 20 })
+    initialProjects = result.items
+    initialTotal = result.total
+  } catch (error) {
+    console.warn('研发项目加载失败:', error)
+  }
+
+  return <ResearchPage initialProjects={initialProjects} initialTotal={initialTotal} />
 }

@@ -53,6 +53,7 @@ export async function fetchResearchProjects(
   if (filters.stage) params.set('stage', filters.stage)
   if (filters.status) params.set('status', filters.status)
   if (filters.keyword) params.set('keyword', filters.keyword)
+  params.set('project_type', '')  // Only regular research projects
   params.set('page', String(filters.page || 1))
   params.set('page_size', String(filters.page_size || 20))
   return apiFetchPaginated(

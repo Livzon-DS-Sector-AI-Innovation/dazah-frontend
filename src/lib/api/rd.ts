@@ -31,7 +31,7 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 
 // 项目管理
 export async function fetchProjects(): Promise<BayesianProject[]> {
-  return fetchAPI('/research/projects')
+  return fetchAPI('/research/projects?project_type=bayesian')
 }
 
 export async function fetchProject(projectId: string): Promise<BayesianProject> {
@@ -41,7 +41,7 @@ export async function fetchProject(projectId: string): Promise<BayesianProject> 
 export async function createProject(data: CreateProjectRequest): Promise<BayesianProject> {
   return fetchAPI('/research/projects', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, project_type: 'bayesian' }),
   })
 }
 

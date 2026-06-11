@@ -95,3 +95,15 @@ import { BatchTable } from '@/components/production'  // 通过 index.ts
 4. 如果有写操作，写在 actions/<模块>.ts 里
 5. 类型定义更新到 types/<模块>.ts
 6. 新增的对外组件记得在 components/<模块>/index.ts 里导出
+
+## Docker 开发环境
+
+本项目有两种 docker-compose 配置：
+- `docker-compose.yml` — 生产构建（`next build` + `next start`，无热更新）
+- `docker-compose.dev.yml` — 开发构建（`pnpm dev`，有热更新，推荐日常开发使用）
+
+开发时请使用：
+```bash
+docker compose -f docker-compose.dev.yml up -d --build
+```
+

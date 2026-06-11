@@ -136,13 +136,13 @@ export function ICHAnalysisPage() {
 
   const { message } = App.useApp()
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
   // Load history
   const loadHistory = useCallback(async (page = 1) => {
     setHistoryLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/research/ich/records?page=${page}&page_size=10`)
+      const res = await fetch(`${API_BASE}/api/v1/research/ich/records?page=${page}&page_size=10`)
       const data = await res.json()
       if (data.code === 200) {
         setHistory(data.data || [])
@@ -167,7 +167,7 @@ export function ICHAnalysisPage() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const res = await fetch(`${API_BASE}/research/ich/analyze?use_llm=true`, {
+      const res = await fetch(`${API_BASE}/api/v1/research/ich/analyze?use_llm=true`, {
         method: 'POST',
         body: formData,
       })
@@ -193,7 +193,7 @@ export function ICHAnalysisPage() {
   const viewRecord = async (recordId: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`${API_BASE}/research/ich/records/${recordId}`)
+      const res = await fetch(`${API_BASE}/api/v1/research/ich/records/${recordId}`)
       const data = await res.json()
       if (data.code === 200) {
         setResult({
@@ -212,7 +212,7 @@ export function ICHAnalysisPage() {
   // Delete a history record
   const deleteRecord = async (recordId: string) => {
     try {
-      const res = await fetch(`${API_BASE}/research/ich/records/${recordId}`, { method: 'DELETE' })
+      const res = await fetch(`${API_BASE}/api/v1/research/ich/records/${recordId}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.code === 200) {
         message.success('记录已删除')
@@ -238,7 +238,7 @@ export function ICHAnalysisPage() {
   // LLM config handlers
   const loadLlmConfig = async () => {
     try {
-      const res = await fetch(`${API_BASE}/research/llm/config`)
+      const res = await fetch(`${API_BASE}/api/v1/research/llm/config`)
       const data = await res.json()
       if (data.code === 200) {
         setLlmConfig(data.data)
@@ -256,7 +256,7 @@ export function ICHAnalysisPage() {
   const saveLlmConfig = async () => {
     try {
       const values = await llmForm.validateFields()
-      const res = await fetch(`${API_BASE}/research/llm/config`, {
+      const res = await fetch(`${API_BASE}/api/v1/research/llm/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
@@ -276,7 +276,7 @@ export function ICHAnalysisPage() {
     setLlmTesting(true)
     setLlmTestResult(null)
     try {
-      const res = await fetch(`${API_BASE}/research/llm/test`, { method: 'POST' })
+      const res = await fetch(`${API_BASE}/api/v1/research/llm/test`, { method: 'POST' })
       const data = await res.json()
       setLlmTestResult({ success: data.code === 200, message: data.message || data.data?.message || '测试完成' })
     } catch (error) {

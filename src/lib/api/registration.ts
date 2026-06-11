@@ -5,7 +5,7 @@ import {
   AuthorizationLetterListParams,
 } from '@/types/registration'
 
-const API_BASE = 'http://localhost:8000'
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000'
 
 export async function fetchProducts(): Promise<ProductListResponse> {
   const res = await fetch(`${API_BASE}/api/v1/registration/authorization-letters/products`, {

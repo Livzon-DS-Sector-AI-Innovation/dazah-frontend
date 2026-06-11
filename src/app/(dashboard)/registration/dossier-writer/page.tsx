@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  Table, Button, Space, Tag, Modal, Form, Input, Select, message, Popconfirm, Card,
+  Table, Button, Space, Tag, Modal, Form, Input, Select, Popconfirm, Card, App,
 } from 'antd'
 import {
   PlusOutlined, EyeOutlined, DeleteOutlined, ReloadOutlined, FileWordOutlined, UploadOutlined,
@@ -41,6 +41,7 @@ const PARSE_STATUS_MAP: Record<string, { color: string; label: string }> = {
 export default function DossierWriterListPage() {
   const router = useRouter()
   const { dossiers, dossiersTotal, dossiersLoading, loadDossiers } = useDossierWriterStore()
+  const { message } = App.useApp()
   
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)

@@ -9,7 +9,7 @@ import {
   BayesianObjective
 } from '@/types/rd'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_BASE = process.env.API_BASE_URL || 'http://localhost:8000'
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}/api/v1${endpoint}`, {

@@ -80,6 +80,7 @@ export const moduleMenus: ModuleMenu[] = [
     children: [
       { key: "review", label: "申报进度", path: "/registration/review" },
       { key: "filing", label: "注册申报", path: "/registration/filing" },
+      { key: "dossier-writer", label: "申报资料撰写", path: "/registration/dossier-writer" },
       { key: "regulation", label: "法规跟踪", path: "/registration/regulation" },
       { key: "documents", label: "文件管理", path: "/registration/documents" },
     ],

@@ -36,6 +36,10 @@ export default function CpvProductDetailPage() {
           setProduct(prod)
           setCppParams(cpp)
           setCqaParams(cqa)
+          // 自动选择第一个CPP参数
+          if (cpp.length > 0) {
+            setSelectedParamId(cpp[0].id)
+          }
         }
       } catch (err) {
         console.error(err)

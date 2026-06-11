@@ -13,18 +13,19 @@ import {
   Alert,
   Space,
   Typography,
-  Divider
+  Divider,
+  Select,
+  Radio
 } from 'antd'
 import { 
   UploadOutlined, 
   FileTextOutlined,
   ExperimentOutlined,
-  CheckCircleOutlined,
-  WarningOutlined
+  DownloadOutlined
 } from '@ant-design/icons'
-import type { UploadFile } from 'antd/es/upload/interface'
 
-const { Title, Text } = Typography
+const { Title, Text, Paragraph } = Typography
+const { Option } = Select
 
 interface ElementResult {
   symbol: string
@@ -43,6 +44,10 @@ interface ElementResult {
   cutaneous_assess: boolean
   notes: string
   found_in_text?: boolean
+  needs_assessment?: boolean
+  pde_for_route?: number
+  control_threshold?: number
+  ctcl_applicable?: boolean
 }
 
 interface SolventResult {
@@ -57,8 +62,11 @@ interface SolventResult {
 interface Q3DResult {
   type: 'Q3D'
   text_length: number
+  steps_count: number
+  route: string
   elements_found: ElementResult[]
   total_elements: number
+  needs_assessment: number
   summary: {
     class_1: number
     class_2a: number
@@ -66,11 +74,13 @@ interface Q3DResult {
     class_3: number
     other: number
   }
+  report: string
 }
 
 interface Q3CResult {
   type: 'Q3C'
   text_length: number
+  steps_count: number
   solvents_found: SolventResult[]
   total_solvents: number
   summary: {
@@ -79,6 +89,7 @@ interface Q3CResult {
     class_3: number
     unknown: number
   }
+  report: string
 }
 
 export function ICHAnalysisPage() {
@@ -86,6 +97,8 @@ export function ICHAnalysisPage() {
   const [q3dResult, setQ3dResult] = useState<Q3DResult | null>(null)
   const [q3cResult, setQ3cResult] = useState<Q3CResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [route, setRoute] = useState<string>('oral')
+  const [showReport, setShowReport] = useState(false)
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
@@ -96,7 +109,7 @@ export function ICHAnalysisPage() {
       const formData = new FormData()
       formData.append('file', file)
       
-      const res = await fetch(`${API_BASE}/research/ich/q3d/analyze`, {
+      const res = await fetch(`${API_BASE}/research/ich/q3d/analyze?route=${route}`, {
         method: 'POST',
         body: formData,
       })
@@ -108,13 +121,14 @@ export function ICHAnalysisPage() {
       
       const data = await res.json()
       setQ3dResult(data.data)
+      setShowReport(false)
       message.success('ICH Q3D 分析完成')
     } catch (error: any) {
       message.error(error.message || '分析失败')
     } finally {
       setLoading(false)
     }
-    return false // 阻止自动上传
+    return false
   }
 
   // ICH Q3C 分析
@@ -136,13 +150,25 @@ export function ICHAnalysisPage() {
       
       const data = await res.json()
       setQ3cResult(data.data)
+      setShowReport(false)
       message.success('ICH Q3C 分析完成')
     } catch (error: any) {
       message.error(error.message || '分析失败')
     } finally {
       setLoading(false)
     }
-    return false // 阻止自动上传
+    return false
+  }
+
+  // 下载报告
+  const downloadReport = (report: string, filename: string) => {
+    const blob = new Blob([report], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   // 元素杂质表格列
@@ -174,7 +200,7 @@ export function ICHAnalysisPage() {
       title: '来源',
       dataIndex: 'source',
       key: 'source',
-      width: 200,
+      width: 180,
       ellipsis: true,
     },
     {
@@ -185,59 +211,32 @@ export function ICHAnalysisPage() {
       render: (v: boolean) => v ? <Tag color="red">是</Tag> : <Tag>否</Tag>,
     },
     {
-      title: '口服 PDE (μg/天)',
-      dataIndex: 'oral_pde',
-      key: 'oral_pde',
-      width: 130,
+      title: 'PDE (μg/天)',
+      dataIndex: 'pde_for_route',
+      key: 'pde_for_route',
+      width: 120,
       render: (v: number) => v ?? '-',
     },
     {
-      title: '注射 PDE (μg/天)',
-      dataIndex: 'parenteral_pde',
-      key: 'parenteral_pde',
-      width: 130,
-      render: (v: number) => v ?? '-',
-    },
-    {
-      title: '吸入 PDE (μg/天)',
-      dataIndex: 'inhalation_pde',
-      key: 'inhalation_pde',
-      width: 130,
-      render: (v: number) => v ?? '-',
-    },
-    {
-      title: '皮肤 PDE (μg/天)',
-      dataIndex: 'cutaneous_pde',
-      key: 'cutaneous_pde',
-      width: 130,
-      render: (v: number) => v ?? '-',
+      title: '控制阈值 (μg/天)',
+      dataIndex: 'control_threshold',
+      key: 'control_threshold',
+      width: 140,
+      render: (v: number) => v ? v.toFixed(1) : '-',
     },
     {
       title: 'CTCL (μg/g)',
       dataIndex: 'ctcl',
       key: 'ctcl',
       width: 100,
-      render: (v: number) => v ?? '-',
+      render: (v: number, record: ElementResult) => record.ctcl_applicable ? (v ?? '-') : '-',
     },
     {
-      title: '评估建议',
-      key: 'assessment',
-      width: 250,
-      render: (_: any, record: ElementResult) => {
-        const parts: string[] = []
-        if (record.oral_assess) parts.push('口服')
-        if (record.parenteral_assess) parts.push('注射')
-        if (record.inhalation_assess) parts.push('吸入')
-        if (record.cutaneous_assess) parts.push('皮肤')
-        
-        if (parts.length === 0) {
-          return <Tag color="green">无需评估</Tag>
-        }
-        if (parts.length === 4) {
-          return <Tag color="red">所有途径需评估</Tag>
-        }
-        return <Tag color="orange">{parts.join('、')}需评估</Tag>
-      },
+      title: '需要评估',
+      key: 'needs_assessment',
+      width: 100,
+      render: (_: any, record: ElementResult) => 
+        record.needs_assessment ? <Tag color="red">是</Tag> : <Tag color="green">否</Tag>,
     },
     {
       title: '备注',
@@ -294,6 +293,13 @@ export function ICHAnalysisPage() {
     },
   ]
 
+  const routeOptions = [
+    { label: '口服', value: 'oral' },
+    { label: '注射', value: 'parenteral' },
+    { label: '吸入', value: 'inhalation' },
+    { label: '皮肤', value: 'cutaneous' },
+  ]
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>
@@ -302,7 +308,7 @@ export function ICHAnalysisPage() {
       
       <Alert
         message="ICH 杂质识别工具"
-        description="上传药品合成工艺文件（DOCX格式），自动识别元素杂质（Q3D）和溶剂残留（Q3C），并根据 ICH 指南进行分类和评估建议。"
+        description="上传药品合成工艺文件（DOCX格式），自动识别元素杂质（Q3D）和溶剂残留（Q3C），并根据 ICH 指南进行分类和评估建议。支持浓度前缀识别（如95%乙醇→乙醇）。"
         type="info"
         showIcon
         style={{ marginBottom: 24 }}
@@ -323,23 +329,30 @@ export function ICHAnalysisPage() {
             children: (
               <div>
                 <Card title="上传工艺文件" style={{ marginBottom: 16 }}>
-                  <Upload
-                    accept=".docx"
-                    maxCount={1}
-                    beforeUpload={handleQ3DUpload}
-                    showUploadList={false}
-                  >
-                    <Button icon={<UploadOutlined />} loading={loading}>
-                      选择 DOCX 文件并分析
-                    </Button>
-                  </Upload>
-                  <Alert
-                    message="支持的文件格式"
-                    description="仅支持 Microsoft Word DOCX 格式文件（.docx）"
-                    type="info"
-                    showIcon
-                    style={{ marginTop: 16 }}
-                  />
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div>
+                      <Text strong>给药途径：</Text>
+                      <Radio.Group 
+                        value={route} 
+                        onChange={(e) => setRoute(e.target.value)}
+                        style={{ marginLeft: 16 }}
+                      >
+                        {routeOptions.map(opt => (
+                          <Radio.Button key={opt.value} value={opt.value}>{opt.label}</Radio.Button>
+                        ))}
+                      </Radio.Group>
+                    </div>
+                    <Upload
+                      accept=".docx"
+                      maxCount={1}
+                      beforeUpload={handleQ3DUpload}
+                      showUploadList={false}
+                    >
+                      <Button icon={<UploadOutlined />} loading={loading}>
+                        选择 DOCX 文件并分析
+                      </Button>
+                    </Upload>
+                  </Space>
                 </Card>
 
                 {q3dResult && (
@@ -349,8 +362,17 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="文本长度">
                           {q3dResult.text_length} 字符
                         </Descriptions.Item>
+                        <Descriptions.Item label="工艺步骤数">
+                          {q3dResult.steps_count} 步
+                        </Descriptions.Item>
+                        <Descriptions.Item label="给药途径">
+                          {routeOptions.find(r => r.value === q3dResult.route)?.label || q3dResult.route}
+                        </Descriptions.Item>
                         <Descriptions.Item label="识别元素总数">
                           {q3dResult.total_elements} 个
+                        </Descriptions.Item>
+                        <Descriptions.Item label="需要评估的元素">
+                          <Tag color="red">{q3dResult.needs_assessment} 个</Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label="Class 1 元素">
                           <Tag color="red">{q3dResult.summary.class_1} 个</Tag>
@@ -364,13 +386,20 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="Class 3 元素">
                           <Tag color="blue">{q3dResult.summary.class_3} 个</Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Other 元素">
-                          <Tag>{q3dResult.summary.other} 个</Tag>
-                        </Descriptions.Item>
                       </Descriptions>
                     </Card>
 
-                    <Card title="元素杂质详细列表">
+                    <Card 
+                      title="元素杂质详细列表"
+                      extra={
+                        <Button 
+                          icon={<DownloadOutlined />}
+                          onClick={() => downloadReport(q3dResult.report, 'ICH_Q3D_Report.md')}
+                        >
+                          下载报告
+                        </Button>
+                      }
+                    >
                       <Alert
                         message="评估说明"
                         description={
@@ -379,8 +408,8 @@ export function ICHAnalysisPage() {
                             <div><strong>Class 2A</strong>：出现概率高，需评估所有潜在来源</div>
                             <div><strong>Class 2B</strong>：出现概率较低，除非有意添加，否则可排除</div>
                             <div><strong>Class 3</strong>：口服毒性低，除非有意添加否则口服无需评估</div>
-                            <div><strong>Other</strong>：未建立 PDE，需逐案毒理学论证</div>
-                            <div style={{ marginTop: 8 }}><strong>CTCL</strong>：皮肤毒性浓度限度（Ni、Co 为 35 μg/g，基于致敏性）</div>
+                            <div style={{ marginTop: 8 }}><strong>控制阈值</strong> = 30% PDE，低于此值通常无需额外控制</div>
+                            <div><strong>CTCL</strong>：皮肤毒性浓度限度（Ni、Co 为 35 μg/g）</div>
                           </div>
                         }
                         type="warning"
@@ -392,10 +421,32 @@ export function ICHAnalysisPage() {
                         dataSource={q3dResult.elements_found}
                         rowKey="symbol"
                         pagination={false}
-                        scroll={{ x: 1600 }}
+                        scroll={{ x: 1200 }}
                         size="small"
                       />
                     </Card>
+
+                    {showReport && (
+                      <Card title="合规报告" style={{ marginTop: 16 }}>
+                        <pre style={{ 
+                          whiteSpace: 'pre-wrap', 
+                          fontFamily: 'monospace',
+                          background: '#f5f5f5',
+                          padding: 16,
+                          borderRadius: 4,
+                          maxHeight: 500,
+                          overflow: 'auto'
+                        }}>
+                          {q3dResult.report}
+                        </pre>
+                      </Card>
+                    )}
+                    
+                    <div style={{ marginTop: 16, textAlign: 'center' }}>
+                      <Button onClick={() => setShowReport(!showReport)}>
+                        {showReport ? '隐藏报告' : '查看合规报告'}
+                      </Button>
+                    </div>
                   </>
                 )}
               </div>
@@ -424,7 +475,7 @@ export function ICHAnalysisPage() {
                   </Upload>
                   <Alert
                     message="支持的文件格式"
-                    description="仅支持 Microsoft Word DOCX 格式文件（.docx）"
+                    description="仅支持 Microsoft Word DOCX 格式文件（.docx）。支持浓度前缀识别（如95%乙醇→乙醇）。"
                     type="info"
                     showIcon
                     style={{ marginTop: 16 }}
@@ -438,32 +489,42 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="文本长度">
                           {q3cResult.text_length} 字符
                         </Descriptions.Item>
+                        <Descriptions.Item label="工艺步骤数">
+                          {q3cResult.steps_count} 步
+                        </Descriptions.Item>
                         <Descriptions.Item label="识别溶剂总数">
                           {q3cResult.total_solvents} 个
                         </Descriptions.Item>
-                        <Descriptions.Item label="Class 1 溶剂">
+                        <Descriptions.Item label="Class 1 溶剂（避免使用）">
                           <Tag color="red">{q3cResult.summary.class_1} 个</Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Class 2 溶剂">
+                        <Descriptions.Item label="Class 2 溶剂（限制使用）">
                           <Tag color="orange">{q3cResult.summary.class_2} 个</Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Class 3 溶剂">
+                        <Descriptions.Item label="Class 3 溶剂（低毒）">
                           <Tag color="green">{q3cResult.summary.class_3} 个</Tag>
-                        </Descriptions.Item>
-                        <Descriptions.Item label="未分类溶剂">
-                          <Tag>{q3cResult.summary.unknown} 个</Tag>
                         </Descriptions.Item>
                       </Descriptions>
                     </Card>
 
-                    <Card title="溶剂残留详细列表">
+                    <Card 
+                      title="溶剂残留详细列表"
+                      extra={
+                        <Button 
+                          icon={<DownloadOutlined />}
+                          onClick={() => downloadReport(q3cResult.report, 'ICH_Q3C_Report.md')}
+                        >
+                          下载报告
+                        </Button>
+                      }
+                    >
                       <Alert
                         message="分类说明"
                         description={
                           <div>
                             <div><strong>Class 1</strong>：致癌物、疑似致癌物、环境危害物 — 应避免使用</div>
                             <div><strong>Class 2</strong>：非遗传毒性致癌物、神经毒性、致畸 — 限制使用</div>
-                            <div><strong>Class 3</strong>：低毒性 — 无长期毒性研究，GMP 或其他质量标准限制</div>
+                            <div><strong>Class 3</strong>：低毒性 — 按 GMP 或其他质量标准控制</div>
                           </div>
                         }
                         type="warning"
@@ -479,6 +540,28 @@ export function ICHAnalysisPage() {
                         size="small"
                       />
                     </Card>
+
+                    {showReport && (
+                      <Card title="合规报告" style={{ marginTop: 16 }}>
+                        <pre style={{ 
+                          whiteSpace: 'pre-wrap', 
+                          fontFamily: 'monospace',
+                          background: '#f5f5f5',
+                          padding: 16,
+                          borderRadius: 4,
+                          maxHeight: 500,
+                          overflow: 'auto'
+                        }}>
+                          {q3cResult.report}
+                        </pre>
+                      </Card>
+                    )}
+                    
+                    <div style={{ marginTop: 16, textAlign: 'center' }}>
+                      <Button onClick={() => setShowReport(!showReport)}>
+                        {showReport ? '隐藏报告' : '查看合规报告'}
+                      </Button>
+                    </div>
                   </>
                 )}
               </div>

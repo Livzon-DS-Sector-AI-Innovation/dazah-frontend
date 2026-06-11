@@ -28,12 +28,21 @@ const { Title, Text } = Typography
 
 interface ElementResult {
   symbol: string
-  name: string
-  class: string
+  source: string
+  intentionally_added: boolean
+  assessment_required: boolean
+  q3d_class: string
   oral_pde?: number
   parenteral_pde?: number
   inhalation_pde?: number
-  found_in_text: boolean
+  cutaneous_pde?: number
+  ctcl?: number
+  oral_assess: boolean
+  parenteral_assess: boolean
+  inhalation_assess: boolean
+  cutaneous_assess: boolean
+  notes: string
+  found_in_text?: boolean
 }
 
 interface SolventResult {
@@ -42,7 +51,6 @@ interface SolventResult {
   class: string
   limit_ppm?: number
   pde_mg_day?: number
-  concern?: string
   found_in_text: boolean
 }
 
@@ -56,6 +64,7 @@ interface Q3DResult {
     class_2a: number
     class_2b: number
     class_3: number
+    other: number
   }
 }
 
@@ -68,6 +77,7 @@ interface Q3CResult {
     class_1: number
     class_2: number
     class_3: number
+    unknown: number
   }
 }
 
@@ -141,49 +151,101 @@ export function ICHAnalysisPage() {
       title: '元素符号',
       dataIndex: 'symbol',
       key: 'symbol',
-      width: 100,
-    },
-    {
-      title: '元素名称',
-      dataIndex: 'name',
-      key: 'name',
-      width: 120,
+      width: 80,
+      fixed: 'left' as const,
     },
     {
       title: 'Q3D 分类',
-      dataIndex: 'class',
-      key: 'class',
-      width: 120,
+      dataIndex: 'q3d_class',
+      key: 'q3d_class',
+      width: 100,
       render: (cls: string) => {
         const colors: Record<string, string> = {
           'Class 1': 'red',
           'Class 2A': 'orange',
           'Class 2B': 'gold',
           'Class 3': 'blue',
+          'Other': 'default',
         }
         return <Tag color={colors[cls] || 'default'}>{cls}</Tag>
       },
     },
     {
+      title: '来源',
+      dataIndex: 'source',
+      key: 'source',
+      width: 200,
+      ellipsis: true,
+    },
+    {
+      title: '有意添加',
+      dataIndex: 'intentionally_added',
+      key: 'intentionally_added',
+      width: 90,
+      render: (v: boolean) => v ? <Tag color="red">是</Tag> : <Tag>否</Tag>,
+    },
+    {
       title: '口服 PDE (μg/天)',
       dataIndex: 'oral_pde',
       key: 'oral_pde',
-      width: 150,
-      render: (v: number) => v || '-',
+      width: 130,
+      render: (v: number) => v ?? '-',
     },
     {
       title: '注射 PDE (μg/天)',
       dataIndex: 'parenteral_pde',
       key: 'parenteral_pde',
-      width: 150,
-      render: (v: number) => v || '-',
+      width: 130,
+      render: (v: number) => v ?? '-',
     },
     {
       title: '吸入 PDE (μg/天)',
       dataIndex: 'inhalation_pde',
       key: 'inhalation_pde',
+      width: 130,
+      render: (v: number) => v ?? '-',
+    },
+    {
+      title: '皮肤 PDE (μg/天)',
+      dataIndex: 'cutaneous_pde',
+      key: 'cutaneous_pde',
+      width: 130,
+      render: (v: number) => v ?? '-',
+    },
+    {
+      title: 'CTCL (μg/g)',
+      dataIndex: 'ctcl',
+      key: 'ctcl',
+      width: 100,
+      render: (v: number) => v ?? '-',
+    },
+    {
+      title: '评估建议',
+      key: 'assessment',
+      width: 250,
+      render: (_: any, record: ElementResult) => {
+        const parts: string[] = []
+        if (record.oral_assess) parts.push('口服')
+        if (record.parenteral_assess) parts.push('注射')
+        if (record.inhalation_assess) parts.push('吸入')
+        if (record.cutaneous_assess) parts.push('皮肤')
+        
+        if (parts.length === 0) {
+          return <Tag color="green">无需评估</Tag>
+        }
+        if (parts.length === 4) {
+          return <Tag color="red">所有途径需评估</Tag>
+        }
+        return <Tag color="orange">{parts.join('、')}需评估</Tag>
+      },
+    },
+    {
+      title: '备注',
+      dataIndex: 'notes',
+      key: 'notes',
       width: 150,
-      render: (v: number) => v || '-',
+      ellipsis: true,
+      render: (v: string) => v || '-',
     },
   ]
 
@@ -199,7 +261,7 @@ export function ICHAnalysisPage() {
       title: '溶剂名称（英文）',
       dataIndex: 'name_en',
       key: 'name_en',
-      width: 180,
+      width: 200,
     },
     {
       title: 'Q3C 分类',
@@ -211,8 +273,9 @@ export function ICHAnalysisPage() {
           'Class 1': 'red',
           'Class 2': 'orange',
           'Class 3': 'green',
+          'unknown': 'default',
         }
-        return <Tag color={colors[cls] || 'default'}>{cls}</Tag>
+        return <Tag color={colors[cls] || 'default'}>{cls || '未分类'}</Tag>
       },
     },
     {
@@ -220,32 +283,30 @@ export function ICHAnalysisPage() {
       dataIndex: 'limit_ppm',
       key: 'limit_ppm',
       width: 120,
-      render: (v: number) => v || '-',
+      render: (v: number) => v ?? '-',
     },
     {
       title: 'PDE (mg/天)',
       dataIndex: 'pde_mg_day',
       key: 'pde_mg_day',
       width: 120,
-      render: (v: number) => v || '-',
-    },
-    {
-      title: '关注点',
-      dataIndex: 'concern',
-      key: 'concern',
-      width: 200,
-      render: (v: string) => v || '-',
+      render: (v: number) => v ?? '-',
     },
   ]
 
   return (
-    <div style={{ padding: '24px' }}>
-      <Title level={2}>ICH Q3C、Q3D 杂质识别</Title>
-      <Text type="secondary">
-        上传合成工艺 DOCX 文件，自动识别元素杂质（Q3D）和溶剂残留（Q3C）
-      </Text>
-
-      <Divider />
+    <div style={{ padding: 24 }}>
+      <Title level={2}>
+        <ExperimentOutlined /> ICH Q3C、Q3D 杂质识别
+      </Title>
+      
+      <Alert
+        message="ICH 杂质识别工具"
+        description="上传药品合成工艺文件（DOCX格式），自动识别元素杂质（Q3D）和溶剂残留（Q3C），并根据 ICH 指南进行分类和评估建议。"
+        type="info"
+        showIcon
+        style={{ marginBottom: 24 }}
+      />
 
       <Tabs
         activeKey={activeTab}
@@ -303,16 +364,36 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="Class 3 元素">
                           <Tag color="blue">{q3dResult.summary.class_3} 个</Tag>
                         </Descriptions.Item>
+                        <Descriptions.Item label="Other 元素">
+                          <Tag>{q3dResult.summary.other} 个</Tag>
+                        </Descriptions.Item>
                       </Descriptions>
                     </Card>
 
                     <Card title="元素杂质详细列表">
+                      <Alert
+                        message="评估说明"
+                        description={
+                          <div>
+                            <div><strong>Class 1</strong>：人体毒性与环保关注元素，所有途径必须评估</div>
+                            <div><strong>Class 2A</strong>：出现概率高，需评估所有潜在来源</div>
+                            <div><strong>Class 2B</strong>：出现概率较低，除非有意添加，否则可排除</div>
+                            <div><strong>Class 3</strong>：口服毒性低，除非有意添加否则口服无需评估</div>
+                            <div><strong>Other</strong>：未建立 PDE，需逐案毒理学论证</div>
+                            <div style={{ marginTop: 8 }}><strong>CTCL</strong>：皮肤毒性浓度限度（Ni、Co 为 35 μg/g，基于致敏性）</div>
+                          </div>
+                        }
+                        type="warning"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                      />
                       <Table
                         columns={elementColumns}
                         dataSource={q3dResult.elements_found}
                         rowKey="symbol"
                         pagination={false}
-                        scroll={{ x: 800 }}
+                        scroll={{ x: 1600 }}
+                        size="small"
                       />
                     </Card>
                   </>
@@ -369,16 +450,33 @@ export function ICHAnalysisPage() {
                         <Descriptions.Item label="Class 3 溶剂">
                           <Tag color="green">{q3cResult.summary.class_3} 个</Tag>
                         </Descriptions.Item>
+                        <Descriptions.Item label="未分类溶剂">
+                          <Tag>{q3cResult.summary.unknown} 个</Tag>
+                        </Descriptions.Item>
                       </Descriptions>
                     </Card>
 
                     <Card title="溶剂残留详细列表">
+                      <Alert
+                        message="分类说明"
+                        description={
+                          <div>
+                            <div><strong>Class 1</strong>：致癌物、疑似致癌物、环境危害物 — 应避免使用</div>
+                            <div><strong>Class 2</strong>：非遗传毒性致癌物、神经毒性、致畸 — 限制使用</div>
+                            <div><strong>Class 3</strong>：低毒性 — 无长期毒性研究，GMP 或其他质量标准限制</div>
+                          </div>
+                        }
+                        type="warning"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                      />
                       <Table
                         columns={solventColumns}
                         dataSource={q3cResult.solvents_found}
                         rowKey="name_en"
                         pagination={false}
-                        scroll={{ x: 900 }}
+                        scroll={{ x: 800 }}
+                        size="small"
                       />
                     </Card>
                   </>

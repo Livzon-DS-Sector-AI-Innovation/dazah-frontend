@@ -188,6 +188,7 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "experiments", label: "实验记录", path: "/rd/experiments" },
       { key: "reports", label: "研发报告", path: "/rd/reports" },
       { key: "bayesian", label: "贝叶斯优化", path: "/rd/bayesian" },
+      { key: "ich-analysis", label: "ICH Q3C、Q3D杂质识别", path: "/rd/ich-analysis" },
     ],
   },
   {

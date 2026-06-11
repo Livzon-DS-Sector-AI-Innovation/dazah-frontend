@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Table, Input, Select, message, Tag, Tooltip } from 'antd'
+import { Table, Input, Select, Tag, Tooltip, App } from 'antd'
 import { SearchOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { Employee } from '@/types/hr'
 import { fetchEmployeesAction } from '@/actions/hr'
@@ -19,7 +19,10 @@ const statusColorMap: Record<string, string> = {
   待审批: 'processing',
 }
 
-export default function RosterClient({ initialEmployees, initialTotal }: RosterClientProps) {
+export default function RosterClient({
+ initialEmployees, initialTotal }: RosterClientProps) {
+  const { message } = App.useApp()
+
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees)
   const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button, message, Table, Space, Popconfirm, Input } from 'antd'
+import { Button, Table, Space, Popconfirm, Input, App } from 'antd'
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { Team } from '@/types/hr'
 import { fetchTeamsAction, deleteTeam } from '@/actions/hr'
@@ -12,7 +12,10 @@ interface TeamClientProps {
   departmentName: string
 }
 
-export default function TeamClient({ departmentId, departmentName }: TeamClientProps) {
+export default function TeamClient({
+ departmentId, departmentName }: TeamClientProps) {
+  const { message } = App.useApp()
+
   const [teams, setTeams] = useState<Team[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)

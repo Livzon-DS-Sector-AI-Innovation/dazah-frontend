@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button, message, Table, Space, Popconfirm, Input, Tag } from 'antd'
+import { Button, Table, Space, Popconfirm, Input, Tag, App } from 'antd'
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { OffboardingRecord } from '@/types/hr'
 import { fetchOffboardingRecordsAction, deleteOffboardingRecord } from '@/actions/hr'
@@ -13,9 +13,12 @@ interface OffboardingClientProps {
 }
 
 export default function OffboardingClient({
+
   initialRecords,
   initialTotal,
 }: OffboardingClientProps) {
+  const { message } = App.useApp()
+
   const [records, setRecords] = useState<OffboardingRecord[]>(initialRecords)
   const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)

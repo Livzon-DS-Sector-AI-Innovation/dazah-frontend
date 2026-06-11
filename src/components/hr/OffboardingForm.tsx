@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Modal, Form, Select, DatePicker, Input, message } from 'antd'
+import { Modal, Form, Select, DatePicker, Input, App } from 'antd'
 import dayjs from 'dayjs'
 import { Employee, OffboardingRecord, OffboardingRecordCreateInput, OffboardingRecordUpdateInput } from '@/types/hr'
 import { createOffboardingRecord, updateOffboardingRecord } from '@/actions/hr'
@@ -14,7 +14,10 @@ interface OffboardingFormProps {
   onSuccess: () => void
 }
 
-export default function OffboardingForm({ open, record, onClose, onSuccess }: OffboardingFormProps) {
+export default function OffboardingForm({
+ open, record, onClose, onSuccess }: OffboardingFormProps) {
+  const { message } = App.useApp()
+
   const [form] = Form.useForm()
   const isEdit = !!record
   const [employees, setEmployees] = useState<Employee[]>([])

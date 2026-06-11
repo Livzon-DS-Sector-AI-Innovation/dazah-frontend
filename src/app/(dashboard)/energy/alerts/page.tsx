@@ -3,7 +3,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Button, Space, message } from 'antd'
+import { Button, Space, App } from 'antd'
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
 import { AlertRuleTable } from '@/components/energy'
 import { AlertRule, PaginatedResponse } from '@/types/energy'
@@ -11,6 +11,9 @@ import { getAlertRules, deleteAlertRule } from '@/actions/energy'
 import { useEnergyStore } from '@/stores/energy'
 
 export default function AlertsPage() {
+  const { message } = App.useApp()
+
+
   const { alertConfigDrawerOpen, openAlertConfigDrawer } = useEnergyStore()
   const [data, setData] = useState<AlertRule[]>([])
   const [loading, setLoading] = useState(false)

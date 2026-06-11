@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Table, Input, Select, DatePicker, Button, Space, Tag, message, Card, Statistic, Row, Col, Modal } from 'antd'
+import { Table, Input, Select, DatePicker, Button, Space, Tag, Card, Statistic, Row, Col, Modal, App } from 'antd'
 import { SearchOutlined, CheckCircleOutlined, CloseCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 import { LabelVerification } from '@/types/label-verification'
 import { fetchLabelVerifications, fetchLabelVerificationStatistics } from '@/lib/api/label-verification'
@@ -16,9 +16,12 @@ interface LabelVerificationClientProps {
 }
 
 export default function LabelVerificationClient({
+
   initialVerifications,
   initialTotal,
 }: LabelVerificationClientProps) {
+  const { message } = App.useApp()
+
   const [verifications, setVerifications] = useState<LabelVerification[]>(initialVerifications)
   const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)

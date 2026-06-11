@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Table, Button, Space, Tag, Input, Select, Popconfirm, message, Tooltip } from 'antd'
+import { Table, Button, Space, Tag, Input, Select, Popconfirm, Tooltip, App } from 'antd'
 import { SearchOutlined, EditOutlined, DeleteOutlined, SyncOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { Employee } from '@/types/hr'
 import { useHrStore } from '@/stores/hr'
@@ -25,6 +25,7 @@ const statusColorMap: Record<string, string> = {
 }
 
 export default function EmployeeTable({
+
   employees,
   total,
   page,
@@ -33,6 +34,8 @@ export default function EmployeeTable({
   onRefresh,
   onEdit,
 }: EmployeeTableProps) {
+  const { message } = App.useApp()
+
   const [loading, setLoading] = useState(false)
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const { searchKeyword, setSearchKeyword, filterStatus, setFilterStatus } = useHrStore()

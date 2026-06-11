@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, Button, Statistic, Row, Col, Tag, message, Spin } from 'antd'
+import { Card, Button, Statistic, Row, Col, Tag, Spin, App } from 'antd'
 import { SyncOutlined, CloudSyncOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { fetchSyncStatus, syncFromFeishu } from '@/lib/api/hr'
 
@@ -15,6 +15,7 @@ interface SyncStatus {
 }
 
 export default function FeishuSyncPanel({ onSynced }: { onSynced?: () => void }) {
+  const { message } = App.useApp()
   const [status, setStatus] = useState<SyncStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const [syncing, setSyncing] = useState(false)

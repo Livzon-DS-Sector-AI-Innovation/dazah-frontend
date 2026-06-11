@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Modal, Form, Input, message } from 'antd'
+import { Modal, Form, Input, App } from 'antd'
 import { Team, TeamCreateInput, TeamUpdateInput } from '@/types/hr'
 import { createTeam, updateTeam } from '@/actions/hr'
 
@@ -13,7 +13,10 @@ interface TeamFormProps {
   onSuccess: () => void
 }
 
-export default function TeamForm({ open, team, departmentId, onClose, onSuccess }: TeamFormProps) {
+export default function TeamForm({
+ open, team, departmentId, onClose, onSuccess }: TeamFormProps) {
+  const { message } = App.useApp()
+
   const [form] = Form.useForm()
   const isEdit = !!team
 

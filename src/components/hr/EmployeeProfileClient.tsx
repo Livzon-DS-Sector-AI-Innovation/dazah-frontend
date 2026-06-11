@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button, message, Tabs } from 'antd'
+import { Button, Tabs, App } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { Employee, Department } from '@/types/hr'
 import { fetchEmployeesAction } from '@/actions/hr'
@@ -17,9 +17,12 @@ interface EmployeeProfileClientProps {
 }
 
 export default function EmployeeProfileClient({
+
   initialEmployees,
   initialTotal,
 }: EmployeeProfileClientProps) {
+  const { message } = App.useApp()
+
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees)
   const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)

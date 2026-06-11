@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Modal, Form, Input, Select, DatePicker, Tabs, message } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, Tabs, App } from 'antd'
 import dayjs from 'dayjs'
 import { Employee, EmployeeCreateInput, EmployeeUpdateInput, Department } from '@/types/hr'
 import { createEmployee, updateEmployee } from '@/actions/hr'
@@ -16,7 +16,10 @@ interface EmployeeFormProps {
 
 const { TabPane } = Tabs
 
-export default function EmployeeForm({ open, employee, onClose, onSuccess }: EmployeeFormProps) {
+export default function EmployeeForm({
+ open, employee, onClose, onSuccess }: EmployeeFormProps) {
+  const { message } = App.useApp()
+
   const [form] = Form.useForm()
   const isEdit = !!employee
   const [departments, setDepartments] = useState<Department[]>([])

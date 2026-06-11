@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Modal, Form, Input, message } from 'antd'
+import { Modal, Form, Input, App } from 'antd'
 import { Department, DepartmentCreateInput, DepartmentUpdateInput } from '@/types/hr'
 import { createDepartment, updateDepartment } from '@/actions/hr'
 
@@ -12,7 +12,10 @@ interface DepartmentFormProps {
   onSuccess: () => void
 }
 
-export default function DepartmentForm({ open, department, onClose, onSuccess }: DepartmentFormProps) {
+export default function DepartmentForm({
+ open, department, onClose, onSuccess }: DepartmentFormProps) {
+  const { message } = App.useApp()
+
   const [form] = Form.useForm()
   const isEdit = !!department
 

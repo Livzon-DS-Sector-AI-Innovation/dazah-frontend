@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, Switch, Button, Dropdown, Tag, Typography, Popconfirm, message } from 'antd'
+import { Card, Switch, Button, Dropdown, Tag, Typography, Popconfirm, App } from 'antd'
 import {
   EditOutlined,
   MoreOutlined,
@@ -32,7 +32,10 @@ const CARD_STYLE: React.CSSProperties = {
   marginBottom: 12,
 }
 
-export default function AIWorkflowCard({ workflow, onEdit, onRefresh }: Props) {
+export default function AIWorkflowCard({
+ workflow, onEdit, onRefresh }: Props) {
+  const { message } = App.useApp()
+
   const menuInfo = WORKFLOW_MENU_MAP[workflow.module_code]
   const icon = WORKFLOW_ICONS[workflow.module_code] || '🤖'
   const scriptCount = workflow.script_configs?.filter((s) => s.is_enabled).length || 0

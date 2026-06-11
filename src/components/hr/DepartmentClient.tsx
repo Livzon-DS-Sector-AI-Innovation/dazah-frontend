@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button, message, Table, Space, Popconfirm, Input, Modal } from 'antd'
+import { Button, Table, Space, Popconfirm, Input, Modal, App } from 'antd'
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, TeamOutlined } from '@ant-design/icons'
 import { Department } from '@/types/hr'
 import { fetchDepartmentsAction, deleteDepartment } from '@/actions/hr'
@@ -14,9 +14,12 @@ interface DepartmentClientProps {
 }
 
 export default function DepartmentClient({
+
   initialDepartments,
   initialTotal,
 }: DepartmentClientProps) {
+  const { message } = App.useApp()
+
   const [departments, setDepartments] = useState<Department[]>(initialDepartments)
   const [total, setTotal] = useState(initialTotal)
   const [page, setPage] = useState(1)

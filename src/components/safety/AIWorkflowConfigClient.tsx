@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Typography, message } from 'antd'
+import { Typography, App } from 'antd'
 import { ApiOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import type { AIWorkflowConfig } from '@/types/safety'
 import { WORKFLOW_MENU_MAP } from '@/types/safety'
@@ -179,10 +179,13 @@ interface Props {
 }
 
 export default function AIWorkflowConfigClient({
+
   initialWorkflows,
   apiConnected,
   apiModelLabel,
 }: Props) {
+  const { message } = App.useApp()
+
   const [workflows, setWorkflows] = useState<AIWorkflowConfig[]>(
     () => initialWorkflows.filter((w) => !EXCLUDED_MODULE_CODES.has(w.module_code)),
   )

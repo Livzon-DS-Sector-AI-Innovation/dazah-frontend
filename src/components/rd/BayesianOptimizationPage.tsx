@@ -1,25 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  Card, 
-  Button, 
-  Table, 
-  Modal, 
-  Form, 
-  Input, 
-  InputNumber, 
-  Select, 
-  Space, 
-  Tag, 
-  message, 
-  Tabs,
-  Descriptions,
-  Popconfirm,
-  Empty,
-  Spin,
-  Divider
-} from 'antd'
+import { Card, Button, Table, Modal, Form, Input, InputNumber, Select, Space, Tag, Tabs, Descriptions, Popconfirm, Empty, Spin, Divider, App } from 'antd'
 import { 
   PlusOutlined, 
   DeleteOutlined, 
@@ -58,6 +40,8 @@ interface BayesianOptimizationPageProps {
 }
 
 export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizationPageProps) {
+  const { message } = App.useApp()
+
   const [projects, setProjects] = useState<BayesianProject[]>(initialProjects)
   const [currentProject, setCurrentProject] = useState<BayesianProject | null>(null)
   const [loading, setLoading] = useState(false)

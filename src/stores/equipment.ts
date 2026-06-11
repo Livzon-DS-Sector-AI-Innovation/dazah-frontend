@@ -22,6 +22,7 @@ import {
   InspectionTemplate,
   InspectionTemplateItem,
   Maintainer,
+  DepartmentOption,
 } from '@/types/equipment'
 
 interface EquipmentStore {
@@ -35,6 +36,10 @@ interface EquipmentStore {
   selectedCategory: string | null
   selectedLocation: string | null
   statusFilter: EquipmentStatus | ''
+  departmentFilter: string | null
+  departments: DepartmentOption[]
+  setDepartmentFilter: (id: string | null) => void
+  setDepartments: (departments: DepartmentOption[]) => void
   keyword: string
   page: number
   pageSize: number
@@ -250,6 +255,8 @@ export const useEquipmentStore = create<EquipmentStore>()(
       selectedCategory: null,
       selectedLocation: null,
       statusFilter: '',
+      departmentFilter: null,
+      departments: [],
       keyword: '',
       page: 1,
       pageSize: 20,
@@ -270,6 +277,8 @@ export const useEquipmentStore = create<EquipmentStore>()(
       setSelectedCategory: (id) => set({ selectedCategory: id, page: 1 }, false, 'equipment/setSelectedCategory'),
       setSelectedLocation: (id) => set({ selectedLocation: id, page: 1 }, false, 'equipment/setSelectedLocation'),
       setStatusFilter: (status) => set({ statusFilter: status, page: 1 }, false, 'equipment/setStatusFilter'),
+      setDepartmentFilter: (id) => set({ departmentFilter: id, page: 1 }, false, 'equipment/setDepartmentFilter'),
+      setDepartments: (departments) => set({ departments }, false, 'equipment/setDepartments'),
       setKeyword: (keyword) => set({ keyword, page: 1 }, false, 'equipment/setKeyword'),
       setPage: (page) => set({ page }, false, 'equipment/setPage'),
       setPageSize: (pageSize) => set({ pageSize, page: 1 }, false, 'equipment/setPageSize'),

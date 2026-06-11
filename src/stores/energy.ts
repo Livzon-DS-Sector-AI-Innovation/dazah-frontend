@@ -7,7 +7,7 @@ import {
 } from '@/types/energy'
 
 interface EnergyState {
-  // 设备配置筛选
+  // 数据源配置筛选
   deviceFilters: DeviceQueryParams
   setDeviceFilters: (filters: Partial<DeviceQueryParams>) => void
   resetDeviceFilters: () => void
@@ -72,16 +72,14 @@ const defaultDataFilters: DataQueryParams = {
 }
 
 const defaultLogFilters: LogQueryParams = {
-  device_id: undefined,
+  platform_code: undefined,
   status: undefined,
-  start_time: undefined,
-  end_time: undefined,
   page: 1,
   page_size: 10,
 }
 
 export const useEnergyStore = create<EnergyState>((set) => ({
-  // 设备配置筛选
+  // 数据源配置筛选
   deviceFilters: defaultDeviceFilters,
   setDeviceFilters: (filters) =>
     set((state) => ({

@@ -62,6 +62,7 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
     closeEquipmentDrawer,
     categories,
     locations,
+    departments,
   } = useEquipmentStore()
 
   const categoryOptions = flattenCategories(categories)
@@ -72,7 +73,8 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
       if (editingEquipment) {
         form.setFieldsValue({
           name: editingEquipment.name,
-          category_id: editingEquipment.category_id,
+          equipment_no: editingEquipment.equipment_no,
+          category_ids: editingEquipment.category_ids || [],
           location_id: editingEquipment.location_id,
           status: editingEquipment.status,
           model: editingEquipment.model ?? undefined,
@@ -82,6 +84,8 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
           production_date: editingEquipment.production_date ? dayjs(editingEquipment.production_date) : undefined,
           commissioning_date: editingEquipment.commissioning_date ? dayjs(editingEquipment.commissioning_date) : undefined,
           description: editingEquipment.description ?? undefined,
+          department_id: editingEquipment.department_id ?? undefined,
+          responsible_person_name: editingEquipment.responsible_person_name ?? undefined,
           importance: editingEquipment.importance ?? '低',
         })
       } else {
@@ -90,12 +94,25 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
     }
   }, [equipmentDrawerOpen, editingEquipment, form])
 
+  // 选择部门后自动填入负责人
+  const handleDepartmentChange = (deptId: string | undefined) => {
+    if (!deptId) {
+      form.setFieldsValue({ responsible_person_name: undefined })
+      return
+    }
+    const dept = departments.find(d => d.id === deptId)
+    form.setFieldsValue({
+      responsible_person_name: dept?.leader_name || undefined,
+    })
+  }
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
+      const { responsible_person_name, ...restValues } = values
       const submitData = {
-        ...values,
+        ...restValues,
         production_date: values.production_date
           ? values.production_date.format('YYYY-MM-DD')
           : undefined,
@@ -156,12 +173,20 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
           <Input placeholder="请输入设备名称" />
         </Form.Item>
         <Form.Item
-          name="category_id"
+          name="equipment_no"
+          label="设备编号"
+          rules={[{ required: true, message: '请输入设备编号' }]}
+        >
+          <Input placeholder="请输入唯一设备编号" disabled={!!editingEquipment} />
+        </Form.Item>
+        <Form.Item
+          name="category_ids"
           label="设备分类"
-          rules={[{ required: true, message: '请选择设备分类' }]}
+          rules={[{ required: true, type: 'array', min: 1, message: '请至少选择一个设备分类' }]}
         >
           <Select
-            placeholder="请选择设备分类"
+            mode="multiple"
+            placeholder="请选择设备分类（支持多选）"
             showSearch
             optionFilterProp="label"
             options={categoryOptions}
@@ -178,6 +203,19 @@ export function EquipmentDrawer({ onRefresh }: EquipmentDrawerProps) {
             optionFilterProp="label"
             options={locationOptions}
           />
+        </Form.Item>
+        <Form.Item name="department_id" label="归属部门">
+          <Select
+            placeholder="请选择归属部门"
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            options={departments.map(d => ({ label: d.name, value: d.id }))}
+            onChange={handleDepartmentChange}
+          />
+        </Form.Item>
+        <Form.Item name="responsible_person_name" label="负责人">
+          <Input placeholder="选择部门后自动填入" disabled />
         </Form.Item>
         <Form.Item
           name="status"

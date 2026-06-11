@@ -76,11 +76,12 @@ export function InspectionTemplateDrawer({ categories, onRefresh }: InspectionTe
         await updateInspectionTemplate(editingInspectionTemplate.id, data)
         message.success('更新成功')
       } else {
+        // 新建模板强制 is_active=false，不能直接启用（需先添加检查项）
         const data: CreateInspectionTemplateInput = {
           name: values.name,
           description: values.description || undefined,
           equipment_category_id: values.equipment_category_id || undefined,
-          is_active: values.is_active ?? false,
+          is_active: false,
         }
         await createInspectionTemplate(data)
         message.success('创建成功')
@@ -120,7 +121,7 @@ export function InspectionTemplateDrawer({ categories, onRefresh }: InspectionTe
         <Form.Item name="is_active" label="启用状态" valuePropName="checked">
           {switchDisabled ? (
             <Tooltip title={enableTooltip}>
-              <Switch checkedChildren="启用" unCheckedChildren="停用" disabled />
+              <Switch checkedChildren="启用" unCheckedChildren="停用" disabled checked={false} />
             </Tooltip>
           ) : (
             <Switch checkedChildren="启用" unCheckedChildren="停用" />

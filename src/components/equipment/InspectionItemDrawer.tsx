@@ -11,6 +11,7 @@ import {
   deleteInspectionTemplateItem,
 } from '@/actions/equipment'
 import { fetchInspectionTemplateByIdClient } from '@/lib/api/equipment-client'
+import { linkPrimary, linkDanger } from '@/components/equipment/shared-styles'
 import type { InspectionTemplateItem } from '@/types/equipment'
 
 const { Text } = Typography
@@ -142,6 +143,8 @@ export function InspectionItemDrawer() {
 
   // 表单模式：null=浏览模式，'create'=新增，string=编辑的 item id
   const [formMode, setFormMode] = useState<'create' | string | null>(null)
+  // 保存正在编辑的检查项数据，用于预填表单（避免依赖 store 快照）
+  const [editingItemData, setEditingItemData] = useState<InspectionTemplateItem | null>(null)
 
   // 加载检查项列表
   const loadItems = useCallback(async () => {
@@ -161,9 +164,11 @@ export function InspectionItemDrawer() {
     if (inspectionItemDrawerOpen && inspectionItemTemplateId) {
       loadItems()
       if (editingInspectionItem) {
+        setEditingItemData(editingInspectionItem)
         setFormMode(editingInspectionItem.id)
       } else {
         setFormMode(null)
+        setEditingItemData(null)
       }
     }
   }, [inspectionItemDrawerOpen, inspectionItemTemplateId, editingInspectionItem, loadItems])
@@ -175,19 +180,22 @@ export function InspectionItemDrawer() {
   }
 
   const handleStartCreate = () => setFormMode('create')
-  const handleStartEdit = (item: InspectionTemplateItem) => setFormMode(item.id)
-  const handleCancelEdit = () => setFormMode(null)
-  const handleFormSuccess = () => { setFormMode(null); loadItems() }
+  const handleStartEdit = (item: InspectionTemplateItem) => {
+    setEditingItemData(item)
+    setFormMode(item.id)
+  }
+  const handleCancelEdit = () => { setFormMode(null); setEditingItemData(null) }
+  const handleFormSuccess = () => { setFormMode(null); setEditingItemData(null); loadItems() }
 
-  // 获取编辑模式的初始值
+  // 获取编辑模式的初始值（使用本地状态而非 store 快照，确保点击编辑时数据已就绪）
   const editingInitialValues: ItemFormValues | undefined =
-    editingInspectionItem && formMode === editingInspectionItem.id
+    editingItemData && formMode === editingItemData.id
       ? {
-          item_name: editingInspectionItem.item_name,
-          item_description: editingInspectionItem.item_description || '',
-          expected_result: editingInspectionItem.expected_result || '',
-          check_method: editingInspectionItem.check_method || '',
-          sort_order: editingInspectionItem.sort_order,
+          item_name: editingItemData.item_name,
+          item_description: editingItemData.item_description || '',
+          expected_result: editingItemData.expected_result || '',
+          check_method: editingItemData.check_method || '',
+          sort_order: editingItemData.sort_order,
         }
       : undefined
 
@@ -243,16 +251,10 @@ export function InspectionItemDrawer() {
       width: 120,
       fixed: 'end' as const,
       render: (_: unknown, record: InspectionTemplateItem) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleStartEdit(record)}
-            style={{ padding: '0 4px' }}
-          >
-            编辑
-          </Button>
+        <Space size={12}>
+          <span role="button" onClick={() => handleStartEdit(record)} style={linkPrimary}>
+            <EditOutlined />编辑
+          </span>
           <Popconfirm
             title="确定删除此检查项？"
             onConfirm={() => handleDelete(record)}
@@ -260,15 +262,9 @@ export function InspectionItemDrawer() {
             cancelText="取消"
             okButtonProps={{ danger: true }}
           >
-            <Button
-              type="link"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              style={{ padding: '0 4px' }}
-            >
-              删除
-            </Button>
+            <span role="button" style={linkDanger}>
+              <DeleteOutlined />删除
+            </span>
           </Popconfirm>
         </Space>
       ),

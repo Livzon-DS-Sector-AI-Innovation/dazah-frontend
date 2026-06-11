@@ -30,6 +30,7 @@ const priorityOptions: { label: string; value: WorkOrderPriority }[] = [
 const typeOptions: { label: string; value: WorkOrderType }[] = [
   { label: '故障维修', value: '故障维修' }, { label: '计划维护', value: '计划维护' },
   { label: '巡检', value: '巡检' }, { label: '校准', value: '校准' },
+  { label: '异常处理', value: '异常处理' }, { label: '日常维护', value: '日常维护' },
 ]
 
 interface Props { onRefresh?: () => void }
@@ -51,9 +52,13 @@ export function WorkOrderTable({ onRefresh }: Props) {
     },
     {
       title: '工单类型', dataIndex: 'order_type', key: 'order_type', width: 100,
-      render: (t: WorkOrderType) => (
-        <span style={t === '故障维修' ? pillWarning : pillPurple}>{t}</span>
-      ),
+      render: (t: WorkOrderType) => {
+        const typeStyle =
+          t === '故障维修' || t === '异常处理' ? pillWarning :
+          t === '日常维护' ? pillInfo :
+          pillPurple
+        return <span style={typeStyle}>{t}</span>
+      },
     },
     {
       title: '优先级', dataIndex: 'priority', key: 'priority', width: 80,

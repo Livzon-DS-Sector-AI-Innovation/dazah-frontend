@@ -40,6 +40,7 @@ export const moduleMenus: ModuleMenu[] = [
       { key: "maintenance", label: "维护保养", path: "/equipment/maintenance" },
       { key: "inspection", label: "设备巡检", path: "/equipment/inspection" },
       { key: "spare-parts", label: "备件管理", path: "/equipment/spare-parts" },
+      { key: "personnel", label: "人员配置", path: "/equipment/personnel" },
     ],
   },
   {
@@ -49,7 +50,7 @@ export const moduleMenus: ModuleMenu[] = [
     path: "/energy",
     children: [
       { key: "overview", label: "能源总览", path: "/energy" },
-      { key: "devices", label: "设备配置", path: "/energy/devices" },
+      { key: "devices", label: "数据源配置", path: "/energy/devices" },
       { key: "alerts", label: "预警管理", path: "/energy/alerts" },
       { key: "collect-logs", label: "采集日志", path: "/energy/collect-logs" },
     ],

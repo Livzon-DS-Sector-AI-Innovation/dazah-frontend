@@ -26,7 +26,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string; ico
   '已关闭': { label: '已关闭', color: '#787671', bg: '#f0eeec', icon: '✕' },
 }
 
-const ALL_STATUSES: InspectionTaskStatus[] = ['待执行', '执行中', '已完成', '已关闭']
+const ALL_STATUSES: InspectionTaskStatus[] = ['待执行', '执行中', '已完成']
 
 export function InspectionTasksTab({ templates, equipments: allEquipments }: Props) {
   const { message, modal } = App.useApp()
@@ -43,8 +43,12 @@ export function InspectionTasksTab({ templates, equipments: allEquipments }: Pro
         status: tasksStatusFilter || undefined,
         page: tasksPage, page_size: tasksPageSize,
       })
-      setTasks(result.items)
-      setTasksTotal(result.total)
+      // 任务列表不展示已关闭的，已关闭任务在历史记录中查看
+      const filtered = tasksStatusFilter
+        ? result.items
+        : result.items.filter((t: InspectionTask) => t.status !== '已关闭')
+      setTasks(filtered)
+      setTasksTotal(tasksStatusFilter ? result.total : filtered.length)
     } catch (err: unknown) {
       message.error((err as Error).message || '加载任务失败')
     } finally {
@@ -66,7 +70,7 @@ export function InspectionTasksTab({ templates, equipments: allEquipments }: Pro
       ? allEquipments.filter(e => eqIds.includes(e.id)).map(e => ({ id: e.id, name: e.name, no: e.equipment_no }))
       : undefined
     setExecutingTask(
-      record.id, routeDetail, items, template.name,
+      record.id, record.plan_type, routeDetail, items, template.name,
       record.equipment_id, record.equipment_name, record.equipment_no,
       eqIds, eqInfos,
     )
@@ -109,6 +113,8 @@ export function InspectionTasksTab({ templates, equipments: allEquipments }: Pro
   const columns: ColumnsType<InspectionTask> = [
     {
       title: '任务编号', dataIndex: 'task_no', key: 'task_no', width: 180,
+      sorter: (a, b) => a.task_no.localeCompare(b.task_no),
+      defaultSortOrder: 'descend',
       render: (no: string) => (
         <span style={{ fontFamily: '"SF Mono", "Fira Code", monospace', fontSize: 12, color: '#5d5b54', letterSpacing: -0.2 }}>
           {no}
@@ -118,7 +124,7 @@ export function InspectionTasksTab({ templates, equipments: allEquipments }: Pro
     {
       title: '类型', dataIndex: 'plan_type', key: 'plan_type', width: 90,
       render: (t: string) => {
-        const cmap: Record<string, string> = { '日常巡检': '#0075de', '周巡检': '#5645d4', '月巡检': '#7b3ff2', '专项巡检': '#dd5b00' }
+        const cmap: Record<string, string> = { '线路巡检': '#5645d4', '设备巡检': '#dd5b00' }
         return <span style={{ fontSize: 13, fontWeight: 500, color: cmap[t] || '#5d5b54' }}>{t}</span>
       },
     },

@@ -2,9 +2,9 @@
 export type EnergyType = 'electricity' | 'water' | 'gas'
 
 // 监控级别
-export type MonitorLevel = 'normal' | 'important' | 'critical'
+export type MonitorLevel = 'normal' | 'important' | 'urgent'
 
-// 设备配置
+// 数据源配置
 export interface EnergyDeviceConfig {
   id: string
   platform_code: string
@@ -23,7 +23,7 @@ export interface EnergyDeviceConfig {
   updated_at: string
 }
 
-// 创建设备配置输入
+// 创建数据源配置输入
 export interface CreateDeviceInput {
   platform_code: string
   platform_device_code: string
@@ -39,7 +39,7 @@ export interface CreateDeviceInput {
   remark?: string
 }
 
-// 更新设备配置输入
+// 更新数据源配置输入
 export interface UpdateDeviceInput {
   platform_code?: string
   platform_device_code?: string
@@ -95,44 +95,66 @@ export interface EnergyStatistics {
   total_electricity: number
   total_water: number
   total_gas: number
-  total_cost: number
-  electricity_change: number
-  water_change: number
-  gas_change: number
-  cost_change: number
+}
+
+// 总览数据
+export interface EnergyOverviewData {
+  summary: EnergyStatistics
+  trend: TrendDataPoint[]
+  distribution: DistributionDataPoint[]
 }
 
 // 统计查询参数
 export interface StatisticsParams {
   start_time?: string
   end_time?: string
+  energy_type?: EnergyType
 }
 
 // 采集状态
-export type CollectStatus = 'success' | 'failed' | 'timeout'
+export type CollectStatus = 'success' | 'partial' | 'failed'
 
 // 采集日志
 export interface CollectLog {
   id: string
-  config_id: string
-  device_name: string
+  platform_code: string
+  collect_time: string
   status: CollectStatus
-  collected_value?: number
-  unit?: string
-  duration?: number
-  error_message?: string
-  request_params?: Record<string, unknown>
-  response_data?: Record<string, unknown>
-  collected_at: string
+  device_count: number
+  success_count: number
+  error_message: string | null
   created_at: string
+}
+
+// 采集日志设备详情
+export interface CollectLogDeviceDetail {
+  device_name: string
+  platform_device_code: string
+  energy_type: string
+  value: number
+  unit: string
+  data_timestamp: string
+}
+
+// 采集日志详情（含设备数据）
+export interface CollectLogDetail {
+  id: string
+  platform_code: string
+  collect_time: string
+  status: CollectStatus
+  device_count: number
+  success_count: number
+  error_message: string | null
+  created_at: string
+  devices: CollectLogDeviceDetail[]
+  time_range_start: string | null
+  time_range_end: string | null
 }
 
 // 采集日志查询参数
 export interface LogQueryParams {
-  device_id?: string
+  platform_code?: string
   status?: CollectStatus
-  start_time?: string
-  end_time?: string
   page?: number
   page_size?: number
 }

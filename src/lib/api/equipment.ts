@@ -293,3 +293,15 @@ export async function fetchInspectionTemplateById(id: string): Promise<Inspectio
 export async function fetchWorkOrderMaterials(workOrderId: string): Promise<MaterialRecord[]> {
   return apiFetch(`${API_BASE_URL}/api/v1/equipment/maintenance/work-orders/${workOrderId}/materials`)
 }
+
+// ==================== 部门列表 ====================
+export interface DepartmentOption {
+  id: string
+  name: string
+  leader_name: string | null
+  leader_user_id: string | null
+}
+
+export async function fetchDepartments(): Promise<DepartmentOption[]> {
+  return apiFetch(`${API_BASE_URL}/api/v1/equipment/departments`)
+}

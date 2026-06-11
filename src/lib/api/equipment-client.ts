@@ -17,6 +17,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 interface FetchEquipmentsParams {
   category_id?: string | null
   location_id?: string | null
+  department_id?: string | null
   status?: string
   keyword?: string
   page?: number
@@ -28,6 +29,7 @@ export async function fetchEquipmentsClient(params: FetchEquipmentsParams = {}):
 
   if (params.category_id) searchParams.append('category_id', params.category_id)
   if (params.location_id) searchParams.append('location_id', params.location_id)
+  if (params.department_id) searchParams.append('department_id', params.department_id)
   if (params.status) searchParams.append('status', params.status)
   if (params.keyword) searchParams.append('keyword', params.keyword)
   if (params.page && params.page > 0) searchParams.append('page', params.page.toString())
@@ -307,4 +309,12 @@ export async function fetchClaimTimeoutConfigClient(): Promise<ClaimTimeoutConfi
   if (!response.ok) throw new Error(`请求失败: ${response.status}`)
   const result = await response.json()
   return result.data || { emergency: 15, high: 30, medium: 60, low: 120 }
+}
+
+// ==================== 部门列表 ====================
+export async function fetchDepartmentsClient(): Promise<import('@/types/equipment').DepartmentOption[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/equipment/departments`)
+  if (!response.ok) throw new Error(`请求失败: ${response.status}`)
+  const result = await response.json()
+  return result.data || []
 }

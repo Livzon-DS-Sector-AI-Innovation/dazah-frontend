@@ -3,19 +3,22 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { App, Button, Select, DatePicker, Space, Spin, Card, Row, Col, Statistic } from 'antd'
-import { ExportOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import dayjs from 'dayjs'
+import { Select, Button } from 'antd'
+import { ThunderboltOutlined } from '@ant-design/icons'
 import { useEnergyStore } from '@/stores/energy'
-import { CollectLogTable } from '@/components/energy/CollectLogTable'
+import { CollectLogTable, CollectLogDetailDrawer } from '@/components/energy'
 import { getCollectLogs, triggerCollect } from '@/actions/energy'
 import { CollectLog, PaginatedResponse } from '@/types/energy'
 
-const { RangePicker } = DatePicker
-
 export default function CollectLogsPage() {
-  const { message } = App.useApp()
-  const { logFilters, setLogFilters, resetLogFilters } = useEnergyStore()
+  const {
+    logFilters,
+    setLogFilters,
+    resetLogFilters,
+    collectLogDrawerOpen,
+    collectLogDrawerId,
+    closeCollectLogDrawer,
+  } = useEnergyStore()
 
   const [loading, setLoading] = useState(false)
   const [triggerLoading, setTriggerLoading] = useState(false)
@@ -33,7 +36,6 @@ export default function CollectLogsPage() {
       setData(result)
     } catch (error) {
       console.error('获取采集日志失败:', error)
-      message.error('获取采集日志失败')
     } finally {
       setLoading(false)
     }
@@ -47,165 +49,154 @@ export default function CollectLogsPage() {
     setTriggerLoading(true)
     try {
       await triggerCollect()
-      message.success('采集任务已触发')
       fetchData()
     } catch (error) {
-      message.error('触发采集失败')
+      console.error('触发采集失败:', error)
     } finally {
       setTriggerLoading(false)
     }
   }
 
-  const handleRetry = async (configId: string) => {
+  const handleRetry = async (platformCode: string) => {
     try {
-      await triggerCollect([configId])
-      message.success('重试任务已触发')
+      await triggerCollect(platformCode)
       fetchData()
     } catch (error) {
-      message.error('触发重试失败')
+      console.error('触发重试失败:', error)
     }
   }
 
-  // 计算统计信息
-  const stats = {
-    total: data.total,
-    successRate:
-      data.items.length > 0
-        ? (
-            (data.items.filter((item) => item.status === 'success').length /
-              data.items.length) *
-            100
-          ).toFixed(1)
-        : '0',
-    avgDuration:
-      data.items.length > 0
-        ? Math.round(
-            data.items
-              .filter((item) => item.duration !== undefined)
-              .reduce((sum, item) => sum + (item.duration || 0), 0) /
-              data.items.filter((item) => item.duration !== undefined).length
-          )
-        : 0,
-    failedCount: data.items.filter((item) => item.status === 'failed').length,
+  const filledInputStyle = {
+    background: '#f6f5f4',
+    border: 'none',
+    borderRadius: 8,
+    height: 36,
   }
 
   return (
-    <div className="p-6">
+    <div
+      style={{
+        padding: '28px 32px',
+        maxWidth: 1280,
+        minHeight: '100%',
+        background: '#fafaf9',
+      }}
+    >
+      {/* ════ 标题区 ════ */}
       <h1
-        className="font-semibold mb-4"
-        style={{ fontSize: 22, color: '#1a1a1a', lineHeight: 1.3 }}
+        style={{
+          fontSize: 28,
+          fontWeight: 500,
+          color: '#1a1a1a',
+          margin: 0,
+          letterSpacing: '-0.3px',
+          lineHeight: 1.3,
+        }}
       >
         采集日志
       </h1>
-
-      <Row gutter={[16, 16]} className="mb-4">
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic title="今日采集总数" value={stats.total} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="成功率"
-              value={stats.successRate}
-              suffix="%"
-              styles={{
-                content: {
-                  color: Number(stats.successRate) >= 90 ? '#3f8600' : '#cf1322',
-                },
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic title="平均耗时" value={stats.avgDuration} suffix="ms" />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="失败设备数"
-              value={stats.failedCount}
-              styles={{
-                content: {
-                  color: stats.failedCount > 0 ? '#cf1322' : '#3f8600',
-                },
-              }}
-              prefix={<ThunderboltOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <div
+      <p
         style={{
-          background: '#ffffff',
-          padding: 20,
-          borderRadius: 12,
-          border: '1px solid #e5e3df',
+          fontSize: 13,
+          color: '#a4a097',
+          margin: '4px 0 0',
+          lineHeight: 1.5,
         }}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <Space>
-            <Select
-              placeholder="采集状态"
-              style={{ width: 120 }}
-              value={logFilters.status}
-              onChange={(value) => setLogFilters({ status: value })}
-              allowClear
-              options={[
-                { label: '成功', value: 'success' },
-                { label: '失败', value: 'failed' },
-                { label: '超时', value: 'timeout' },
-              ]}
-            />
-            <RangePicker
-              value={
-                logFilters.start_time && logFilters.end_time
-                  ? [dayjs(logFilters.start_time), dayjs(logFilters.end_time)]
-                  : undefined
-              }
-              onChange={(dates) => {
-                if (dates) {
-                  setLogFilters({
-                    start_time: dates[0]?.toISOString(),
-                    end_time: dates[1]?.toISOString(),
-                  })
-                } else {
-                  setLogFilters({
-                    start_time: undefined,
-                    end_time: undefined,
-                  })
-                }
-              }}
-            />
-            <Button onClick={resetLogFilters}>重置</Button>
-          </Space>
-          <Space>
-            <Button
-              type="primary"
-              icon={<ThunderboltOutlined />}
-              onClick={handleTriggerCollect}
-              loading={triggerLoading}
-            >
-              手动采集
-            </Button>
-            <Button icon={<ExportOutlined />}>导出</Button>
-          </Space>
-        </div>
+        查看数据采集任务的执行记录与结果详情
+      </p>
 
-        <Spin spinning={loading}>
-          <CollectLogTable
-            data={data.items}
-            loading={loading}
-            total={data.total}
-            onRefresh={fetchData}
-            onRetry={handleRetry}
-          />
-        </Spin>
+      {/* 渐变分割线 */}
+      <div
+        style={{
+          height: 1,
+          marginTop: 18,
+          marginBottom: 20,
+          background:
+            'linear-gradient(to right, #5645d4 0%, #e6e0f5 40%, transparent 100%)',
+        }}
+      />
+
+      {/* ════ 筛选栏 ════ */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 8,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          background: '#ffffff',
+          borderRadius: 12,
+          padding: '12px 18px',
+          boxShadow: '0 1px 3px rgba(10, 10, 10, 0.04)',
+          border: '1px solid #ede9e4',
+          marginBottom: 20,
+        }}
+      >
+        <Select
+          placeholder="采集状态"
+          allowClear
+          variant="filled"
+          style={{ width: 120, ...filledInputStyle }}
+          value={logFilters.status}
+          onChange={(value) => setLogFilters({ status: value })}
+          options={[
+            { label: '成功', value: 'success' },
+            { label: '失败', value: 'failed' },
+            { label: '部分成功', value: 'partial' },
+          ]}
+        />
+
+        <Button
+          onClick={resetLogFilters}
+          style={{
+            color: '#787671',
+            borderRadius: 8,
+            height: 36,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        >
+          重置
+        </Button>
+
+        {/* 右侧弹簧 */}
+        <div style={{ flex: 1 }} />
+
+        <Button
+          icon={<ThunderboltOutlined />}
+          onClick={handleTriggerCollect}
+          loading={triggerLoading}
+          style={{
+            color: '#5645d4',
+            borderColor: '#5645d4',
+            borderRadius: 8,
+            fontWeight: 500,
+            fontSize: 14,
+            height: 36,
+            padding: '0 16px',
+          }}
+        >
+          手动采集
+        </Button>
       </div>
+
+      {/* ════ 数据表格 ════ */}
+      <CollectLogTable
+        data={data.items}
+        loading={loading}
+        total={data.total}
+        onRefresh={fetchData}
+        onRetry={handleRetry}
+      />
+
+      {/* ════ 详情抽屉 ════ */}
+      {collectLogDrawerOpen && collectLogDrawerId && (
+        <CollectLogDetailDrawer
+          logId={collectLogDrawerId}
+          open={collectLogDrawerOpen}
+          onClose={closeCollectLogDrawer}
+        />
+      )}
     </div>
   )
 }

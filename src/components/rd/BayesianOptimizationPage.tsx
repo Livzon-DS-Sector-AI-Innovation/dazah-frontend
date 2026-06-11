@@ -96,7 +96,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       message.success('项目创建成功')
       setCreateModalVisible(false)
       form.resetFields()
-      loadProjects()
+      await loadProjects()
     } catch (error: any) {
       message.error(error.message || '创建失败')
     }
@@ -110,7 +110,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       if (currentProject?.id === projectId) {
         setCurrentProject(null)
       }
-      loadProjects()
+      await loadProjects()
     } catch (error: any) {
       message.error(error.message || '删除失败')
     }
@@ -124,7 +124,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       message.success('参数添加成功')
       setComponentModalVisible(false)
       componentForm.resetFields()
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
     } catch (error: any) {
       message.error(error.message || '添加失败')
     }
@@ -138,7 +138,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       message.success('目标添加成功')
       setObjectiveModalVisible(false)
       objectiveForm.resetFields()
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
     } catch (error: any) {
       message.error(error.message || '添加失败')
     }
@@ -151,7 +151,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     try {
       await suggestExperiments({ project_id: currentProject.id, num_experiments: 5 })
       message.success('实验推荐成功')
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
     } catch (error: any) {
       message.error(error.message || '推荐失败')
     } finally {
@@ -166,7 +166,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     try {
       await generateReactionScope(currentProject.id, `${currentProject.name} - 反应范围`)
       message.success('反应范围生成成功')
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
     } catch (error: any) {
       message.error(error.message || '生成失败')
     } finally {
@@ -192,8 +192,8 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       message.success('项目更新成功')
       setEditProjectModalVisible(false)
       editProjectForm.resetFields()
-      loadProjectDetail(currentProject.id)
-      loadProjects()
+      await loadProjectDetail(currentProject.id)
+      await loadProjects()
     } catch (error: any) {
       message.error(error.message || '更新失败')
     }
@@ -205,7 +205,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     try {
       await deleteComponent(componentId)
       message.success('参数删除成功')
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
     } catch (error: any) {
       message.error(error.message || '删除失败')
     }
@@ -217,7 +217,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     try {
       await deleteObjective(objectiveId)
       message.success('目标删除成功')
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
     } catch (error: any) {
       message.error(error.message || '删除失败')
     }
@@ -238,7 +238,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
       setRecordResultModalVisible(false)
       recordResultForm.resetFields()
       if (currentProject) {
-        loadProjectDetail(currentProject.id)
+        await loadProjectDetail(currentProject.id)
       }
     } catch (error: any) {
       message.error(error.message || '记录失败')
@@ -270,7 +270,7 @@ export function BayesianOptimizationPage({ initialProjects }: BayesianOptimizati
     try {
       const result = await importCSV(currentProject.id, file)
       message.success(result.message)
-      loadProjectDetail(currentProject.id)
+      await loadProjectDetail(currentProject.id)
       return true
     } catch (error: any) {
       message.error(error.message || '导入失败')

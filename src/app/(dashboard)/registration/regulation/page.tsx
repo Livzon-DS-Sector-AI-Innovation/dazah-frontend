@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import {
   Table, Card, Row, Col, Statistic, Input, Select, DatePicker, Button, Space, Tag, message,
-  Drawer, Descriptions, Progress, Divider, Spin, Alert, Badge, List,
+  Drawer, Descriptions, Progress, Divider, Spin, Alert, Badge,
 } from 'antd'
 import {
   FileTextOutlined, PlusOutlined, EyeOutlined, ReloadOutlined,
@@ -343,8 +343,11 @@ export default function RegulatoryTrackerPage() {
             {singleResult.keyChanges.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-semibold mb-2"><ThunderboltOutlined className="mr-1" /> 关键变更点</h4>
-                <List size="small" dataSource={singleResult.keyChanges}
-                  renderItem={(item) => (<List.Item className="py-1"><span className="text-blue-600 mr-2">•</span>{item}</List.Item>)} />
+                <ul className="space-y-1">
+                  {singleResult.keyChanges.map((item) => (
+                    <li key={item} className="py-1 flex items-start gap-2"><span className="text-blue-600">•</span>{item}</li>
+                  ))}
+                </ul>
               </div>
             )}
             {singleResult.impactAreas.length > 0 && (
@@ -358,8 +361,11 @@ export default function RegulatoryTrackerPage() {
             {singleResult.complianceSuggestions.length > 0 && (
               <div className="mb-4">
                 <h4 className="font-semibold mb-2"><WarningOutlined className="mr-1" /> 合规建议</h4>
-                <List size="small" dataSource={singleResult.complianceSuggestions}
-                  renderItem={(item, idx) => (<List.Item className="py-1"><Badge count={idx + 1} style={{ backgroundColor: '#1890ff' }} className="mr-2" />{item}</List.Item>)} />
+                <ul className="space-y-1">
+                  {singleResult.complianceSuggestions.map((item, idx) => (
+                    <li key={idx} className="py-1 flex items-start gap-2"><Badge count={idx + 1} style={{ backgroundColor: '#1890ff' }} />{item}</li>
+                  ))}
+                </ul>
               </div>
             )}
             <Divider />
@@ -405,22 +411,26 @@ export default function RegulatoryTrackerPage() {
             <div>
               <h4 className="font-semibold mb-3"><WarningOutlined className="mr-1 text-red-500" /> 重点关注法规（按影响程度排序）</h4>
               {batchResult.topConcerns.length > 0 ? (
-                <List dataSource={batchResult.topConcerns}
-                  renderItem={(item) => (
-                    <List.Item actions={[
-                      <Button key="detail" type="link" size="small" icon={<RobotOutlined />}
+                <div className="space-y-3">
+                  {batchResult.topConcerns.map((item) => (
+                    <div key={item.documentId} className="flex items-start gap-3 p-3 border border-gray-200 rounded-md">
+                      <ImpactBadge level={item.impactLevel} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium mb-1">{item.title}</div>
+                        <div className="text-sm text-gray-500">{item.reason}</div>
+                      </div>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<RobotOutlined />}
                         onClick={() => {
                           const doc = documents.find(d => d.id === item.documentId)
                           if (doc) { setBatchAnalysisOpen(false); handleSingleAnalysis(doc) }
-                        }}>详情</Button>
-                    ]}>
-                      <List.Item.Meta
-                        avatar={<ImpactBadge level={item.impactLevel} />}
-                        title={<span className="font-medium">{item.title}</span>}
-                        description={item.reason}
-                      />
-                    </List.Item>
-                  )} />
+                        }}
+                      >详情</Button>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center text-gray-400 py-4">当前列表无需重点关注的法规</div>
               )}

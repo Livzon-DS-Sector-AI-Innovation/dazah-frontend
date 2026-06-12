@@ -79,6 +79,7 @@ export const moduleMenus: ModuleMenu[] = [
     path: "/registration",
     children: [
       { key: "authorization-letter", label: "授权书管理", path: "/registration/authorization-letter" },
+      { key: "supplementary-reply", label: "发补回复", path: "/registration/supplementary-reply" },
       { key: "filing", label: "注册申报", path: "/registration/filing" },
       { key: "regulation", label: "法规跟踪", path: "/registration/regulation" },
       { key: "documents", label: "文件管理", path: "/registration/documents" },

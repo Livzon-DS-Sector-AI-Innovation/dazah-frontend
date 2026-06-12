@@ -309,7 +309,7 @@ export default function RegulatoryTrackerPage() {
       <Drawer
         title={<div className="flex items-center gap-2"><RobotOutlined /><span>AI 影响评估</span></div>}
         placement="right"
-        width={520}
+        styles={{ wrapper: { width: 520 } }}
         open={singleAnalysisOpen}
         onClose={() => setSingleAnalysisOpen(false)}
       >
@@ -374,7 +374,7 @@ export default function RegulatoryTrackerPage() {
       <Drawer
         title={<div className="flex items-center gap-2"><ThunderboltOutlined /><span>批量影响评估报告</span></div>}
         placement="right"
-        width={600}
+        styles={{ wrapper: { width: 600 } }}
         open={batchAnalysisOpen}
         onClose={() => { setBatchAnalysisOpen(false); setBatchResult(null) }}
       >

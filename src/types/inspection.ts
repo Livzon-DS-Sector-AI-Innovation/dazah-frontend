@@ -117,6 +117,7 @@ export interface CreateInspectionTaskInput {
 
 export interface InspectionTaskFilters {
   status?: InspectionTaskStatus
+  exclude_status?: InspectionTaskStatus
   route_id?: string
   assigned_to?: string
   equipment_id?: string

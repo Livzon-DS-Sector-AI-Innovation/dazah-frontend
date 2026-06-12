@@ -55,7 +55,7 @@ export function InspectionRouteDrawer({ templates }: InspectionRouteDrawerProps)
 
   return (
     <Drawer
-      title={editingRoute ? '编辑巡检路线' : '新建巡检路线'}
+      title={editingRoute ? '编辑巡检线路' : '新建巡检线路'}
       size={480}
       open={routeDrawerOpen}
       onClose={closeRouteDrawer}

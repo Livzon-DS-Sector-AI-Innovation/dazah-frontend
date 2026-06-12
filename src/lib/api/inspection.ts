@@ -66,6 +66,7 @@ export async function fetchInspectionTemplateByIdClient(id: string) {
 export async function fetchInspectionTasks(filters: InspectionTaskFilters = {}): Promise<InspectionTaskListResponse> {
   const params = new URLSearchParams()
   if (filters.status) params.append('status', filters.status)
+  if (filters.exclude_status) params.append('exclude_status', filters.exclude_status)
   if (filters.route_id) params.append('route_id', filters.route_id)
   if (filters.assigned_to) params.append('assigned_to', filters.assigned_to)
   if (filters.equipment_id) params.append('equipment_id', filters.equipment_id)

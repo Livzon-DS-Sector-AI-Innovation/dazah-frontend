@@ -1521,6 +1521,11 @@ export const REPORT_STATUS_OPTIONS = [
   { value: ReportStatus.REJECTED, label: '已驳回', color: 'red' },
 ]
 
+export const REPORT_TYPE_OPTIONS = [
+  { value: 'regular', label: '常规作业', color: 'blue' },
+  { value: 'non_regular', label: '非常规作业', color: 'orange' },
+]
+
 // ── 八大特殊作业报备 ──
 
 export interface SpecialOperationReport {
@@ -1610,12 +1615,29 @@ export interface SpecialOperationLedgerStats {
   critical_count: number
 }
 
+// ── 危险源选项（用于每日风险报备关联） ──
+
+export interface HazardRiskOption {
+  id: string
+  hazard_id_no: string
+  department: string
+  position: string
+  specific_activity: string
+  inherent_risk_level: string
+  inherent_risk_label: string
+  existing_engineering_controls?: string
+  existing_management_controls?: string
+  existing_ppe?: string
+  existing_emergency_measures?: string
+}
+
 // ── 每日风险作业报备 ──
 
 export interface DailyRiskReport {
   id: string
   report_no: string
   report_date: string
+  report_type?: string
   department?: string
   hazard_identification_id?: string
   operation_description: string
@@ -1664,6 +1686,7 @@ export interface DailyRiskReportQueryParams {
   status?: string
   department?: string
   report_date?: string
+  report_type?: string
   keyword?: string
 }
 

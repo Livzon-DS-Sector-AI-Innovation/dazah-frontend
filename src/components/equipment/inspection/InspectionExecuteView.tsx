@@ -120,7 +120,7 @@ export function InspectionExecuteView({ onClose }: Props) {
           <EnvironmentOutlined style={{ fontSize: 24, color: '#7b3ff2' }} />
           <div>
             <Text strong style={{ fontSize: 15, color: '#391c57', display: 'block', marginBottom: 4 }}>
-              巡检路线：{routeName}
+              巡检线路：{routeName}
             </Text>
             {routeDeviceNames && (
               <Text style={{ fontSize: 13, color: '#7b3ff2' }}>

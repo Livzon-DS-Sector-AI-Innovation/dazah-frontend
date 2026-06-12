@@ -123,12 +123,12 @@ export function InspectionTaskDrawer({ templates, equipments }: InspectionTaskDr
         {planType === '线路巡检' && (
           <Form.Item
             name="route_id"
-            label="巡检路线"
-            rules={[{ required: true, message: '请选择巡检路线' }]}
+            label="巡检线路"
+            rules={[{ required: true, message: '请选择巡检线路' }]}
           >
             <Select
               showSearch
-              placeholder="选择巡检路线"
+              placeholder="选择巡检线路"
               optionFilterProp="label"
               onChange={handleRouteChange}
               options={routes.map(r => ({

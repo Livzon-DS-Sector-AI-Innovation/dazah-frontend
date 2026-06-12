@@ -91,8 +91,8 @@ export async function createBatch(data: CreateBatchInput) {
 }
 \`\`\`
 
-## 飞书集成
-暂时为空
+## 提交代码
+使用git将代码push到远程仓库前，必须先build保证无任何错误。
 
 ## 不允许修改的文件
 

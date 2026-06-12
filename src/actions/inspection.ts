@@ -40,7 +40,7 @@ function revalidate() {
   revalidatePath('/equipment/inspection')
 }
 
-// ==================== 巡检路线 ====================
+// ==================== 巡检线路 ====================
 export async function createInspectionRoute(data: CreateInspectionRouteInput) {
   const result = await actionFetch(`${BASE}/routes`, { method: 'POST', body: JSON.stringify(data) })
   revalidate()

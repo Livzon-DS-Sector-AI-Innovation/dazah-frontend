@@ -87,7 +87,7 @@ export function InspectionPage({ initialTemplates, initialEquipments, initialCat
       label: (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
           <EnvironmentOutlined style={{ fontSize: 15 }} />
-          巡检路线
+          巡检线路
         </span>
       ),
       children: <InspectionRoutesTab templates={templates} equipments={initialEquipments} />,
@@ -142,7 +142,7 @@ export function InspectionPage({ initialTemplates, initialEquipments, initialCat
         <p style={{
           fontSize: 14, color: '#787671', margin: 0, lineHeight: 1.5,
         }}>
-          巡检路线管理 · 任务执行 · 历史追溯 · 模板管理
+          巡检线路管理 · 任务执行 · 历史追溯 · 模板管理
         </p>
       </div>
 

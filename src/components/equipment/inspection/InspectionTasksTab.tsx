@@ -39,16 +39,14 @@ export function InspectionTasksTab({ templates, equipments: allEquipments }: Pro
   const loadTasks = useCallback(async () => {
     setTasksLoading(true)
     try {
+      // 默认排除已关闭任务（在历史记录中查看），指定 status 时不过滤
       const result = await fetchInspectionTasks({
         status: tasksStatusFilter || undefined,
+        exclude_status: tasksStatusFilter ? undefined : '已关闭',
         page: tasksPage, page_size: tasksPageSize,
       })
-      // 任务列表不展示已关闭的，已关闭任务在历史记录中查看
-      const filtered = tasksStatusFilter
-        ? result.items
-        : result.items.filter((t: InspectionTask) => t.status !== '已关闭')
-      setTasks(filtered)
-      setTasksTotal(tasksStatusFilter ? result.total : filtered.length)
+      setTasks(result.items)
+      setTasksTotal(result.total)
     } catch (err: unknown) {
       message.error((err as Error).message || '加载任务失败')
     } finally {
